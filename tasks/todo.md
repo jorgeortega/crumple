@@ -10,17 +10,17 @@ Plan: [plan.md](plan.md). Spec: [SPEC.md](../SPEC.md). C numbers are the spec's 
 
 ### Task 1: Create the package skeleton (M)
 Set up the TypeScript package with its development tools and license.
-- [ ] `package.json` names `crumple-mcp`, Node 22.13 or newer, MIT, and `"private": true` until launch
-- [ ] LICENSE names October Moon LLC; strict `tsconfig`; a sample test passes
-- [ ] The work is pushed to a private GitHub repo, `jorgeortega/crumple`, as a backup
+- [x] `package.json` names `crumple-mcp`, Node 22.13 or newer, MIT, and `"private": true` until launch
+- [x] LICENSE names October Moon LLC; strict `tsconfig`; a sample test passes
+- [x] The work is pushed to a private GitHub repo, `jorgeortega/crumple`, as a backup
 - Verify: `npm run check`; the repo shows as private
 - Depends on: none. Files: `package.json`, `tsconfig.json`, `LICENSE`, `.gitignore`, `eslint.config.js`
 
 ### Task 2: Add the local gate (M)
 With no CI until December, this is what stops bad commits.
-- [ ] `.githooks/pre-push` runs `npm run check`, and `npm run setup` turns it on
-- [ ] A secret scan fails on a planted fake key; an import-boundary test fails on a planted bad import
-- [ ] The GitHub workflow file exists, ready for December
+- [x] `.githooks/pre-push` runs `npm run check`, and `npm run setup` turns it on
+- [x] A secret scan fails on a planted fake key; an import-boundary test fails on a planted bad import
+- [x] The GitHub workflow file exists, ready for December
 - Verify: plant both failures, watch the gate stop them, remove them
 - Depends on: 1. Files: `.githooks/pre-push`, `scripts/secret-scan.mjs`, `tests/boundaries.test.ts`, `.github/workflows/ci.yml`
 
@@ -31,9 +31,9 @@ With no CI until December, this is what stops bad commits.
 
 ### Task 4: Test the MCP SDK on Node and Workers (S, time-boxed to one session)
 The only finding that could change the design.
-- [ ] A throwaway server built on the official SDK answers `tools/list` and `tools/call` on Node and in `workerd`, on revision 2026-07-28
-- [ ] The official Python client reaches both
-- [ ] `docs/adr/0001-mcp-library.md` records the result. If it fails, it records the fallback and tells the owner
+- [x] A throwaway server built on the official SDK answers `tools/list` and `tools/call` on Node and in `workerd`, on revision 2026-07-28
+- [x] The official Python client reaches both
+- [x] `docs/adr/0001-mcp-library.md` records the result. If it fails, it records the fallback and tells the owner
 - Verify: run the spike; attach the output to the record
 - Depends on: 1. Files: `spikes/mcp-sdk/*`, `docs/adr/0001-mcp-library.md`
 

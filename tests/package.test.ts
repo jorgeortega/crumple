@@ -26,7 +26,7 @@ describe('the package', () => {
   // Runtime dependencies are capped because install size is the first impression
   // with npx. Adding a third is an owner decision, so it has to fail here first.
   it('has no runtime dependencies beyond the two the spec allows', () => {
-    const allowed = ['@modelcontextprotocol/sdk', 'yaml'];
+    const allowed = ['@modelcontextprotocol/server', 'yaml'];
     const runtime = Object.keys(pkg.dependencies ?? {});
     expect(runtime.filter((name) => !allowed.includes(name))).toEqual([]);
   });

@@ -137,10 +137,10 @@ Each one becomes a short decision record in `docs/adr/`.
 |---|---|---|---|
 | Runtime | Node 22.13 or newer for the package; the same core on Cloudflare Workers for the demo. The core uses web-standard APIs only | People install with npm and run on their own machines; the owner chose Cloudflare for the demo | A thin adapter for each |
 | Language | TypeScript everywhere that ships. The only Python is the interop test (C14) | An npm package has to contain its evals and agent runner to be useful. This changes the earlier TypeScript and Python default | The Python signal that many postings ask for, which the owner should raise in conversation |
-| Dependencies | `@modelcontextprotocol/sdk` 2.x and `yaml` at most. Lift the rest rather than depend on it | Install size affects first impressions with `npx` | More code to own |
+| Dependencies | `@modelcontextprotocol/server` 2.x and `yaml` at most. Lift the rest rather than depend on it | Install size affects first impressions with `npx` | More code to own |
 | OpenAPI to tools | Copy the converter from `openapi-agentify` (MIT, the owner's) rather than depend on it | That package brings `typescript`, `zod` and `ajv` along | Two copies to keep in step. `openapi-agentify` runs inside your app, Crumple in front of it, and the README says when to use each |
 | MCP version | Serve 2026-07-28; the spec for `mcp-surface` decides about older clients, since adoption argues for keeping them | Stateless requests mean any instance can serve any call | Some extra code if older clients stay |
-| MCP library | Official TypeScript SDK 2.x. A spike checks it runs on Workers; if not, the demo uses `modern.ts` from Latitude 10 | Using the standard library shows judgment | Less control |
+| MCP library | Official TypeScript SDK 2.x, through `createMcpHandler`. The spike passed on Node and in `workerd` ([ADR 0001](docs/adr/0001-mcp-library.md)), so the `modern.ts` fallback isn't needed | Using the standard library shows judgment | Less control, and an 18 MB install unless the package is bundled |
 | Authentication | Hashed API keys plus JWT checking, acting only as a resource server | Right size for 20 days | No built-in OAuth login flow, which is a natural Latitude 10 upgrade |
 | Storage | One small interface: memory by default, `node:sqlite` when configured, D1 on the demo | `npx` must work with no setup | Some features only last as long as the process in memory mode |
 | Limits across instances | Exact in the single-process Node runtime. On the demo, D1's atomic counter for the daily cap and per-instance limits for the rest, documented | Durable Objects are out of scope, which removes a large piece of work | Approximate limits on the demo only |
@@ -365,7 +365,7 @@ Job applications and the 30 to 40 conversations stay in the owner's
 |---|---|
 | MCP 2026-07-28 is stable, with no handshake or sessions | [Changelog](https://modelcontextprotocol.io/specification/2026-07-28/changelog) |
 | Python SDK 2.x supports 2026-07-28 | [Python SDK releases](https://github.com/modelcontextprotocol/python-sdk/releases) |
-| TypeScript SDK 2.4.0 mentions 2026-07-28, but Workers support isn't stated, hence the spike | [TypeScript SDK releases](https://github.com/modelcontextprotocol/typescript-sdk/releases) |
+| TypeScript SDK 2.4.0 serves 2026-07-28 on Node 22.13 and in `workerd` | [ADR 0001](docs/adr/0001-mcp-library.md), tested 2026-11-04 |
 | Trace context goes in `_meta` | [SEP-414](https://modelcontextprotocol.io/seps/414) |
 | Workers Paid is $5/month and includes 10M requests | [Cloudflare pricing](https://developers.cloudflare.com/workers/platform/pricing/) |
 | Star counts for OpenAPI and MCP projects | GitHub search API, 2026-11-04 |

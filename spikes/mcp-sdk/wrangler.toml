@@ -1,0 +1,5 @@
+# Throwaway. Only ever run with `wrangler dev`, which uses workerd on this machine.
+name = "crumple-spike"
+main = "worker.mjs"
+compatibility_date = "2026-11-01"
+compatibility_flags = ["nodejs_compat"]

@@ -1,0 +1,77 @@
+date: 2026-11-04
+node server runs on: v22.13.1
+probe and clients run on: v26.10.0
+packages: server 2.4.0, client 2.4.0, wrangler 4.157.0, python mcp 2.3.0
+
+node server output at start:
+node spike on http://127.0.0.1:8801/mcp
+
+=== node: official TypeScript client
+default client negotiated: 2025-11-25
+PASS  connects and negotiates 2026-07-28
+PASS  a reader sees only the read tool
+PASS  the JSON Schema arrives unchanged
+PASS  a tool call runs
+PASS  traceparent in _meta reaches the tool
+PASS  a bad argument is refused by the schema
+PASS  a reader can't call the write tool
+PASS  an admin sees both tools
+PASS  no key is refused before the SDK
+PASS  an older 2025 client is still served
+PASS  a client with default options still works
+
+11/11 passed against http://127.0.0.1:8801/mcp
+pinned client negotiated: 2026-07-28
+
+=== node: official Python client
+protocol: 2026-07-28
+tools: ['get_customer']
+call: {"id":"cus_1","era":"modern","caller":"reader","traceparent":null,"ctxKeys":["sessionId","mcpReq","http"]}
+PASS
+
+=== workerd: official TypeScript client
+default client negotiated: 2025-11-25
+PASS  connects and negotiates 2026-07-28
+PASS  a reader sees only the read tool
+PASS  the JSON Schema arrives unchanged
+PASS  a tool call runs
+PASS  traceparent in _meta reaches the tool
+PASS  a bad argument is refused by the schema
+PASS  a reader can't call the write tool
+PASS  an admin sees both tools
+PASS  no key is refused before the SDK
+PASS  an older 2025 client is still served
+PASS  a client with default options still works
+
+11/11 passed against http://127.0.0.1:8802/mcp
+pinned client negotiated: 2026-07-28
+
+=== workerd: official Python client
+protocol: 2026-07-28
+tools: ['get_customer']
+call: {"id":"cus_1","era":"modern","caller":"reader","traceparent":null,"ctxKeys":["sessionId","mcpReq","http"]}
+PASS
+
+=== workerd: raw messages
+--- tools/list
+{"result":{"tools":[{"name":"get_customer","description":"Read one customer by id.","inputSchema":{"type":"object","properties":{"id":{"type":"string","description":"The customer id","pattern":"^cus_"}},"required":["id"],"additionalProperties":false},"annotations":{"readOnlyHint":true}}],"resultType":"complete","ttlMs":0,"cacheScope":"private","_meta":{"io.modelcontextprotocol/serverInfo":{"name":"crumple-spike","version":"0.0.0"}}},"jsonrpc":"2.0","id":2}
+
+--- tools/call good
+{"result":{"content":[{"type":"text","text":"{\"id\":\"cus_1\",\"era\":\"modern\",\"caller\":\"reader\",\"traceparent\":\"00-0af7651916cd43dd8448eb211c80319c-b7ad6b7169203331-01\",\"ctxKeys\":[\"sessionId\",\"mcpReq\",\"http\"]}"}],"resultType":"complete","_meta":{"io.modelcontextprotocol/serverInfo":{"name":"crumple-spike","version":"0.0.0"}}},"jsonrpc":"2.0","id":3}
+
+--- tools/call bad argument
+{"result":{"content":[{"type":"text","text":"Input validation error: Invalid arguments for tool get_customer: #: Property \"id\" does not match schema.; #/id: String does not match pattern."}],"isError":true,"resultType":"complete","_meta":{"io.modelcontextprotocol/serverInfo":{"name":"crumple-spike","version":"0.0.0"}}},"jsonrpc":"2.0","id":4}
+
+--- tools/call hidden tool
+{"jsonrpc":"2.0","id":5,"error":{"code":-32602,"message":"Tool delete_customer not found"}}
+
+--- tools/call without the routing header
+{"jsonrpc":"2.0","error":{"code":-32020,"message":"Bad Request: the request headers and body disagree: the body names method tools/call but the required Mcp-Method header is absent","data":{"mismatch":{"header":"(missing)","body":"the body names method tools/call but the required Mcp-Method header is absent"}}},"id":6}
+
+=== node: cost of a server per request (in process, one laptop, rough)
+loading the SDK: 35 ms
+    1 tools: p50 0.10 ms, p99 1.05 ms per tools/call
+   51 tools: p50 0.10 ms, p99 1.91 ms per tools/call
+  201 tools: p50 0.16 ms, p99 2.08 ms per tools/call
+ 1001 tools: p50 0.51 ms, p99 2.63 ms per tools/call
+./run-all.sh: line 28: 65386 Terminated: 15          "$NODE_BIN" node-server.mjs 8801 > "$LOG/node.log" 2>&1

@@ -1,0 +1,11 @@
+{
+  "name": "spike-mcp-sdk",
+  "private": true,
+  "type": "module",
+  "description": "Throwaway. Answers one question: can the official SDK serve 2026-07-28 on Node and in workerd?",
+  "dependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
+    "@modelcontextprotocol/server": "2.4.0",
+    "wrangler": "4.157.0"
+  }
+}
