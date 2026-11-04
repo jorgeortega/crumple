@@ -46,8 +46,8 @@ JSON Schema from OpenAPI (`mcp-surface`), trace context (C11) and real MCP (C14)
 1. **The package name in the spec was wrong.** `@modelcontextprotocol/sdk` is still
    1.32.2. Version 2 is split into `@modelcontextprotocol/server` and `/client`. The
    spec and the dependency test now say so.
-2. **Authentication stays ours, cleanly.** The SDK "never reads headers". We verify the
-   caller first and pass the result in as `authInfo`, which is where `access-control`
+2. **Authentication stays ours, cleanly.** The SDK doesn't read auth headers itself. We
+   verify the caller first and pass the result in as `authInfo`, which is where `access-control`
    was going to sit anyway.
 3. **A fresh server per request is affordable.** That's how the SDK works, and it's what
    makes a per-caller tool list simple. Median cost per `tools/call` was 0.10 ms with 1
@@ -58,11 +58,15 @@ JSON Schema from OpenAPI (`mcp-surface`), trace context (C11) and real MCP (C14)
    the SDK's own default client. The `legacy: 'stateless'` setting serves both from one
    factory at almost no cost. `SPEC-mcp-surface.md` should keep it, and the owner decides
    there.
-5. **My first run proved less than it seemed to.** It showed 10 of 10 passing, but the
+5. **The first run proved less than it seemed to.** It showed 10 of 10 passing, but the
    client had silently used the older protocol and one check couldn't fail. The tell was
    a line printed underneath the results. `prove` must check which version was actually
    negotiated rather than assume it.
-6. **Avoid `responseMode: 'json'`.** It prints a warning on every start. The default,
+6. **A per-caller tool list has to stay marked private.** The changelog says list results
+   carry `cacheScope`, which tells shared caches whether they may keep them. Our lists
+   differ by caller, so a `public` one could show one caller's tools to another. The SDK
+   sent `private` with `ttlMs: 0` in the spike. `SPEC-mcp-surface.md` should add a test.
+7. **Avoid `responseMode: 'json'`.** It prints a warning on every start. The default,
    `auto`, sends plain JSON anyway unless a tool streams something first.
 
 ## What it costs
@@ -90,6 +94,6 @@ JSON Schema from OpenAPI (`mcp-surface`), trace context (C11) and real MCP (C14)
 - Stock clients such as Claude Code. Task 21 covers this.
 - stdio. Crumple serves HTTP only, so `serve` needs a real test with clients that prefer
   stdio.
-- Node's Host and Origin checks. The SDK exports `validateHostHeader` and
+- Host and Origin checks on a local server. The SDK exports `validateHostHeader` and
   `validateOriginHeader`, but a local server must actually use them, or a web page could
   reach it through DNS rebinding. `SPEC-cli.md` must include this.

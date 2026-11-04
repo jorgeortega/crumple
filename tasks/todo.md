@@ -25,7 +25,7 @@ With no CI until December, this is what stops bad commits.
 - Depends on: 1. Files: `.githooks/pre-push`, `scripts/secret-scan.mjs`, `tests/boundaries.test.ts`, `.github/workflows/ci.yml`
 
 ### Task 3: Write the primer (S)
-- [ ] `docs/learn/primer.md` explains MCP, tool calling and the agent loop in plain language, using this repo's example, in about 20 minutes of reading
+- [x] `docs/learn/primer.md` explains MCP, tool calling and the agent loop in plain language, using this repo's example, in about 20 minutes of reading
 - [ ] **OWNER:** read it, then a short teach-back (days 1-3)
 - Depends on: none. Files: `docs/learn/primer.md`
 

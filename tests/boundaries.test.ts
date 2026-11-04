@@ -117,7 +117,7 @@ describe('findViolations', () => {
 
   it.each([
     ['the executor importing the protocol layer', 'src/executor/call.ts', "import { x } from '../mcp-surface/server.js';"],
-    ['the executor importing an MCP library', 'src/executor/call.ts', "import { x } from '@modelcontextprotocol/sdk';"],
+    ['the executor importing an MCP library', 'src/executor/call.ts', "import { x } from '@modelcontextprotocol/server';"],
     ['access control importing the executor', 'src/access-control/policy.ts', "import type { x } from '../executor/call.js';"],
     ['the agent reaching into the server', 'src/agent-runner/loop.ts', "const m = await import('../mcp-surface/server.js');"],
     ['prove reaching into the server', 'src/prove/run.ts', "import { x } from '../mcp-surface/server.js';"],
@@ -131,8 +131,8 @@ describe('findViolations', () => {
   it.each([
     ['the executor using telemetry', 'src/executor/call.ts', "import { x } from '../telemetry/spans.js';"],
     ['a module importing itself', 'src/executor/call.ts', "import { x } from './errors.js';"],
-    ['the protocol layer using its library', 'src/mcp-surface/server.ts', "import { x } from '@modelcontextprotocol/sdk';"],
-    ['prove using an MCP client', 'src/prove/run.ts', "import { x } from '@modelcontextprotocol/sdk';"],
+    ['the protocol layer using its library', 'src/mcp-surface/server.ts', "import { x } from '@modelcontextprotocol/server';"],
+    ['prove using an MCP client', 'src/prove/run.ts', "import { x } from '@modelcontextprotocol/client';"],
     ['the CLI using Node', 'src/cli/main.ts', "import { x } from 'node:fs';"],
     ['the CLI wiring the commands', 'src/cli/main.ts', "import { x } from '../prove/run.js';"],
     ['the Node adapter using the protocol layer', 'src/node.ts', "import { x } from './mcp-surface/server.js';"],
