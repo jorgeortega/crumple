@@ -134,8 +134,9 @@ The only finding that could change the design.
 - Depends on: 4, 14, 17. Files: `src/mcp-surface/convert.ts`, `facts.ts`, `server.ts`, `results.ts`, tests, `tests/python-interop/*`
 
 ### Task 19: Add `node:sqlite` storage (S)
-- [ ] Memory and SQLite pass the same test suite behind one interface
-- Depends on: 18. Files: `src/store/*`, its test
+- [x] **OWNER:** add `store` to the map ("Yes, add store", 2026-11-04)
+- [x] Memory and SQLite pass the same test suite behind one interface
+- Depends on: 18. Files: `src/store/*`, `tests/helpers/store-contract.ts`, its test
 
 ### Task 20: Build `cli` config and `serve` (M)
 - [ ] **OWNER:** approve `SPEC-cli.md` first
@@ -242,6 +243,7 @@ The only finding that could change the design.
 
 ### Task 36: Release (owner actions)
 - [ ] Final secret scan, including history, and the install test from a packed tarball
+- [ ] `npm run test:oldest-node` and `npm run test:interop` pass, because the pre-push gate runs neither
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
 - [ ] Links added to outreach messages; a link from latitude10.tech goes through its Build Gate
 

@@ -198,6 +198,7 @@ npm run check            # types, lint, tests, secret scan: what the pre-push ho
 npm run prove            # all claims against Crumple; writes proof/latest.md and .json
 npm run prove:load       # load runs on this machine; writes proof/load-<date>.md
 npm run test:interop     # the Python SDK test (needs uv)
+npm run test:oldest-node # the whole suite on Node 22.13.1, the oldest we promise
 npm run deploy:demo      # deploys the demo by hand (asks first: see Boundaries)
 ```
 
@@ -214,6 +215,7 @@ crumple/
     executor/           knows nothing about MCP
     access-control/     authentication, policy, sealed credentials
     mcp-surface/        the protocol layer
+    store/              saved keys and audit events
     fault-api/          ships in the package, for demo and prove
     prove/              the checks and their reports
     agent-runner/       the loop and model adapters

@@ -98,8 +98,9 @@ function sourceFiles(folder: string): SourceFile[] {
 const MAP = readMap(readFileSync(join(ROOT, 'CAPABILITY-MAP.md'), 'utf8'));
 
 describe('the capability map', () => {
-  it('lists all ten modules with their dependencies', () => {
-    expect(Object.keys(MAP)).toHaveLength(10);
+  it('lists all eleven modules with their dependencies', () => {
+    expect(Object.keys(MAP)).toHaveLength(11);
+    expect(MAP['store']).toEqual(['access-control', 'telemetry']);
     expect(MAP['executor']).toEqual(['telemetry']);
     expect(MAP['fault-api']).toEqual([]);
     expect(MAP['prove']).toEqual(['fault-api']);

@@ -30,6 +30,8 @@ function fakeSleep() {
     new Promise<void>((resolve, reject) => {
       waits.push(ms);
       if (ms < MAX_WAIT_MS) resolve();
+      // An abort event never fires twice, and on Node 22 this can start just after it fired.
+      if (signal.aborted) reject(signal.reason as Error);
       signal.addEventListener('abort', () => {
         reject(signal.reason as Error);
       }, { once: true });

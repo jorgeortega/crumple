@@ -23,6 +23,7 @@
     "secrets": "node scripts/secret-scan.mjs",
     "test:coverage": "vitest run --coverage",
     "test:interop": "vitest run --config vitest.interop.config.ts",
+    "test:oldest-node": "npx -y -p node@22.13.1 node node_modules/vitest/vitest.mjs run",
     "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run secrets"
   },
   "devDependencies": {
