@@ -48,8 +48,8 @@ The only finding that could change the design.
 - Depends on: 4. Files: the two specs
 
 ### Task 6: Build `fault-api` normal behaviour (S)
-- [ ] An OpenAPI document with reads and writes on fake customers and payments
-- [ ] Every request's headers are logged and can be read back, which C3 relies on
+- [x] An OpenAPI document with reads and writes on fake customers and payments
+- [x] Every request's headers are logged and can be read back, which C3 relies on
 - Verify: `npx vitest run src/fault-api`
 - Depends on: 5. Files: `src/fault-api/*`
 
