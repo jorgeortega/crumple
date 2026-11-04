@@ -1,6 +1,6 @@
 # Spec: `fault-api`
 
-Status: draft for the owner's approval, 2026-11-04. Module on
+Status: approved by the owner on 2026-11-04 ("Approve both"), including the fifth command. Module on
 [the map](CAPABILITY-MAP.md), depending on nothing.
 
 ## What it is
@@ -141,9 +141,8 @@ on the document once, since poor descriptions would hurt the evals later.
 it must pass client disconnects through as an abort signal, or `hang` could never tell it was
 abandoned.
 
-## Decision for the owner
+## Decided
 
-**Add a fifth command, `npx crumple-mcp fault-api`?** Someone running `prove` on their own server
-can only test C5 to C9 by pointing their server's upstream at `fault-api`, and that requires
-running it. The spec's command list has only four. I recommend adding it: it's about 20 lines, and
-those are the most impressive checks.
+**A fifth command, `npx crumple-mcp fault-api`.** The owner approved it on 2026-11-04. Someone running
+`prove` on their own server can only test C5 to C9 by pointing their server's upstream at `fault-api`,
+so they have to be able to run it. It listens on `127.0.0.1` only. Task 20 builds the command.

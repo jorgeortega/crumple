@@ -186,6 +186,7 @@ npx crumple-mcp prove https://you/mcp               # checks a server you own
 npx crumple-mcp serve ./openapi.yaml --upstream https://api.you.com
 npx crumple-mcp eval ./scenarios                    # replays recordings unless --live
 npx crumple-mcp eval ./scenarios --live --max-usd 1 # stops at the budget
+npx crumple-mcp fault-api                           # the API that fails on command, on 127.0.0.1
 ```
 
 For working on it:

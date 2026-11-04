@@ -43,7 +43,7 @@ The only finding that could change the design.
 ## Phase 1: Foundations and execution (days 4-7)
 
 ### Task 5: Spec `fault-api` and `telemetry`
-- [ ] **OWNER:** approve `SPEC-fault-api.md` and `SPEC-telemetry.md`
+- [x] **OWNER:** approve `SPEC-fault-api.md` and `SPEC-telemetry.md` (2026-11-04)
 - Verify: both trace to the map and name their claims. Claude checks OpenTelemetry's MCP conventions at the source here
 - Depends on: 4. Files: the two specs
 

@@ -1,6 +1,6 @@
 # Spec: `telemetry`
 
-Status: draft for the owner's approval, 2026-11-04. Module on
+Status: approved by the owner on 2026-11-04 ("Approve both"), including no recording of tool arguments. Module on
 [the map](CAPABILITY-MAP.md), depending on nothing.
 
 ## What it is
@@ -167,9 +167,8 @@ they only last as long as the process, and the `cli` spec covers saving them thr
 `src/telemetry/` holds `index.ts`, `attributes.ts` (the allowlist, and every name in one place), `span.ts`,
 `traceparent.ts`, `sinks.ts`, `otlp.ts`, `metrics.ts` and `audit.ts`, with tests alongside.
 
-## Decision for the owner
+## Decided
 
-**Should tool arguments stay impossible to record, with no debug flag?** I recommend yes, and the rest of this spec
-assumes it. The cost is real: debugging "why did the agent call it with that?" means looking at the agent's side,
-where the arguments are already in the conversation. The server never holds them in a trace, which is a line you can
-say plainly in an interview.
+**Tool arguments stay impossible to record, with no debug flag.** The owner approved this on 2026-11-04.
+The cost is real: debugging "why did the agent call it with that?" means looking at the agent's side, where
+the arguments are already in the conversation. The server never holds them in a trace.
