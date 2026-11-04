@@ -3,9 +3,12 @@ import { realSleep, startTimer, untilAborted, type Sleep } from './clock.js';
 import { classify, describeError, type ExecutorError, type Failure, type Verdict } from './errors.js';
 import type { Credential, Operation } from './operation.js';
 import { buildPlan, CallRefused, credentialForms, parseBaseUrl, redact, toRequest, type RequestPlan } from './request.js';
+import { backoffMs, parseRetryAfter, type BackoffLimits } from './retry.js';
 
 const DEFAULT_DEADLINE_MS = 30_000;
 const DEFAULT_ATTEMPT_TIMEOUT_MS = 10_000;
+const DEFAULT_ATTEMPTS = 3;
+const DEFAULT_BACKOFF: BackoffLimits = { baseMs: 200, capMs: 5_000 };
 const MAX_RESPONSE_BYTES = 1024 * 1024;
 const MAX_DETAIL_BYTES = 2048;
 const TEXT_TYPE = /^text\/|json|xml|javascript|yaml|csv|x-www-form-urlencoded/i;
@@ -24,7 +27,7 @@ export interface ExecutorOptions {
   newKey?: () => string;
   deadlineMs?: number;
   attemptTimeoutMs?: number;
-  retry?: { attempts?: number };
+  retry?: { attempts?: number; baseMs?: number; capMs?: number };
   /** Send traceparent upstream, so the API's own traces can join in. */
   sendTraceparent?: boolean;
 }
@@ -57,6 +60,7 @@ interface Failed {
   kind: 'failed';
   failure: Failure;
   detail?: string;
+  retryAfterMs?: number;
 }
 
 type AttemptResult = Answered | Failed | { kind: 'no_credential' } | { kind: 'cancelled' };
@@ -93,12 +97,17 @@ export function createExecutor(options: ExecutorOptions): Executor {
     headers: fixedHeaders = {},
     telemetry,
     fetch: send = (request: Request) => fetch(request),
+    now = () => Date.now(),
     sleep = realSleep,
+    random = () => Math.random(),
     newKey = () => crypto.randomUUID(),
     deadlineMs = DEFAULT_DEADLINE_MS,
     attemptTimeoutMs = DEFAULT_ATTEMPT_TIMEOUT_MS,
     sendTraceparent = true,
+    retry: { attempts: maxAttempts = DEFAULT_ATTEMPTS, ...backoffOptions } = {},
   } = options;
+
+  const backoff: BackoffLimits = { ...DEFAULT_BACKOFF, ...backoffOptions };
 
   const serverAddress = parseBaseUrl(baseUrl).hostname;
 
@@ -110,7 +119,8 @@ export function createExecutor(options: ExecutorOptions): Executor {
       const failure: Failure = { kind: 'status', status };
       if (classify(failure, operation.retry).code !== 'rejected') {
         response.body?.cancel().catch(() => undefined);
-        return { kind: 'failed', failure };
+        const retryAfterMs = parseRetryAfter(response.headers.get('retry-after'), now());
+        return { kind: 'failed', failure, ...(retryAfterMs === undefined ? {} : { retryAfterMs }) };
       }
       // Reads a little past the cap, so a credential straddling it is removed whole rather
       // than cut in half, where it wouldn't match.
@@ -134,7 +144,12 @@ export function createExecutor(options: ExecutorOptions): Executor {
     return { kind: 'answered', status, contentType, body: redact(text, forms) };
   }
 
-  async function attempt(operation: Operation, plan: RequestPlan, parent: Span, signal: AbortSignal, callerSignal: AbortSignal | undefined): Promise<AttemptResult> {
+  interface AttemptInfo {
+    resendCount: number;
+    delayMs?: number;
+  }
+
+  async function attempt(operation: Operation, plan: RequestPlan, parent: Span, signal: AbortSignal, callerSignal: AbortSignal | undefined, info: AttemptInfo): Promise<AttemptResult> {
     let credential: Credential;
     try {
       credential = await untilAborted(getCredential(), signal);
@@ -147,7 +162,13 @@ export function createExecutor(options: ExecutorOptions): Executor {
 
     const span = parent.child(`${operation.method} ${operation.path}`, {
       kind: 'client',
-      attributes: { 'http.request.method': operation.method, 'url.template': operation.path, 'server.address': serverAddress },
+      attributes: {
+        'http.request.method': operation.method,
+        'url.template': operation.path,
+        'server.address': serverAddress,
+        ...(info.resendCount === 0 ? {} : { 'http.request.resend_count': info.resendCount }),
+        ...(info.delayMs === undefined ? {} : { 'crumple.retry.delay_ms': info.delayMs }),
+      },
     });
 
     const timer = startTimer(sleep, attemptTimeoutMs);
@@ -184,28 +205,48 @@ export function createExecutor(options: ExecutorOptions): Executor {
   const plan = (operation: Operation, args: unknown) =>
     buildPlan(operation, args, baseUrl, { headers: fixedHeaders, newKey });
 
-  function finalError(verdict: Verdict, plan: RequestPlan, detail: string | undefined): ExecutorError {
+  function finalError(verdict: Verdict, plan: RequestPlan, result: Failed): ExecutorError {
     return describeError({
       code: verdict.code,
       retry: verdict.retry,
       ...(verdict.retry === 'same_key' && plan.key !== undefined ? { idempotencyKey: plan.key } : {}),
-      ...(detail === undefined ? {} : { detail }),
+      ...(result.detail === undefined ? {} : { detail: result.detail }),
+      ...(result.retryAfterMs === undefined ? {} : { retryAfterMs: result.retryAfterMs }),
     });
   }
 
-  async function run(operation: Operation, plan: RequestPlan, span: Span, signal: AbortSignal, context: CallContext): Promise<Outcome> {
-    const result = await attempt(operation, plan, span, signal, context.signal);
+  const cancelled = (attempts: number): Outcome => ({ ok: false, attempts, error: describeError({ code: 'cancelled', retry: 'no' }) });
 
-    if (result.kind === 'answered') {
-      return { ok: true, status: result.status, body: result.body, contentType: result.contentType, attempts: 1 };
+  async function run(operation: Operation, plan: RequestPlan, span: Span, signal: AbortSignal, context: CallContext, deadlineAt: number): Promise<Outcome> {
+    let info: AttemptInfo = { resendCount: 0 };
+
+    for (let attempts = 1; ; attempts += 1) {
+      const result = await attempt(operation, plan, span, signal, context.signal, info);
+
+      if (result.kind === 'answered') {
+        return { ok: true, status: result.status, body: result.body, contentType: result.contentType, attempts };
+      }
+      if (result.kind === 'no_credential') {
+        return { ok: false, attempts: attempts - 1, error: describeError({ code: 'upstream_auth', retry: 'no', message: 'Crumple has no usable credential for this API. You can\'t fix this: tell the operator.' }) };
+      }
+      if (result.kind === 'cancelled') return cancelled(attempts);
+
+      const verdict = classify(result.failure, operation.retry);
+      const giveUp = () => ({ ok: false as const, attempts, error: finalError(verdict, plan, result) });
+      if (!verdict.retryable || attempts >= maxAttempts || signal.aborted) return giveUp();
+
+      // Retry-After wins over backoff. If the wait wouldn't fit in the deadline, it isn't
+      // worth starting: the agent gets the answer now and can decide for itself.
+      const delayMs = result.retryAfterMs ?? backoffMs(attempts - 1, random, backoff);
+      if (now() + delayMs >= deadlineAt) return giveUp();
+
+      try {
+        await sleep(delayMs, signal);
+      } catch {
+        return context.signal?.aborted ? cancelled(attempts) : giveUp();
+      }
+      info = { resendCount: attempts, delayMs };
     }
-    if (result.kind === 'no_credential') {
-      return { ok: false, attempts: 0, error: describeError({ code: 'upstream_auth', retry: 'no', message: 'Crumple has no usable credential for this API. You can\'t fix this: tell the operator.' }) };
-    }
-    if (result.kind === 'cancelled') {
-      return { ok: false, attempts: 1, error: describeError({ code: 'cancelled', retry: 'no' }) };
-    }
-    return { ok: false, attempts: 1, error: finalError(classify(result.failure, operation.retry), plan, result.detail) };
   }
 
   return {
@@ -213,12 +254,13 @@ export function createExecutor(options: ExecutorOptions): Executor {
       const span = context.parentSpan
         ? context.parentSpan.child('execute', { attributes: { 'crumple.deadline_ms': deadlineMs } })
         : telemetry.startSpan('execute', { attributes: { 'crumple.deadline_ms': deadlineMs } });
+      const startedAt = now();
       const timer = startTimer(sleep, deadlineMs);
       const signal = context.signal ? AbortSignal.any([timer.signal, context.signal]) : timer.signal;
 
       let outcome: Outcome;
       try {
-        outcome = await run(operation, plan(operation, args), span, signal, context);
+        outcome = await run(operation, plan(operation, args), span, signal, context, startedAt + deadlineMs);
       } catch (error) {
         const message = error instanceof CallRefused ? error.message : 'The arguments can\'t be turned into a request.';
         outcome = { ok: false, attempts: 0, error: describeError({ code: 'invalid_arguments', retry: 'no', message }) };

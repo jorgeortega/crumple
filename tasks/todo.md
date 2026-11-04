@@ -85,9 +85,9 @@ The only finding that could change the design.
 - Depends on: 10. Files: `src/executor/request.ts`, `call.ts`, `errors.ts`, tests
 
 ### Task 12: Add retries and idempotency (M) — C5, C7
-- [ ] Retries only on temporary failures, with jittered backoff, honoring `Retry-After` and the deadline
-- [ ] Writes retry only with an idempotency key; apply-then-drop produces exactly one effect
-- [ ] A write that gives up returns its key, so the agent can retry safely
+- [x] Retries only on temporary failures, with jittered backoff, honoring `Retry-After` and the deadline
+- [x] Writes retry only with an idempotency key; apply-then-drop produces exactly one effect
+- [x] A write that gives up returns its key, so the agent can retry safely
 - Verify: `npx vitest run src/executor`, with an injected clock
 - Depends on: 11. Files: `src/executor/retry.ts`, `idempotency.ts`, tests
 
