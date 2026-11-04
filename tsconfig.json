@@ -13,6 +13,8 @@
     "verbatimModuleSyntax": true,
     "isolatedModules": true,
     "skipLibCheck": true,
+    "allowJs": true,
+    "checkJs": true,
     "noEmit": true
   },
   "include": ["src", "tests", "scripts", "*.ts"],

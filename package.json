@@ -16,10 +16,12 @@
     "node": ">=22.13"
   },
   "scripts": {
+    "setup": "git config core.hooksPath .githooks",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
-    "check": "npm run typecheck && npm run lint && npm test"
+    "secrets": "node scripts/secret-scan.mjs",
+    "check": "npm run typecheck && npm run lint && npm test && npm run secrets"
   },
   "devDependencies": {
     "@types/node": "22.20.5",

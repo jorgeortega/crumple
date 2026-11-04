@@ -1,0 +1,5 @@
+#!/bin/sh
+# Turn this on once per clone with: npm run setup
+# This is the only gate until GitHub Actions returns in December 2026, so a failure
+# here stops the push. Don't skip it with --no-verify; fix what it found.
+exec npm run check
