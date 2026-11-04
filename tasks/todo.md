@@ -92,7 +92,7 @@ The only finding that could change the design.
 - Depends on: 11. Files: `src/executor/retry.ts`, `idempotency.ts`, tests
 
 ### Task 13: Add the circuit breaker (S) — C8
-- [ ] Opens on sustained failure, fails fast with zero upstream requests, tests recovery, closes
+- [x] Opens on sustained failure, fails fast with zero upstream requests, tests recovery, closes
 - Verify: state-table test, plus a `fault-api` test counting requests
 - Depends on: 12. Files: `src/executor/breaker.ts`, its test
 

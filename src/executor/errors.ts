@@ -117,7 +117,7 @@ function nextStep({ retry, retryAfterMs, idempotencyKey }: ErrorFacts): string {
   if (retry === 'check_first') return ' Read the record to find out before trying again.';
   if (retry !== 'later') return '';
   if (retryAfterMs === undefined) return ' Try again later.';
-  const seconds = Math.ceil(retryAfterMs / 1000);
+  const seconds = Math.max(1, Math.ceil(retryAfterMs / 1000));
   return ` Try again in ${seconds} ${seconds === 1 ? 'second' : 'seconds'}.`;
 }
 

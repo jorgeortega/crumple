@@ -1,4 +1,5 @@
 import type { Span, Telemetry } from '../telemetry/index.js';
+import { admit, CLOSED, DEFAULT_BREAKER, report, type BreakerConfig, type BreakerEvent, type BreakerState } from './breaker.js';
 import { realSleep, startTimer, untilAborted, type Sleep } from './clock.js';
 import { classify, describeError, type ExecutorError, type Failure, type Verdict } from './errors.js';
 import type { Credential, Operation } from './operation.js';
@@ -28,6 +29,7 @@ export interface ExecutorOptions {
   deadlineMs?: number;
   attemptTimeoutMs?: number;
   retry?: { attempts?: number; baseMs?: number; capMs?: number };
+  breaker?: Partial<BreakerConfig>;
   /** Send traceparent upstream, so the API's own traces can join in. */
   sendTraceparent?: boolean;
 }
@@ -108,6 +110,9 @@ export function createExecutor(options: ExecutorOptions): Executor {
   } = options;
 
   const backoff: BackoffLimits = { ...DEFAULT_BACKOFF, ...backoffOptions };
+  const breakerConfig: BreakerConfig = { ...DEFAULT_BREAKER, ...options.breaker };
+  // One breaker for the one upstream. It's per instance, so on Workers each isolate has its own.
+  let breaker: BreakerState = CLOSED;
 
   const serverAddress = parseBaseUrl(baseUrl).hostname;
 
@@ -219,9 +224,24 @@ export function createExecutor(options: ExecutorOptions): Executor {
 
   async function run(operation: Operation, plan: RequestPlan, span: Span, signal: AbortSignal, context: CallContext, deadlineAt: number): Promise<Outcome> {
     let info: AttemptInfo = { resendCount: 0 };
+    // What to say if the breaker stops a retry. "Nothing was sent" would be a lie by then,
+    // because an earlier attempt may have applied this write.
+    let previous: (() => Outcome) | undefined;
 
     for (let attempts = 1; ; attempts += 1) {
+      const decision = admit(breaker, now());
+      breaker = decision.state;
+      span.setAttributes({ 'crumple.breaker.state': breaker.name });
+      if (!decision.allowed) {
+        return previous?.() ?? {
+          ok: false,
+          attempts: 0,
+          error: describeError({ code: 'circuit_open', retry: 'later', retryAfterMs: decision.retryAfterMs }),
+        };
+      }
+
       const result = await attempt(operation, plan, span, signal, context.signal, info);
+      breaker = report(breaker, breakerEvent(result), decision.probe, now(), breakerConfig);
 
       if (result.kind === 'answered') {
         return { ok: true, status: result.status, body: result.body, contentType: result.contentType, attempts };
@@ -232,7 +252,7 @@ export function createExecutor(options: ExecutorOptions): Executor {
       if (result.kind === 'cancelled') return cancelled(attempts);
 
       const verdict = classify(result.failure, operation.retry);
-      const giveUp = () => ({ ok: false as const, attempts, error: finalError(verdict, plan, result) });
+      const giveUp = (): Outcome => ({ ok: false, attempts, error: finalError(verdict, plan, result) });
       if (!verdict.retryable || attempts >= maxAttempts || signal.aborted) return giveUp();
 
       // Retry-After wins over backoff. If the wait wouldn't fit in the deadline, it isn't
@@ -246,6 +266,7 @@ export function createExecutor(options: ExecutorOptions): Executor {
         return context.signal?.aborted ? cancelled(attempts) : giveUp();
       }
       info = { resendCount: attempts, delayMs };
+      previous = giveUp;
     }
   }
 
@@ -273,6 +294,15 @@ export function createExecutor(options: ExecutorOptions): Executor {
       return outcome;
     },
   };
+}
+
+function breakerEvent(result: AttemptResult): BreakerEvent {
+  if (result.kind === 'answered') return 'success';
+  if (result.kind !== 'failed') return 'neutral';
+  const { failure } = result;
+  if (failure.kind === 'lost' || failure.kind === 'timed_out') return 'failure';
+  if (failure.kind === 'status') return failure.status >= 500 ? 'failure' : 'success';
+  return 'neutral';
 }
 
 function errorTypeOf(result: Failed): string {
