@@ -1,7 +1,7 @@
 # Spec: `access-control`
 
-Status: draft for the owner's review, 2026-11-04. Module on [the map](CAPABILITY-MAP.md), depending only on
-`telemetry`. Three decisions need the owner, at the end.
+Status: approved by the owner on 2026-11-04 ("Approve all three"), including the three decisions at the end. Module on
+[the map](CAPABILITY-MAP.md), depending only on `telemetry`.
 
 ## What it is
 
@@ -157,8 +157,10 @@ also supported, with the same hidden wrapper, and the docs won't imply that thos
 
 Every decision, allowed or refused, writes a span and an audit event, with no arguments, through the fields `telemetry` already has.
 
-**A stranger can't push real records out.** The memory audit log keeps the newest 10,000 events, so a flood of bad keys could
-evict real ones. Failed sign-ins are therefore capped at 60 audit events a minute per instance, and the rest are only counted.
+**A stranger can't quickly push real records out.** The memory audit log keeps the newest 10,000 events, so a flood of bad keys could
+evict real ones. Failed sign-ins are therefore capped at 60 audit events a minute per instance, and the rest are only counted. That slows
+an attack rather than stopping it: a steady flood would still fill the memory log in about three hours, which is one more reason to save
+audit events through the storage interface.
 
 **If an audit sink fails, the call still goes ahead** and the failure is counted, following `telemetry`'s rule that observability
 can't be why a call fails. A regulated system would want the opposite, which goes under the limits.
@@ -245,7 +247,9 @@ No network and no real clock. Keys are generated in each test, and tokens are si
 Heads-up, not part of this approval: storage in Task 19 needs a `src/store` folder, which isn't on the map, and the boundary test refuses
 unknown folders. Adding it is a map change, so I'll ask then.
 
-## Decisions for the owner
+## Decided
+
+The owner approved all three on 2026-11-04.
 
 **1. `*` means read-only, and every write must be granted by name with `writes: true`.** Even `{ tool: 'create_payment' }` alone is refused.
 The alternative is that naming a tool allows it. Mine costs some extra typing and one confusing refusal, which its message explains, and in

@@ -249,11 +249,15 @@ export type Decision =
   | { allow: true; grant: string }
   | { allow: false; reason: 'no_grant' | 'writes_not_allowed' };
 
-export function decide(principal: Principal, tool: ToolInfo): Decision {
-  const grant = principal.grants.find((g) => g.tool === tool.name || g.tool === '*');
-  if (!grant) return { allow: false, reason: 'no_grant' };
-  if (tool.writes && !grant.writes) return { allow: false, reason: 'writes_not_allowed' };
-  return { allow: true, grant: grant.tool };
+export function decide(principal: Principal, tool: ToolInfo | undefined): Decision {
+  if (!tool) return { allow: false, reason: 'no_grant' };
+  const named = principal.grants.find((g) => g.tool === tool.name && g.tool !== '*' && (!tool.writes || g.writes === true));
+  if (named) return { allow: true, grant: named.tool };
+  const matches = principal.grants.some((g) => g.tool === tool.name || g.tool === '*');
+  if (!matches) return { allow: false, reason: 'no_grant' };
+  // '*' is read-only, whatever it says: a broad grant can never write.
+  if (tool.writes) return { allow: false, reason: 'writes_not_allowed' };
+  return { allow: true, grant: '*' };
 }
 ```
 

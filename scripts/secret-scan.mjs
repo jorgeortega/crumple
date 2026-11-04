@@ -20,6 +20,7 @@ const SECRET_SHAPES = [
   { name: 'Slack token', pattern: /\bxox[abprs]-[0-9A-Za-z-]{20,}/ },
   // Latitude 10's own key prefixes, since code is lifted from there.
   { name: 'Latitude 10 key', pattern: /\bl10[a-z]?_[0-9A-Za-z_-]{24,}/ },
+  { name: 'Crumple key', pattern: /\bcrumple_[0-9A-Za-z_-]{43}/ },
   { name: 'Private key', pattern: /-----BEGIN [A-Z ]*PRIVATE KEY-----\s*[A-Za-z0-9+/=]{64,}/ },
 ];
 

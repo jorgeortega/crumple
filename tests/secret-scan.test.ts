@@ -22,6 +22,7 @@ describe('findSecretShapes', () => {
     ['npm token', `npm_${'a'.repeat(36)}`],
     ['Slack token', `xoxb-${'1'.repeat(20)}`],
     ['Latitude 10 key', `l10m_${'a'.repeat(24)}`],
+    ['Crumple key', `crumple_${'a'.repeat(43)}`],
     ['Private key', `-----BEGIN PRIVATE KEY-----\n${'A'.repeat(80)}`],
   ])('finds a %s', (name, text) => {
     expect(findSecretShapes(text)).toEqual([name]);

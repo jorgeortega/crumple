@@ -109,7 +109,7 @@ The only finding that could change the design.
 ## Phase 2: Permissions, protocol, package (days 8-11)
 
 ### Task 15: Spec `access-control`
-- [ ] **OWNER:** approve `SPEC-access-control.md`, after Claude reads `keys.ts` and `jose.ts`
+- [x] **OWNER:** approve `SPEC-access-control.md`, after Claude reads `keys.ts` and `jose.ts` (2026-11-04)
 - Depends on: 11; can overlap Checkpoint B. Files: `SPEC-access-control.md`
 
 ### Task 16: Build API keys and the policy (M) — C1
