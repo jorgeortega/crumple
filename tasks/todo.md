@@ -103,7 +103,7 @@ The only finding that could change the design.
 
 ### Checkpoint B
 - [x] 95% branch coverage in `executor`; C5 to C10 pass at module level
-- [ ] Claude writes `docs/learn/fault-api.md`, `telemetry.md`, `executor.md`
+- [x] Claude writes `docs/learn/fault-api.md`, `telemetry.md`, `executor.md`
 - [ ] **OWNER:** read them and do three teach-backs
 
 ## Phase 2: Permissions, protocol, package (days 8-11)
