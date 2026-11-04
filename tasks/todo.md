@@ -61,9 +61,9 @@ The only finding that could change the design.
 - Depends on: 6. Files: `src/fault-api/faults.ts`, its test
 
 ### Task 8: Build `telemetry` spans (M)
-- [ ] Nested spans with attributes, recorded to a memory sink through one small interface
-- [ ] `traceparent` is read and written per W3C Trace Context
-- [ ] Attributes are scrubbed: no bodies, arguments, keys or credentials
+- [x] Nested spans with attributes, recorded to a memory sink through one small interface
+- [x] `traceparent` is read and written per W3C Trace Context
+- [x] Attributes are scrubbed: no bodies, arguments, keys or credentials
 - Verify: `npx vitest run src/telemetry`
 - Depends on: 5. Files: `src/telemetry/*`
 
