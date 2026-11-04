@@ -69,6 +69,13 @@ JSON Schema from OpenAPI (`mcp-surface`), trace context (C11) and real MCP (C14)
 7. **Avoid `responseMode: 'json'`.** It prints a warning on every start. The default,
    `auto`, sends plain JSON anyway unless a tool streams something first.
 
+## Later: one handler for every call
+
+Added 2026-11-04, by `SPEC-mcp-surface.md`. The pattern above registers only the tools a caller may use, and the spike did the same. It has a hole:
+the SDK answers "not found" for a hidden tool before any of our code runs, so an attempted delete leaves no audit record, and that attempt is exactly
+what C2 is about. So Crumple doesn't use the SDK's tool registry. It sets its own `tools/list` and `tools/call` handlers through `McpServer`'s `.server`, and calls
+the SDK's validator itself. The rest of this decision stands: the SDK still does versions, headers, JSON-RPC and older clients. Tested the same way, on Node and in `workerd`, with both official clients.
+
 ## What it costs
 
 - **Install size.** The server package and `yaml` come to 18 MB: 8.1 MB is `zod`, which

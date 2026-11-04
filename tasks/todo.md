@@ -126,12 +126,12 @@ The only finding that could change the design.
 - Depends on: 16, 11. Files: `src/access-control/credential.ts`, `jwt.ts`, `jwks.ts`, tests
 
 ### Task 18: Build `mcp-surface`: the first real call (M) — C1, C14
-- [ ] **OWNER:** approve `SPEC-mcp-surface.md` first, including older-client support
-- [ ] Copied converter; `tools/list` and `tools/call` run through access control into the executor
-- [ ] Serves the protected resource metadata when an issuer is configured, and answers 401, 403 and 503 as `SPEC-access-control.md` hands over
-- [ ] The official Python SDK lists and calls a tool against it
+- [x] **OWNER:** approve `SPEC-mcp-surface.md` first, including older-client support (2026-11-04)
+- [x] Copied converter; `tools/list` and `tools/call` run through access control into the executor
+- [x] Serves the protected resource metadata when an issuer is configured, and answers 401, 403 and 503 as the specs say
+- [x] The official Python SDK lists and calls a tool against it
 - Verify: `npm run test:interop`
-- Depends on: 4, 14, 17. Files: `src/mcp-surface/convert.ts`, `server.ts`, tests, `tests/python-interop/*`
+- Depends on: 4, 14, 17. Files: `src/mcp-surface/convert.ts`, `facts.ts`, `server.ts`, `results.ts`, tests, `tests/python-interop/*`
 
 ### Task 19: Add `node:sqlite` storage (S)
 - [ ] Memory and SQLite pass the same test suite behind one interface
