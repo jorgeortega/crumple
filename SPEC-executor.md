@@ -154,10 +154,12 @@ everything else fails fast.
 ### Concurrency limits
 
 Two levels: at most 10 in flight per caller, then at most 50 per upstream. **The first level is what delivers C9:** a flooding caller fills its own 10 slots and
-leaves the rest free. Excess calls wait in a bounded queue, at most 20 per caller, using up their own deadline as they wait. Past that, they're refused at once with
+leaves the rest free. Excess calls wait in a bounded queue, at most 20 per caller and 200 for the upstream, using up their own deadline as they wait. Past that, they're refused at once with
 `overloaded`, because a queue with no limit is just a slower outage.
 
 A call keeps its slots during backoff. Releasing them would let more work in exactly while the upstream is struggling.
+
+A call that waited out its whole deadline isn't sent, and gets `overloaded`. For a write, sending it would be a charge nobody will wait to hear about. Building it found this: a queued call was being sent at the instant it expired.
 
 **Limit:** this is first-come-first-served at the upstream level, not fair scheduling, so hundreds of well-behaved callers could still queue behind one another. Limits are
 exact within a Node process, and per instance on Workers, as the main spec says.

@@ -2,6 +2,7 @@ import type { Span, Telemetry } from '../telemetry/index.js';
 import { admit, CLOSED, DEFAULT_BREAKER, report, type BreakerConfig, type BreakerEvent, type BreakerState } from './breaker.js';
 import { realSleep, startTimer, untilAborted, type Sleep } from './clock.js';
 import { classify, describeError, type ExecutorError, type Failure, type Verdict } from './errors.js';
+import { createLimits, DEFAULT_LIMITS, type LimitOptions, type Release } from './limits.js';
 import type { Credential, Operation } from './operation.js';
 import { buildPlan, CallRefused, credentialForms, parseBaseUrl, redact, toRequest, type RequestPlan } from './request.js';
 import { backoffMs, parseRetryAfter, type BackoffLimits } from './retry.js';
@@ -30,6 +31,7 @@ export interface ExecutorOptions {
   attemptTimeoutMs?: number;
   retry?: { attempts?: number; baseMs?: number; capMs?: number };
   breaker?: Partial<BreakerConfig>;
+  limits?: Partial<LimitOptions>;
   /** Send traceparent upstream, so the API's own traces can join in. */
   sendTraceparent?: boolean;
 }
@@ -111,6 +113,7 @@ export function createExecutor(options: ExecutorOptions): Executor {
 
   const backoff: BackoffLimits = { ...DEFAULT_BACKOFF, ...backoffOptions };
   const breakerConfig: BreakerConfig = { ...DEFAULT_BREAKER, ...options.breaker };
+  const limits = createLimits({ ...DEFAULT_LIMITS, ...options.limits });
   // One breaker for the one upstream. It's per instance, so on Workers each isolate has its own.
   let breaker: BreakerState = CLOSED;
 
@@ -206,7 +209,6 @@ export function createExecutor(options: ExecutorOptions): Executor {
     }
   }
 
-  // Before any queue or network, so a bad argument costs nothing.
   const plan = (operation: Operation, args: unknown) =>
     buildPlan(operation, args, baseUrl, { headers: fixedHeaders, newKey });
 
@@ -219,6 +221,8 @@ export function createExecutor(options: ExecutorOptions): Executor {
       ...(result.retryAfterMs === undefined ? {} : { retryAfterMs: result.retryAfterMs }),
     });
   }
+
+  const notSent = (code: 'overloaded'): Outcome => ({ ok: false, attempts: 0, error: describeError({ code, retry: 'later' }) });
 
   const cancelled = (attempts: number): Outcome => ({ ok: false, attempts, error: describeError({ code: 'cancelled', retry: 'no' }) });
 
@@ -276,16 +280,35 @@ export function createExecutor(options: ExecutorOptions): Executor {
         ? context.parentSpan.child('execute', { attributes: { 'crumple.deadline_ms': deadlineMs } })
         : telemetry.startSpan('execute', { attributes: { 'crumple.deadline_ms': deadlineMs } });
       const startedAt = now();
+      const deadlineAt = startedAt + deadlineMs;
       const timer = startTimer(sleep, deadlineMs);
       const signal = context.signal ? AbortSignal.any([timer.signal, context.signal]) : timer.signal;
 
       let outcome: Outcome;
+      let release: Release | undefined;
       try {
-        outcome = await run(operation, plan(operation, args), span, signal, context, startedAt + deadlineMs);
+        // Before any queue or network, so a bad argument costs nothing.
+        const requestPlan = plan(operation, args);
+
+        release = await limits.acquire(context.caller, signal);
+        span.setAttributes({ 'crumple.queue_ms': now() - startedAt });
+        // A call that waited out its whole deadline isn't sent. For a write, that would be
+        // sending a charge nobody will wait to hear about.
+        outcome = release && now() < deadlineAt
+          ? await run(operation, requestPlan, span, signal, context, deadlineAt)
+          : notSent('overloaded');
       } catch (error) {
-        const message = error instanceof CallRefused ? error.message : 'The arguments can\'t be turned into a request.';
-        outcome = { ok: false, attempts: 0, error: describeError({ code: 'invalid_arguments', retry: 'no', message }) };
+        if (error instanceof CallRefused) {
+          outcome = { ok: false, attempts: 0, error: describeError({ code: 'invalid_arguments', retry: 'no', message: error.message }) };
+        } else if (signal.aborted) {
+          // The wait for a slot ended. Nothing was sent, whoever gave up.
+          outcome = context.signal?.aborted ? cancelled(0) : notSent('overloaded');
+        } else {
+          // Only building the request can get here, such as with arguments JSON can't hold.
+          outcome = { ok: false, attempts: 0, error: describeError({ code: 'invalid_arguments', retry: 'no', message: 'The arguments can\'t be turned into a request.' }) };
+        }
       } finally {
+        release?.();
         timer.cancel();
       }
 

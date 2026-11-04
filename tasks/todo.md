@@ -97,12 +97,12 @@ The only finding that could change the design.
 - Depends on: 12. Files: `src/executor/breaker.ts`, its test
 
 ### Task 14: Add concurrency limits (S) — C9
-- [ ] Per-caller and per-upstream limits, a bounded queue, and a structured refusal when full
+- [x] Per-caller and per-upstream limits, a bounded queue, and a structured refusal when full
 - Verify: a flooding caller doesn't stop a second caller's calls
 - Depends on: 12. Files: `src/executor/limits.ts`, its test
 
 ### Checkpoint B
-- [ ] 95% branch coverage in `executor`; C5 to C10 pass at module level
+- [x] 95% branch coverage in `executor`; C5 to C10 pass at module level
 - [ ] Claude writes `docs/learn/fault-api.md`, `telemetry.md`, `executor.md`
 - [ ] **OWNER:** read them and do three teach-backs
 
