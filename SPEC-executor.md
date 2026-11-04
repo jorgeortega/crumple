@@ -1,6 +1,6 @@
 # Spec: `executor`
 
-Status: draft for the owner's approval, 2026-11-04. Module on
+Status: approved by the owner on 2026-11-04 ("Approve both"), including both decisions at the end. Module on
 [the map](CAPABILITY-MAP.md), depending only on `telemetry`.
 
 ## What it is
@@ -82,7 +82,7 @@ interface ExecutorError {
 | `rejected` | The API said the request is wrong (4xx) | `no` | Fix the arguments, then call again |
 | `upstream_auth` | The API refused **Crumple's** credential | `no` | The agent can't fix this. Tell the operator |
 | `rate_limited` | Asked to slow down | `later` | Try again in 30 seconds |
-| `unavailable` | Still failing after retries | `later`, or `same_key` | The API is having problems |
+| `unavailable` | A read is still failing after retries | `later` | The API is having problems |
 | `timeout` | The deadline ran out on a read | `later` | No answer within 30 seconds |
 | `outcome_unknown` | **A write may or may not have happened** | `check_first`, or `same_key` | Read the record before trying again |
 | `circuit_open` | Failing fast, nothing was sent | `later` | The API has been failing, so this wasn't sent |
@@ -178,7 +178,7 @@ So when a `with_key` write gives up, the error returns the key with `retry: 'sam
 }
 ```
 
-The evals test that a real model follows this. **See the first decision below.**
+The evals test that a real model follows this.
 
 ## What's lifted, and what changes
 
@@ -253,11 +253,13 @@ All with `fault-api` in process, and a fake clock, so nothing really waits.
 `src/executor/`: `index.ts`, `request.ts` (lifted), `call.ts`, `errors.ts` (`classify()` and the error list), `retry.ts`, `breaker.ts`, `limits.ts` and `clock.ts`, with tests alongside. Tasks 11 to 14
 build these in order. `operation.ts` holds the plain shape of an operation, which `mcp-surface` fills in from OpenAPI.
 
-## Decisions for the owner
+## Decided
 
-**1. Show the idempotency key to the agent?** I recommend yes, as above. The alternative is to derive a key from the caller, tool and arguments, so a repeat call gets the same key automatically. That needs nothing
+The owner approved both on 2026-11-04.
+
+**1. The idempotency key is shown to the agent,** as above. The alternative was to derive a key from the caller, tool and arguments, so a repeat call gets the same key automatically. That needs nothing
 from the model, but it would silently swallow a legitimate second identical charge, such as two $50 payments on purpose. An agent can misuse a key, but a silently dropped payment is worse, and a visible key is also what lets the eval show
 an agent recovering properly.
 
-**2. Never retry a write with no idempotency key, even after a 503?** I recommend yes, and the rest of the spec assumes it. The cost: some writes that a retry would have rescued return `outcome_unknown` instead, and the agent has to check and try again.
+**2. A write with no idempotency key is never retried, even after a 503.** The cost: some writes that a retry would have rescued return `outcome_unknown` instead, and the agent has to check and try again.
 The benefit is the sentence "Crumple never applies a write twice, and when it can't be sure, it says so", which is the claim this project stands on.

@@ -75,7 +75,7 @@ The only finding that could change the design.
 - Depends on: 8. Files: `src/telemetry/otlp.ts`, its test
 
 ### Task 10: Spec `executor`
-- [ ] **OWNER:** approve `SPEC-executor.md`, including what's lifted from `upstream.ts` and the retry and idempotency rules
+- [x] **OWNER:** approve `SPEC-executor.md`, including what's lifted from `upstream.ts` and the retry and idempotency rules
 - Depends on: 7, 8. Files: `SPEC-executor.md`
 
 ### Task 11: Build the single-attempt executor with deadlines (M) — C6, C10
