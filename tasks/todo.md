@@ -68,9 +68,9 @@ The only finding that could change the design.
 - Depends on: 5. Files: `src/telemetry/*`
 
 ### Task 9: Export traces and metrics (S)
-- [ ] Spans export as OTLP JSON, and a local viewer shows a sample trace
-- [ ] Latency and count metrics are available from the same records
-- [ ] Audit events (who, what, decision, trace id), which the map lists and this task had missed
+- [x] Spans export as OTLP JSON, and a local viewer shows a sample trace (Jaeger, 2026-11-04)
+- [x] Latency and count metrics are available from the same records
+- [x] Audit events (who, what, decision, trace id), which the map lists and this task had missed
 - Verify: test against a captured OTLP sample; manual check in Jaeger
 - Depends on: 8. Files: `src/telemetry/otlp.ts`, its test
 
