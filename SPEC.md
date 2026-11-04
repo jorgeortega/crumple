@@ -369,10 +369,9 @@ Job applications and the 30 to 40 conversations stay in the owner's
 | Trace context goes in `_meta` | [SEP-414](https://modelcontextprotocol.io/seps/414) |
 | Workers Paid is $5/month and includes 10M requests | [Cloudflare pricing](https://developers.cloudflare.com/workers/platform/pricing/) |
 | Star counts for OpenAPI and MCP projects | GitHub search API, 2026-11-04 |
+| OpenTelemetry's MCP conventions (span names, attributes, buckets), marked Development, moved to their own repository | [semantic-conventions-genai](https://github.com/open-telemetry/semantic-conventions-genai/blob/main/docs/gen-ai/mcp.md), commit `633cbb060b` |
 | `mcp-reliability-harness` runs evals against its own document store, with no infrastructure faults and no dollar costs | [Glama listing](https://glama.ai/mcp/servers/shanwazshah/mcp-reliability-harness), not its source |
 
-Not yet confirmed: OpenTelemetry's MCP span names were read second-hand from
-[Google Cloud's docs](https://docs.cloud.google.com/trace/docs/trace-remote-mcp-server-calls);
-`SPEC-telemetry.md` checks the source. That the account is on Workers Paid is
+Not yet confirmed: that the account is on Workers Paid is
 inferred from a comment in Latitude 10's `wrangler.toml`. How `executor` and
 `openapi-mcp-generator` behave hasn't been read, only their descriptions.

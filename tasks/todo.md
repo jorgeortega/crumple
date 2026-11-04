@@ -54,7 +54,8 @@ The only finding that could change the design.
 - Depends on: 5. Files: `src/fault-api/*`
 
 ### Task 7: Add `fault-api` failure modes (S)
-- [ ] A request header selects: slow, hang, status codes, `Retry-After`, apply-then-drop-response, malicious text, echo the credential
+- [ ] A request header selects: slow, hang, stalled body, status codes, `Retry-After`, apply-then-drop-response, malicious text, echo the credential, a huge body, non-JSON
+- [ ] An unknown fault gets a 400, never silently normal behaviour
 - [ ] Each mode has a test, and concurrent requests with different modes don't interfere
 - Verify: `npx vitest run src/fault-api`
 - Depends on: 6. Files: `src/fault-api/faults.ts`, its test
@@ -69,6 +70,7 @@ The only finding that could change the design.
 ### Task 9: Export traces and metrics (S)
 - [ ] Spans export as OTLP JSON, and a local viewer shows a sample trace
 - [ ] Latency and count metrics are available from the same records
+- [ ] Audit events (who, what, decision, trace id), which the map lists and this task had missed
 - Verify: test against a captured OTLP sample; manual check in Jaeger
 - Depends on: 8. Files: `src/telemetry/otlp.ts`, its test
 
