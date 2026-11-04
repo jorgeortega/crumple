@@ -208,9 +208,8 @@ await createKey(keys, { label: 'ci', grants: [{ tool: '*' }] });  // { id, key }
 
 Passing `getCredential` to the executor is `mcp-surface`'s job, because `access-control` can't import `executor`.
 
-**What goes to `SPEC-mcp-surface.md`:** how a "no grant" refusal looks on the wire. My proposal is a tool error the model can read
-for API keys, since a key has nothing to step up to, and the 403 with `insufficient_scope` that MCP recommends for JWTs.
-`scopesFor(tool)` is here to fill that in.
+**Settled in `SPEC-mcp-surface.md`:** how a "no grant" refusal looks on the wire. It's the same "unknown tool" error for every caller, which
+replaces the proposal first made here (a tool error for keys, a 403 for JWTs). So `scopesFor()`, which that needed, is gone, and only a refused sign-in writes its own span.
 
 ## What it won't do
 

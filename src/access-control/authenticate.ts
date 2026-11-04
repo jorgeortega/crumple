@@ -66,7 +66,7 @@ export interface SpanContext {
 }
 
 export interface AccessControl {
-  authenticate(authorization: string | null | undefined, context?: SpanContext): Promise<Authentication>;
+  authenticate(authorization: string | null | undefined): Promise<Authentication>;
   /** The tools this caller may see. A courtesy to the model: `authorize` is the security. */
   visible<Tool extends ToolInfo>(principal: Principal, tools: readonly Tool[]): Tool[];
   /** Pass `undefined` for a tool that doesn't exist, and `requested` for the name asked for. */
@@ -75,8 +75,6 @@ export interface AccessControl {
   suppressedSignIns(): number;
   /** Only with an issuer configured. MCP requires it, and mcp-surface serves it. */
   resourceMetadata(): ResourceMetadata | undefined;
-  /** Which scopes would allow this tool, for a 403's `scope` parameter. */
-  scopesFor(tool: ToolInfo): string[];
 }
 
 /** How a JWT caller appears in traces: a hash, because a `sub` is often an email address. */
@@ -185,8 +183,11 @@ export function createAccessControl(options: AccessControlOptions): AccessContro
   }
 
   return {
-    async authenticate(authorization, context) {
-      const span = startSpan('authenticate', context);
+    async authenticate(authorization) {
+      // Signing in happens before the request's body is read, so its trace id isn't known yet.
+      // Only a refusal ends this span and so records it. A success would leave a second, orphaned
+      // trace on every call, so mcp-surface puts its time on the server span instead.
+      const span = telemetry.startSpan('authenticate');
 
       const refuse = (status: 401 | 503, reason: string, invalidToken = false): Authentication => {
         span.end({ attributes: { 'crumple.decision': 'deny', 'crumple.decision.reason': reason }, errorType: reason });
@@ -207,7 +208,6 @@ export function createAccessControl(options: AccessControlOptions): AccessContro
       }
       if ('reason' in result) return refuse(401, result.reason, result.invalidToken);
 
-      span.end({ attributes: { 'crumple.caller': result.principal.id, 'crumple.decision': 'allow' } });
       return { ok: true, principal: result.principal };
     },
 
@@ -232,8 +232,5 @@ export function createAccessControl(options: AccessControlOptions): AccessContro
     suppressedSignIns: () => suppressed,
 
     resourceMetadata: () => metadata,
-
-    scopesFor: (tool) =>
-      [...scopes].filter(([, grants]) => decide({ id: '', kind: 'jwt', grants }, tool).allow).map(([scope]) => scope),
   };
 }

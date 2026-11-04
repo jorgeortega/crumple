@@ -25,11 +25,15 @@
     "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run secrets"
   },
   "devDependencies": {
+    "@modelcontextprotocol/client": "2.4.0",
     "@types/node": "22.20.5",
     "@vitest/coverage-v8": "5.1.0",
     "eslint": "10.14.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
     "vitest": "5.1.0"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/server": "2.4.0"
   }
 }

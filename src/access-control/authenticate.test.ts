@@ -99,17 +99,17 @@ describe('authenticate', () => {
     expect(records.events()[0]?.reason).toBe('unavailable');
   });
 
-  it('writes a span for a sign-in, without the key', async () => {
-    const { access, addKey, spans, telemetry } = setup();
-    const { id, key } = await addKey([]);
-    const parent = telemetry.startSpan('server');
-    await access.authenticate(`Bearer ${key}`, { parentSpan: parent });
-    await access.authenticate('Bearer nope');
+  // Signing in comes before the body, so a success would be a second, orphaned trace on every call.
+  it('writes a span only for a refused sign-in, without the key', async () => {
+    const { access, addKey, spans } = setup();
+    const { key } = await addKey([]);
+    await access.authenticate(`Bearer ${key}`);
+    expect(spans.spans()).toEqual([]);
 
-    const [good, bad] = spans.spans().filter((span) => span.name === 'authenticate');
-    expect(good).toMatchObject({ parentSpanId: parent.context.spanId, attributes: { 'crumple.caller': id, 'crumple.decision': 'allow' } });
-    expect(bad).toMatchObject({ attributes: { 'crumple.decision': 'deny', 'crumple.decision.reason': 'invalid_key', 'error.type': 'invalid_key' } });
-    expect(JSON.stringify(spans.spans())).not.toContain(key);
+    await access.authenticate(`Bearer crumple_${'a'.repeat(43)}`);
+    const [refused] = spans.spans();
+    expect(refused).toMatchObject({ name: 'authenticate', attributes: { 'crumple.decision': 'deny', 'crumple.decision.reason': 'invalid_key', 'error.type': 'invalid_key' } });
+    expect(JSON.stringify(spans.spans())).not.toContain('aaaa');
   });
 });
 

@@ -1,7 +1,7 @@
 # Spec: `mcp-surface`
 
-Status: draft for the owner's review, 2026-11-04. Module on [the map](CAPABILITY-MAP.md), depending on `executor`,
-`access-control` and `telemetry`. Two decisions need the owner, at the end.
+Status: approved by the owner on 2026-11-04 ("Approve both"), including the two decisions at the end. Module on
+[the map](CAPABILITY-MAP.md), depending on `executor`, `access-control` and `telemetry`.
 
 ## What it is
 
@@ -70,7 +70,7 @@ because the SDK marks the lower-level `Server` class as deprecated:
 
 ## From OpenAPI to tools
 
-Copied from `openapi-agentify/src/openapi/convert.ts` (MIT, October Moon LLC), with its tests. It's the owner's own, and copying avoids that package's `typescript`, `zod` and `ajv`. Each
+Copied from `openapi-agentify/src/openapi/convert.ts` (MIT, October Moon LLC). Its tests are tied to Agentify's web frameworks, so this module has a dedicated suite of its own, which found a bug in the copy: a third tool with one name came out as `same_2_3`. It's the owner's own code, and copying avoids that package's `typescript`, `zod` and `ajv`. Each
 operation becomes one tool, whose input is its path, query and header parameters plus a `body`.
 
 **Kept:** `$ref` handling (local only, so a document can't make us fetch a URL), 3.0 to 2020-12 schema conversion, cycle cutting, the 1,200-character description cap, name cleaning, and refusing
@@ -190,7 +190,7 @@ It takes a parsed document. Reading files and YAML belongs to `cli`, since this 
 
 | Test | Proves |
 |---|---|
-| The copied converter's tests, plus a table for `writes`, `retry` and `expectsJson` | Conversion, and the executor gets the policy it was promised |
+| The converter's own suite, plus a table for `writes`, `retry` and `expectsJson` | Conversion, and the executor gets the policy it was promised |
 | `fault-api`'s own OpenAPI document converts, and its payment tool becomes `with_key` | The module's own example works |
 | No key, a bad key, no grant: `fault-api` receives **zero** requests | **C1, end to end at last** |
 | A hidden tool and an unknown tool: identical answers, and an audit event for both | C2, and the reason for one door |
@@ -215,7 +215,9 @@ Over real sockets through `node.ts`, not only in process, for the C1, C3 and C5 
 
 `src/mcp-surface/`: `index.ts`, `convert.ts` (copied), `facts.ts` (`writes`, `retry`, `expectsJson`), `server.ts`, `results.ts`, with tests alongside, and `tests/python-interop/`. Task 18 builds them: conversion, then the server, then interop.
 
-## Decisions for the owner
+## Decided
+
+The owner approved both on 2026-11-04.
 
 **1. Keep serving older clients** (the 2025 protocol, through `legacy: 'stateless'`). The spike found that the official TypeScript client negotiates 2025-11-25 unless told otherwise, so a 2026-only server would turn away the SDK's own default. Keeping them is one setting, and the
 cost is that the tests must cover two protocol eras. The alternative is a simpler claim, "2026-07-28 only", at the cost of first-run failures for anyone on an older client. I recommend keeping them, and revisiting when clients move.

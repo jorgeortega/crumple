@@ -122,13 +122,6 @@ describe('scopes', () => {
   it('refuses a config that would grant * with writes', () => {
     expect(() => setup({ jwt: { scopes: { all: [{ tool: '*', writes: true }] } } })).toThrow(/Scope all/);
   });
-
-  it('says which scopes would allow a tool', () => {
-    const { access } = setup();
-    expect(access.scopesFor(WRITE)).toEqual(['payments:write']);
-    expect(access.scopesFor(READ)).toEqual(['customers:read']);
-    expect(access.scopesFor({ name: 'other', writes: false })).toEqual([]);
-  });
 });
 
 describe('a bad token', () => {
@@ -229,6 +222,5 @@ describe('Protected Resource Metadata', () => {
     const telemetry = createTelemetry();
     const access = createAccessControl({ telemetry, audit: createAudit(telemetry, []) });
     expect(access.resourceMetadata()).toBeUndefined();
-    expect(access.scopesFor(READ)).toEqual([]);
   });
 });

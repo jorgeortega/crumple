@@ -41,6 +41,7 @@ export const ATTRIBUTES = {
   'crumple.caller': 'string',
   'crumple.decision': 'string',
   'crumple.decision.reason': 'string',
+  'crumple.auth_ms': 'number',
   'crumple.deadline_ms': 'number',
   'crumple.breaker.state': 'string',
   'crumple.retry.delay_ms': 'number',
