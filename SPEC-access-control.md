@@ -85,7 +85,12 @@ tokens". So a token for another service is refused, even from a trusted issuer. 
 and a valid token with no mapped scopes sees an empty tool list.
 
 **Issuer keys** are cached for 5 minutes to 24 hours, following the response's `max-age`. An unknown key id triggers one
-refetch, at most once a minute, so garbage tokens can't make us hammer the issuer. If a refetch fails, the old keys stay.
+refetch, at most once a minute, so garbage tokens can't make us hammer the issuer. If a refetch fails, the old keys stay, and
+the next attempt waits 10 seconds, so an outage isn't one fetch per request. Calls arriving together share one fetch. Building it added
+those last two.
+
+**The limit of keeping old keys:** if the issuer stays down, a signing key it revoked meanwhile would still be trusted. The other choice
+is refusing everyone during an issuer's outage.
 
 **Protected Resource Metadata** ([RFC 9728](https://datatracker.ietf.org/doc/html/rfc9728)) is how a client finds the
 issuer, and MCP requires it. `resourceMetadata()` returns the document, and `mcp-surface` serves it. With API keys

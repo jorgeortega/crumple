@@ -113,21 +113,22 @@ The only finding that could change the design.
 - Depends on: 11; can overlap Checkpoint B. Files: `SPEC-access-control.md`
 
 ### Task 16: Build API keys and the policy (M) — C1
-- [ ] Keys are stored hashed; a pure `decide()` is deny-by-default, tested by a table of cases
-- [ ] Tool listings show only what a caller may use, and calls are re-checked anyway
+- [x] Keys are stored hashed; a pure `decide()` is deny-by-default, tested by a table of cases
+- [x] Tool listings show only what a caller may use, and calls are re-checked anyway
 - Verify: `npx vitest run src/access-control`
-- Depends on: 15. Files: `src/access-control/keys.ts`, `policy.ts`, tests
+- Depends on: 15. Files: `src/access-control/keys.ts`, `policy.ts`, `authenticate.ts`, tests
 
 ### Task 17: Add sealed credentials and JWT checks (M) — C3, C4
-- [ ] Lifted AES-GCM sealing; the upstream credential goes in the request last and comes out of responses and logs
-- [ ] The agent's token never goes upstream, proved from `fault-api`'s header log
-- [ ] JWTs are checked against an issuer's keys, with protected resource metadata served
+- [x] Lifted AES-GCM sealing; the upstream credential goes in the request last and comes out of responses and logs
+- [x] The agent's token never goes upstream, proved from `fault-api`'s header log
+- [x] JWTs are checked against an issuer's keys, and the protected resource metadata is produced (Task 18 serves it)
 - Verify: `npx vitest run src/access-control`
-- Depends on: 16, 11. Files: `src/access-control/credential.ts`, `jwt.ts`, tests
+- Depends on: 16, 11. Files: `src/access-control/credential.ts`, `jwt.ts`, `jwks.ts`, tests
 
 ### Task 18: Build `mcp-surface`: the first real call (M) — C1, C14
 - [ ] **OWNER:** approve `SPEC-mcp-surface.md` first, including older-client support
 - [ ] Copied converter; `tools/list` and `tools/call` run through access control into the executor
+- [ ] Serves the protected resource metadata when an issuer is configured, and answers 401, 403 and 503 as `SPEC-access-control.md` hands over
 - [ ] The official Python SDK lists and calls a tool against it
 - Verify: `npm run test:interop`
 - Depends on: 4, 14, 17. Files: `src/mcp-surface/convert.ts`, `server.ts`, tests, `tests/python-interop/*`
