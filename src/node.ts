@@ -50,6 +50,9 @@ async function respond(handler: FetchHandler, base: string, req: IncomingMessage
   }
 
   res.writeHead(response.status, Object.fromEntries(response.headers));
+  // Node holds headers back until the first body write. A body that fails first would lose
+  // them too, so a failure partway through would look like no response at all.
+  res.flushHeaders();
   if (!response.body) {
     res.end();
     return;

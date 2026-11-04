@@ -54,9 +54,9 @@ The only finding that could change the design.
 - Depends on: 5. Files: `src/fault-api/*`
 
 ### Task 7: Add `fault-api` failure modes (S)
-- [ ] A request header selects: slow, hang, stalled body, status codes, `Retry-After`, apply-then-drop-response, malicious text, echo the credential, a huge body, non-JSON
-- [ ] An unknown fault gets a 400, never silently normal behaviour
-- [ ] Each mode has a test, and concurrent requests with different modes don't interfere
+- [x] A request header selects: slow, hang, stalled body, status codes, `Retry-After`, apply-then-drop-response, malicious text, echo the credential, a huge body, non-JSON
+- [x] An unknown fault gets a 400, never silently normal behaviour
+- [x] Each mode has a test, and concurrent requests with different modes don't interfere
 - Verify: `npx vitest run src/fault-api`
 - Depends on: 6. Files: `src/fault-api/faults.ts`, its test
 
