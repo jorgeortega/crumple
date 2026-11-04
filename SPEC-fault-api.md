@@ -85,9 +85,10 @@ Three of those weren't on the task list and are worth a word:
 - **A fault it doesn't understand returns a 400.** It never ignores one, because a typo in
   a test mustn't look like a pass.
 
-**Writes and idempotency.** `POST` honors an `Idempotency-Key`, the way Stripe's API does.
+**Writes and idempotency.** `POST` honors an `Idempotency-Key`, following the
+[IETF draft](https://datatracker.ietf.org/doc/draft-ietf-httpapi-idempotency-key-header/) (08).
 The first request with a key applies and stores its response, a repeat returns that stored
-response with no new effect, and the same key with a different body gets a 409. **With no
+response with no new effect, and the same key with a different body gets a 422. **With no
 key, each request applies again.** That's deliberate: it lets a check show the double charge
 happening without the protection.
 

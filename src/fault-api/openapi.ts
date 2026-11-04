@@ -115,7 +115,7 @@ export const OPENAPI = {
             },
           }),
         },
-        responses: { '201': ok('The new customer.', CUSTOMER), '400': ERROR, '401': ERROR, '409': ERROR, '507': ERROR },
+        responses: { '201': ok('The new customer.', CUSTOMER), '400': ERROR, '401': ERROR, '422': ERROR, '507': ERROR },
       },
     },
     '/customers/{id}': {
@@ -162,7 +162,7 @@ export const OPENAPI = {
             },
           }),
         },
-        responses: { '201': ok('The payment.', PAYMENT), '400': ERROR, '401': ERROR, '404': ERROR, '409': ERROR, '507': ERROR },
+        responses: { '201': ok('The payment.', PAYMENT), '400': ERROR, '401': ERROR, '404': ERROR, '422': ERROR, '507': ERROR },
       },
     },
     '/payments/{id}': {

@@ -212,7 +212,7 @@ describe.each(transports)('fault-api %s', (_label, connect) => {
         body: { ...charge, amountCents: 1 },
         headers: withKey,
       });
-      expect(status).toBe(409);
+      expect(status).toBe(422);
       expect(body.error?.code).toBe('idempotency_key_reused');
       expect(api.effects()).toHaveLength(1);
     });

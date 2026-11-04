@@ -185,7 +185,9 @@ export function createFaultApi(options: FaultApiOptions = {}): FaultApi {
     const stored = scope.idempotency.get(key);
     if (stored) {
       if (stored.fingerprint !== fingerprint) {
-        return { reply: failure(409, 'idempotency_key_reused', 'This Idempotency-Key was used with a different request.') };
+        // 422 is what the IETF idempotency key draft says. It keeps 409 for a request with
+        // this key still in flight, which can't happen here: a write runs without waiting.
+        return { reply: failure(422, 'idempotency_key_reused', 'This Idempotency-Key was used with a different request.') };
       }
       return { reply: stored.reply, headers: { 'idempotent-replayed': 'true' } };
     }
