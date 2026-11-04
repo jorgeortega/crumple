@@ -79,8 +79,8 @@ The only finding that could change the design.
 - Depends on: 7, 8. Files: `SPEC-executor.md`
 
 ### Task 11: Build the single-attempt executor with deadlines (M) — C6, C10
-- [ ] Lifted request building and capped reads; each call has a deadline, and cancellation stops the upstream request
-- [ ] Every failure maps to a structured error saying whether retrying can help, including `outcome_unknown` for a write that may have happened
+- [x] Lifted request building and capped reads; each call has a deadline, and cancellation stops the upstream request
+- [x] Every failure maps to a structured error saying whether retrying can help, including `outcome_unknown` for a write that may have happened
 - Verify: a hanging `fault-api` returns an error inside the stated margin
 - Depends on: 10. Files: `src/executor/request.ts`, `call.ts`, `errors.ts`, tests
 
