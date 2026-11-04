@@ -52,7 +52,8 @@ because the SDK marks the lower-level `Server` class as deprecated:
 | Check | Node | `workerd` |
 |---|---|---|
 | The official TypeScript client lists and calls, pinned to 2026-07-28 and on its default 2025-11-25 | pass | pass |
-| The official Python client negotiates 2026-07-28 and lists | pass | pass |
+| The official Python client negotiates 2026-07-28, lists and calls | pass | pass |
+| Both clients raise a refused call as an exception with our message | pass | pass |
 | A hidden tool and an unknown tool get the same answer, and both reach our audit | pass | pass |
 | List results still carry `cacheScope: private` and `ttlMs: 0` | pass | pass |
 | The SDK's validator refuses a bad argument when called directly | pass | pass |
@@ -63,8 +64,9 @@ because the SDK marks the lower-level `Server` class as deprecated:
 **What this gives up:** we don't use the SDK's tool registry or its automatic argument validation. We call the same validator ourselves (`fromJsonSchema`), and
 `docs/adr/0001-mcp-library.md` gets a note, since it showed the other pattern.
 
-**Not confirmed:** how the Python client reports a refusal, since my script let its exception end the run. Task 18's interop test checks it. On Workers a disconnect may simply end the
-handler, which would explain the inconclusive row. The deadline holds either way, but "cancelling aborts the real request" stays a Node claim for now.
+**A consequence:** a refusal is an exception in both official clients, not a result, so `agent-runner` has to catch it and hand it to the model.
+
+**Not confirmed:** on Workers a disconnect may simply end the handler, which would explain the inconclusive row. The deadline holds either way, but "cancelling aborts the real request" stays a Node claim for now.
 
 ## From OpenAPI to tools
 
@@ -216,13 +218,13 @@ Over real sockets through `node.ts`, not only in process, for the C1, C3 and C5 
 ## Decisions for the owner
 
 **1. Keep serving older clients** (the 2025 protocol, through `legacy: 'stateless'`). The spike found that the official TypeScript client negotiates 2025-11-25 unless told otherwise, so a 2026-only server would turn away the SDK's own default. Keeping them is one setting, and the
-cost is that the tests must cover two protocol eras. The alternative is a cleaner story and fewer first-run failures for nobody. I recommend keeping them, and revisiting when clients move.
+cost is that the tests must cover two protocol eras. The alternative is a simpler claim, "2026-07-28 only", at the cost of first-run failures for anyone on an older client. I recommend keeping them, and revisiting when clients move.
 
 **2. A refused call looks like an unknown tool, for everyone, including JWT callers.** It's a JSON-RPC `-32602`: "Unknown tool: delete_customer. It may not exist, or this caller may not be allowed to use it." That's what MCP lists for an unknown tool, and it reveals nothing while still telling a confused person where to look. The audit log holds the real reason.
 
 This **differs from what the approved `SPEC-access-control.md` proposed,** which was a readable tool error for keys and a 403 for JWTs:
 
 - **The 403 is a SHOULD in MCP that this wouldn't follow.** It tells a client to get a token with more scopes, and clients acting for a person **SHOULD** attempt that. So an injected instruction could lead to a sign-in screen asking the user to approve more access. I'd rather the attack stops at a refusal. A client can still request more scopes up front, from the metadata's `scopes_supported`. The README will say we don't follow this one, and why.
-- **A tool error would reach the model more reliably,** since clients only **MAY** show it a protocol error. But an agent that never saw the tool in its list has nothing to recover to. The cost is that some clients may give a less clear message on a refusal, which Task 21 will show.
+- **A tool error would reach the model more reliably,** since clients only **MAY** show it a protocol error, and both official clients raise it as an exception. But an agent that never saw the tool in its list has nothing to recover to. The cost is that some stock clients may show a refusal less clearly, which Task 21 will show.
 
 I recommend this. The alternative is following MCP's 403 for JWTs, at the cost of a second code path, reading the body before signing in, and that consent screen.
