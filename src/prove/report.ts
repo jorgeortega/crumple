@@ -102,7 +102,7 @@ export function renderTerminal(report: ProveReport): string {
   for (const note of report.notes ?? []) lines.push('', `  Note: ${note}`);
   lines.push('', `  ${summary(counts)}.${report.requests ? ` ${String(report.requests.used)} of ${String(report.requests.max)} requests used.` : ` ${seconds(report.durationMs)}.`}`);
 
-  if (report.outOfReach?.length) lines.push(`  Can't be checked from outside: ${report.outOfReach.map((item) => item.claim).join(', ')}. The Markdown report says why.`);
+  if (report.outOfReach?.length) lines.push(`  Can't be checked from outside: ${report.outOfReach.map((item) => item.claim).join(', ')}. --out writes a report that says why.`);
   if (counts.failed > 0) lines.push(`  How to fix these: ${FIX_GUIDE}`);
   if (report.kind === 'server') lines.push(`  ${CONFORMANCE_HINT}`);
   return lines.join('\n');

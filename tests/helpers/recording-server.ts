@@ -28,7 +28,7 @@ export interface RecordingOptions {
   /** Send a next page forever. */
   endlessPages?: boolean;
   /** Called first, for anything a test wants to answer itself. */
-  override?: (call: RecordedCall, request: Request) => Response | Promise<Response> | undefined;
+  override?: (call: RecordedCall, request: Request) => Response | Promise<Response | undefined> | undefined;
   /** What a call to a tool that exists does. */
   callResult?: (call: RecordedCall) => Response | undefined;
   /** Hand out a session id, and refuse anything without it. */
@@ -40,8 +40,8 @@ export interface RecordingOptions {
 export interface RecordingServer {
   url: string;
   calls: RecordedCall[];
-  toolCalls(): string[];
-  close(): Promise<void>;
+  toolCalls: () => string[];
+  close: () => Promise<void>;
 }
 
 const json = (body: unknown, status = 200, headers: Record<string, string> = {}): Response =>

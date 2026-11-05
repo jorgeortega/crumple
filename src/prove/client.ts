@@ -232,7 +232,7 @@ export type OpenResult =
  * Tries 2026-07-28 first, because it needs no handshake, and falls back to initialize the way the
  * spec describes. The fallback is what most servers will need for a while.
  */
-export async function openSession(transport: Transport): Promise<OpenResult> {
+export async function openSession(transport: Transport, options: { probeTimeoutMs?: number } = {}): Promise<OpenResult> {
   let nextId = 1;
   const takeId = (): number => {
     const id = nextId;
@@ -295,7 +295,7 @@ export async function openSession(transport: Transport): Promise<OpenResult> {
     return { ok: false, reason: reply.kind, ...(reply.kind === 'redirected' ? { status: reply.status } : {}) };
   };
 
-  const probe = await transport.send(message(MODERN_VERSION, 'tools/list'), { protocol: MODERN_VERSION });
+  const probe = await transport.send(message(MODERN_VERSION, 'tools/list'), { protocol: MODERN_VERSION, ...(options.probeTimeoutMs === undefined ? {} : { timeoutMs: options.probeTimeoutMs }) });
   const stopped = refusal(probe);
   // A server that chokes on the newer form may still manage the older one.
   if (stopped && !stopped.ok && stopped.reason !== 'broken' && stopped.reason !== 'timeout') return stopped;

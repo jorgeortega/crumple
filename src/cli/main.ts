@@ -29,11 +29,18 @@ const HELP = `crumple-mcp: a crumple zone for AI agents.
       --port <n>                  Default: 8787
 
   prove --self                                Crumple's claims, with failures on purpose
+  prove <url>                                 Check a server you own, from outside
+  prove -- <command>                          The same, for a local server over stdio
+      --call <tool>  --args <json>  The one tool that may be called. None is otherwise
+      --parallel <n>              Call it this many at once, only if it says it's read-only
+      --max-requests <n>          Default: 30
+      --timeout-ms <n>            Default: 10000
       --out <folder>              Write the report here as Markdown, JSON and a badge
 
   --help, --version
 
-The upstream credential comes from CRUMPLE_UPSTREAM_CREDENTIAL, and it's never a flag.
+The upstream credential comes from CRUMPLE_UPSTREAM_CREDENTIAL, and prove's token from
+CRUMPLE_PROVE_TOKEN. Neither is ever a flag.
 This sends no telemetry. --otlp only sends to an address you typed.`;
 
 async function dispatch(argv: string[], io: Io): Promise<number> {

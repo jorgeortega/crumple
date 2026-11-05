@@ -1,6 +1,7 @@
 import { MALICIOUS_TEXT } from '../fault-api/index.js';
-import { callResult, createBudget, createHttpTransport, openSession, type CallResult, type Session } from './client.js';
+import { callResult, createBudget, createHttpTransport, openSession, type Budget, type CallResult, type Session } from './client.js';
 import { fail, pass, type Check, type CheckResult } from './checks.js';
+import { DEFAULT_MAX_REQUESTS, proveServer, type ExternalResult } from './external.js';
 
 // Crumple's claims, each with a failure caused on purpose. Each check starts its own server, so
 // nothing is shared, and speaks MCP to it over a real socket like any other client would.
@@ -16,6 +17,8 @@ export interface TargetSetup {
   retry?: { attempts?: number; baseMs?: number; capMs?: number };
   breaker?: { windowSize?: number; minimumCalls?: number; failureRate?: number; openMs?: number };
   limits?: { perCaller?: number; perUpstream?: number; queuePerCaller?: number; queueUpstream?: number };
+  /** List every tool as read-only, writes too, for C17: a hint must never give prove permission. */
+  hintsLie?: boolean;
 }
 
 export interface UpstreamRequest {
@@ -360,3 +363,41 @@ const c10: Check<StartTarget> = {
 };
 
 export const SELF_CHECKS: readonly Check<StartTarget>[] = [c1, c2, c3, c4, c5, c6, c7, c8, c9, c10];
+
+/** How to run the outside checks. Only a test passes anything else, to show these can fail. */
+export type Prover = (url: string, key: string, budget: Budget) => Promise<ExternalResult>;
+
+const realProver: Prover = (url, key, budget) =>
+  proveServer({ transport: createHttpTransport({ url, token: key, timeoutMs: 5_000, budget }), budget, hasToken: true });
+
+export function proverChecks(prover: Prover = realProver): readonly Check<StartTarget>[] {
+  return [
+    {
+      id: 'prove-is-safe',
+      title: 'prove on a server whose tools all claim to be read-only, writes included',
+      claim: 'C17',
+      run: (start) =>
+        withTarget(start, { hintsLie: true }, async (target) => {
+          const budget = createBudget(DEFAULT_MAX_REQUESTS);
+          const { tools } = await prover(target.url, target.keys.write, budget);
+          const reached = target.upstream.requests().length;
+          const measured = { requests: budget.used(), budget: DEFAULT_MAX_REQUESTS, upstream_requests: reached };
+          if (!tools?.count) return fail('It found no tools, so this shows nothing.', measured);
+          if (reached > 0) return fail(`It reached the API ${count(reached, 'time')}, so it called a real tool nobody named.`, measured);
+          if (budget.used() > DEFAULT_MAX_REQUESTS) return fail('It went over its request budget.', measured);
+          return pass(`${String(tools.count)} tools claimed to be read-only, and none was called: the API received nothing. ${String(budget.used())} of ${String(DEFAULT_MAX_REQUESTS)} requests used.`, measured);
+        }),
+    },
+    {
+      id: 'tool-cost-shown',
+      title: 'What the tool definitions cost',
+      claim: 'C18',
+      run: (start) =>
+        withTarget(start, {}, async (target) => {
+          const { tools } = await prover(target.url, target.keys.write, createBudget(DEFAULT_MAX_REQUESTS));
+          if (!tools?.totalTokens || tools.perTool.length !== tools.count) return fail('It gave no estimate for each tool.');
+          return pass(`About ${String(tools.totalTokens)} tokens per turn across ${String(tools.count)} tools, as an estimate.`, { estimated_tokens: tools.totalTokens, tools: tools.count });
+        }),
+    },
+  ];
+}
