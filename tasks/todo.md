@@ -168,11 +168,11 @@ The only finding that could change the design.
 - Depends on: Checkpoint C. Files: `src/prove/*`, `proof/`
 
 ### Task 23: Point `prove` at any MCP server (M) — C17, C18
-- [ ] A request budget, no real tool called unless named (with `--parallel` only on a tool hinted read-only), and reports listing what didn't run
-- [ ] Estimated token cost for each tool definition, labelled as an estimate
-- [ ] A shareable Markdown report and badge
-- [ ] Local servers over stdio, the last slice and the first to cut
-- [ ] Run on the owner's two servers (approved with the spec), results in `docs/clients.md`
+- [x] A request budget, no real tool called unless named (with `--parallel` only on a tool hinted read-only), and reports listing what didn't run (2026-11-05)
+- [x] Estimated token cost for each tool definition, labelled as an estimate
+- [x] A shareable Markdown report and badge
+- [x] Local servers over stdio, the last slice and the first to cut
+- [ ] Run on the owner's two servers (approved with the spec), results in `docs/clients.md`. The docs server is done. The hosted MCP server is withdrawn, so the second waits for the owner to name a replacement
 - Verify: test against a recording server that counts every call
 - Depends on: 22. Files: `src/prove/external.ts`, `report.ts`, tests
 
@@ -222,7 +222,7 @@ The only finding that could change the design.
 
 ### Checkpoint D
 - [ ] All 18 claims pass in `npm run prove`
-- [ ] Claude writes `docs/learn/prove.md`, `agent-runner.md`, `evals.md`, `hosted-demo.md`
+- [ ] Claude writes `docs/learn/prove.md` (done 2026-11-05), `agent-runner.md`, `evals.md`, `hosted-demo.md`
 - [ ] **OWNER:** read them and do four teach-backs
 
 ## Phase 4: Launch (days 16-20)

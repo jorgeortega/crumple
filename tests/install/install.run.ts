@@ -141,6 +141,13 @@ describe.each([
     }
   });
 
+  it('proves every claim it can from a packed tarball, with no test framework around', async () => {
+    const proving = launch(node(), ['prove', '--self']);
+    expect(await proving.exited).toBe(0);
+    expect(proving.out()).toMatch(/12 passed, 0 failed, 0 not run/);
+    expect(proving.err()).not.toContain('    at ');
+  }, 60_000);
+
   it('says what to do when the file isn\'t there, with exit code 1 and no stack trace', async () => {
     const server = launch(node(), ['serve', './nothing.yaml']);
     expect(await server.exited).toBe(1);

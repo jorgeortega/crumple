@@ -60,6 +60,19 @@ Run automatically, so these stay true:
 | TypeScript `@modelcontextprotocol/client` 2.4.0, pinned | 2026-07-28 | `src/mcp-surface/sockets.test.ts` |
 | The same, on its default options | 2025-11-25 | `src/mcp-surface/sockets.test.ts` |
 
+## `prove` on real servers
+
+`prove`'s own client, tried on servers the owner owns, with no tools named.
+
+| Server | Date | Protocol | Requests | Result |
+|---|---|---|---|---|
+| Latitude 10's docs server, `https://docs.latitude10.tech/mcp` | 2026-11-05 | 2026-07-28 | 4 of 30 | 4 passed, 1 failed, 5 not run. About 196 tokens per turn across 3 tools (estimate) |
+| A local server on the official TypeScript SDK, over stdio | 2026-11-05 | 2025-11-25 | 5 of 30 | 3 passed, 0 failed, 7 not run |
+
+**The failure is a true finding.** The docs server answered a request from an unknown website with a 200, and MCP's spec requires a 403. All of Latitude 10's `/mcp` routes share that handler. The practical risk looks low, since they use bearer keys or are public, so a browser can't add anything sensitive by itself. Still a MUST.
+
+Not tried: Latitude 10's hosted MCP server, which the owner approved, because `docs/runbooks/dogfood.md` in that repo says it's withdrawn on its own API.
+
 ## Not tried yet
 
 The MCP Inspector, Cursor, VS Code, Codex, Gemini CLI and hosted clients such as claude.ai. A hosted client can't reach `127.0.0.1`, so it needs the hosted demo or a server you've exposed yourself.
