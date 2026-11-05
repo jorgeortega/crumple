@@ -4,7 +4,7 @@ Spec: [SPEC-store.md](../../SPEC-store.md). Code: [src/store/](../../src/store/)
 
 ## The one-sentence version
 
-It saves API keys and audit events in one SQLite file, so they outlast the process, behind the interfaces `access-control` and `telemetry` already defined.
+It saves API keys, audit events and an optional sealed credential in one SQLite file, so they outlast the process, behind the interfaces `access-control` and `telemetry` already defined.
 
 ## The central idea: one set of tests for every backend
 
@@ -29,7 +29,6 @@ It comes with Node, so there's no package to add and no native build to fail on 
 - **Audit writes block.** `node:sqlite` is synchronous, so each event is a small disk write on the request's path. Nothing has measured that yet, and `prove:load` will.
 - **A power cut can lose the last few audit events,** though it can't corrupt the file.
 - **One process at a time** is the intended use. Limits and the breaker are per process anyway.
-- **Credentials aren't here yet.** `SPEC-cli.md` decides where a sealed credential lives.
 
 ## The story to tell
 

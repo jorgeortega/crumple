@@ -83,7 +83,7 @@ All real:
 - **Validators differ by runtime,** Ajv on Node and cfworker on Workers, so the API behind Crumple must still validate its own input.
 - **On Workers, whether a disconnect cancels the upstream call is unconfirmed.** The deadline holds either way. Cancelling is only proved on Node.
 - **It hasn't run on Workers in this form.** The spike's script did, and Task 29 runs the real thing.
-- **Install size.** The SDK brings about 18 MB until `SPEC-cli.md` decides on bundling.
+- **Install size.** The SDK brings about 18 MB. `SPEC-cli.md` measured that and chose to keep it.
 
 ## Where to look
 

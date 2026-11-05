@@ -62,7 +62,8 @@ New in this plan:
   else's server knows what it couldn't run.
 - **Development tools needing approval with this plan** (none ship to users):
   `typescript`, `vitest`, `eslint` with `typescript-eslint`, `wrangler`,
-  `@cloudflare/vitest-pool-workers`, and `esbuild` for bundling.
+  `@cloudflare/vitest-pool-workers`. `esbuild` was on this list for bundling, and `SPEC-cli.md`
+  decided against that.
 
 ## The rhythm for each module
 

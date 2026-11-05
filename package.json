@@ -2,6 +2,17 @@
   "name": "crumple-mcp",
   "version": "0.1.0",
   "private": true,
+  "bin": {
+    "crumple-mcp": "dist/cli/bin.js",
+    "crumple": "dist/cli/bin.js"
+  },
+  "files": [
+    "dist",
+    "LICENSE"
+  ],
+  "exports": {
+    "./package.json": "./package.json"
+  },
   "description": "A crumple zone for AI agents: an MCP runtime where every claim is a check you can run.",
   "license": "MIT",
   "author": "October Moon LLC",
@@ -17,12 +28,15 @@
   },
   "scripts": {
     "setup": "git config core.hooksPath .githooks",
+    "build": "tsc -p tsconfig.build.json",
+    "prepack": "npm run build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
     "test": "vitest run",
     "secrets": "node scripts/secret-scan.mjs",
     "test:coverage": "vitest run --coverage",
     "test:interop": "vitest run --config vitest.interop.config.ts",
+    "test:install": "vitest run --config vitest.install.config.ts",
     "test:oldest-node": "npx -y -p node@22.13.1 node node_modules/vitest/vitest.mjs run",
     "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run secrets"
   },
@@ -36,6 +50,7 @@
     "vitest": "5.1.0"
   },
   "dependencies": {
-    "@modelcontextprotocol/server": "2.4.0"
+    "@modelcontextprotocol/server": "2.4.0",
+    "yaml": "2.9.1"
   }
 }

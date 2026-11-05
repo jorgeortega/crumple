@@ -10,6 +10,7 @@ Without it, keys and audit events disappear when the process stops, which is fin
 |---|---|---|
 | API keys | `KeyStore` | `access-control` |
 | Audit events | `AuditSink` | `telemetry` |
+| The sealed upstream credential | Its own, since `SPEC-cli.md` put it here | `cli`'s `credential set` |
 
 Memory stays the default, because `npx` has to work with no setup. D1 is Task 29, and it runs the same shared tests.
 
@@ -29,7 +30,6 @@ Memory stays the default, because `npx` has to work with no setup. D1 is Task 29
 
 ## What it won't do
 
-- **No credentials yet.** A sealed upstream credential needs a place to live, and whether that's here or in a config file is for `SPEC-cli.md`.
 - **Only one Node process at a time is the intended use.** WAL mode lets a second process read, and SQLite will serialize writers, but limits and the breaker are still per process.
 - **Audit writes block.** `node:sqlite` is synchronous, so each event is a small disk write on the request's path. `prove:load` will show what that costs, and nothing here measures it yet.
 - **A power cut can lose the last few audit events,** with `synchronous=NORMAL`, the usual choice with WAL.

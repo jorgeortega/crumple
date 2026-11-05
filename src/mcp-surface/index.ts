@@ -7,4 +7,4 @@ export type { AccessOptions, McpSurface, McpSurfaceOptions } from './server.js';
 export { callerId, createKey, memoryKeyStore, plainCredential, sealCredential, sealedCredential } from '../access-control/index.js';
 export type { Credential, Grant, JwtConfig, KeyRecord, KeyStore, Sealed } from '../access-control/index.js';
 export { createAudit, createTelemetry, formatTrace, memoryAuditSink, memorySink, metricsSink, otlpSink } from '../telemetry/index.js';
-export type { Audit, AuditEvent, AuditSink, MemoryAuditSink, MemorySink, MetricsSink, OtlpSink, SpanSink, Telemetry } from '../telemetry/index.js';
+export type { Audit, AuditEvent, AuditSink, MemoryAuditSink, MemorySink, MetricsSink, OtlpSink, SpanRecord, SpanSink, Telemetry } from '../telemetry/index.js';

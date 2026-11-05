@@ -1,6 +1,6 @@
 # Spec: `cli`
 
-Status: draft for the owner's review, 2026-11-04. Module on [the map](CAPABILITY-MAP.md), depending on `mcp-surface`, `fault-api` and `store`. Three decisions need the owner, at the end.
+Status: approved by the owner on 2026-11-05 ("Approve all three"), including the three decisions at the end. Module on [the map](CAPABILITY-MAP.md), depending on `mcp-surface`, `fault-api` and `store`.
 
 ## What it is
 
@@ -50,7 +50,7 @@ The main spec's five, plus three small ones this spec adds, because a key needs 
 | **`keys create\|list\|revoke --db <file>`** | Manages keys in a database | Task 20 |
 | **`audit --db <file>`** | Prints who did what, with `--denied` and `--limit`. It's how an operator sees the attempted delete | Task 20 |
 | **`credential set --db <file>`** | Seals the upstream credential into a database. Decision 3 | Task 20 |
-| `demo` | The 60-second tour | Task 24 |
+| `demo` | The 60-second tour, and until then an unknown command | Task 24 |
 | `prove <url>` | The checks | Task 22 |
 | `eval <folder>` | The agent evaluations | Task 28 |
 
@@ -133,7 +133,7 @@ Commands load their code when they run, so `serve` without `--db` never touches 
 | The tarball on Node 22.13.1, with no `ExperimentalWarning` in a run without `--db` | The oldest promise, and lazy loading |
 | The tarball holds no tests, specs or spikes | What ships |
 
-85% branch coverage, as the main spec sets. The install test goes in the pre-push gate if it stays under about 10 seconds, and otherwise beside `test:interop`.
+85% branch coverage, as the main spec sets. The install test takes about 4 seconds, but npm has to reach the registry for the two dependencies, and a gate shouldn't fail for being offline. So it's `npm run test:install`, beside `test:interop`, and on the release checklist.
 
 ## What it won't do
 
@@ -143,7 +143,9 @@ Commands load their code when they run, so `serve` without `--db` never touches 
 - **No hot reload.** A changed document needs a restart.
 - **`npx` keeps the key in your terminal scrollback,** and if the output is piped, in that log. Printing it once is the price of having no setup.
 
-## Decisions for the owner
+## Decided
+
+The owner approved all three on 2026-11-05.
 
 **1. Don't bundle, and ship plain compiled files with the two allowed dependencies.** This reverses what ADR 0001 assumed. It said the 18 MB install "is slow for a first `npx`", which I hadn't measured. Now I have, on this machine and connection:
 

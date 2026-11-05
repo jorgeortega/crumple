@@ -139,10 +139,11 @@ The only finding that could change the design.
 - Depends on: 18. Files: `src/store/*`, `tests/helpers/store-contract.ts`, its test
 
 ### Task 20: Build `cli` config and `serve` (M)
-- [ ] **OWNER:** approve `SPEC-cli.md` first
-- [ ] `serve ./openapi.yaml --upstream <url>` runs with sensible defaults and prints a first key once
-- [ ] Each error says what went wrong and what to do next
-- Verify: run against `fault-api` by hand; `tests/cli.test.ts`
+- [x] **OWNER:** approve `SPEC-cli.md` first (2026-11-05)
+- [x] `serve ./openapi.yaml --upstream <url>` runs with sensible defaults and prints a first key once
+- [x] Each error says what went wrong and what to do next
+- [x] `keys`, `audit`, `credential set` and `fault-api`, which `SPEC-cli.md` adds
+- Verify: run against `fault-api` by hand; `src/cli/cli.test.ts`
 - Depends on: 18. Files: `src/cli/*`, `src/node.ts`, tests
 
 ### Task 21: Test with a real MCP client (S)
@@ -152,9 +153,9 @@ The only finding that could change the design.
 - Depends on: 20. Files: `docs/clients.md`
 
 ### Checkpoint C
-- [ ] **Someone else could use it:** a packed tarball runs `serve` in an empty folder
-- [ ] 95% branch coverage in `access-control`
-- [ ] Claude writes `docs/learn/access-control.md`, `mcp-surface.md`, `cli.md`
+- [x] **Someone else could use it:** a packed tarball runs `serve` in an empty folder (`npm run test:install`, 2026-11-05)
+- [x] 95% branch coverage in `access-control`
+- [x] Claude writes `docs/learn/access-control.md`, `mcp-surface.md`, `store.md`, `cli.md`
 - [ ] **OWNER:** read them and do three teach-backs
 
 ## Phase 3: Proof, agent, hosted demo (days 12-15)
@@ -243,7 +244,7 @@ The only finding that could change the design.
 
 ### Task 36: Release (owner actions)
 - [ ] Final secret scan, including history, and the install test from a packed tarball
-- [ ] `npm run test:oldest-node` and `npm run test:interop` pass, because the pre-push gate runs neither
+- [ ] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
 - [ ] Links added to outreach messages; a link from latitude10.tech goes through its Build Gate
 

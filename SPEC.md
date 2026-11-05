@@ -140,7 +140,7 @@ Each one becomes a short decision record in `docs/adr/`.
 | Dependencies | `@modelcontextprotocol/server` 2.x and `yaml` at most. Lift the rest rather than depend on it | Install size affects first impressions with `npx` | More code to own |
 | OpenAPI to tools | Copy the converter from `openapi-agentify` (MIT, the owner's) rather than depend on it | That package brings `typescript`, `zod` and `ajv` along | Two copies to keep in step. `openapi-agentify` runs inside your app, Crumple in front of it, and the README says when to use each |
 | MCP version | Serve 2026-07-28; the spec for `mcp-surface` decides about older clients, since adoption argues for keeping them | Stateless requests mean any instance can serve any call | Some extra code if older clients stay |
-| MCP library | Official TypeScript SDK 2.x, through `createMcpHandler`. The spike passed on Node and in `workerd` ([ADR 0001](docs/adr/0001-mcp-library.md)), so the `modern.ts` fallback isn't needed | Using the standard library shows judgment | Less control, and an 18 MB install unless the package is bundled |
+| MCP library | Official TypeScript SDK 2.x, through `createMcpHandler`. The spike passed on Node and in `workerd` ([ADR 0001](docs/adr/0001-mcp-library.md)), so the `modern.ts` fallback isn't needed | Using the standard library shows judgment | Less control, and an 18 MB install, which `SPEC-cli.md` measured and chose to keep |
 | Authentication | Hashed API keys plus JWT checking, acting only as a resource server | Right size for 20 days | No built-in OAuth login flow, which is a natural Latitude 10 upgrade |
 | Storage | One small interface: memory by default, `node:sqlite` when configured, D1 on the demo | `npx` must work with no setup | Some features only last as long as the process in memory mode |
 | Limits across instances | Exact in the single-process Node runtime. On the demo, D1's atomic counter for the daily cap and per-instance limits for the rest, documented | Durable Objects are out of scope, which removes a large piece of work | Approximate limits on the demo only |
@@ -187,6 +187,9 @@ npx crumple-mcp serve ./openapi.yaml --upstream https://api.you.com
 npx crumple-mcp eval ./scenarios                    # replays recordings unless --live
 npx crumple-mcp eval ./scenarios --live --max-usd 1 # stops at the budget
 npx crumple-mcp fault-api                           # the API that fails on command, on 127.0.0.1
+npx crumple-mcp keys create --db ./crumple.db       # also: keys list, keys revoke
+npx crumple-mcp audit --db ./crumple.db --denied    # who tried what
+npx crumple-mcp credential set --db ./crumple.db    # seals the upstream credential into the file
 ```
 
 For working on it:
@@ -199,6 +202,7 @@ npm run prove            # all claims against Crumple; writes proof/latest.md an
 npm run prove:load       # load runs on this machine; writes proof/load-<date>.md
 npm run test:interop     # the Python SDK test (needs uv)
 npm run test:oldest-node # the whole suite on Node 22.13.1, the oldest we promise
+npm run test:install     # a packed tarball, in an empty folder, on both Node versions
 npm run deploy:demo      # deploys the demo by hand (asks first: see Boundaries)
 ```
 

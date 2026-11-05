@@ -80,9 +80,10 @@ the SDK's validator itself. The rest of this decision stands: the SDK still does
 
 - **Install size.** The server package and `yaml` come to 18 MB: 8.1 MB is `zod`, which
   the SDK requires, and most of the 7 MB server package is source maps and duplicate
-  builds. That's slow for a first `npx`. The whole Workers bundle is only 670 KiB
-  (134 KiB gzipped), so publishing a single bundled file would fix it. `SPEC-cli.md`
-  decides. `esbuild` is already on the approved tools list for this.
+  builds. This record first called that "slow for a first `npx`" without measuring it. Measured
+  on 2026-11-04 on one machine and connection, a cold install with an empty npm cache took 0.5
+  seconds and downloaded about 7.4 MB. So the package isn't bundled, by the owner's decision
+  in `SPEC-cli.md`, which has the numbers. A bundle would be 625 KB.
 - **Less control over the wire.** The SDK decides details such as the exact error text.
   A protocol bug there is one we'd wait on, or work around.
 
