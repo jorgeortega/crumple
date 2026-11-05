@@ -10,7 +10,7 @@ It turns an OpenAPI document into MCP tools and serves them, with every call goi
 
 **The obvious design has a hole, and the first spike used it.** The usual way is to register only the tools a caller may use. It gives a neat per-caller list, and calling a hidden tool gets "not found" from the SDK.
 
-But the SDK answers that **before any of our code runs**. So when an injected instruction makes an agent try `delete_customer`, nothing is recorded. The attempted delete is the event C2 is about, and the one an operator most wants to see.
+But the SDK answers that **before any of our code runs**. So when something tries `delete_customer` without permission, nothing is recorded, and that's an event an operator wants to see.
 
 So there's one handler for `tools/call`, written here:
 
@@ -26,7 +26,9 @@ POST /mcp
   outcome -> tool result
 ```
 
-**This is the story to tell.** It came from asking "what evidence does this leave?" rather than "does it refuse the call?". The usual design does refuse correctly. It just leaves no trace of the attack.
+**This is the story to tell.** It came from asking "what evidence does this leave?" rather than "does it refuse the call?". The usual design does refuse correctly. It just leaves no trace of the attempt.
+
+**And tell it accurately, because I first got this wrong.** I wrote that an injected instruction would make an agent try the delete. Testing real Claude Code showed it can't: with no grant, the tool isn't listed, so the model has nothing to call. The attempt comes from something calling an unlisted tool directly, such as a script with a stolen key, or a stale tool list. Hiding the tool is what stops the injected model, and the one door is what records everyone else.
 
 ## From OpenAPI to tools
 
@@ -79,7 +81,7 @@ All real:
 - **Tools only.** No resources, prompts, subscriptions, or progress.
 - **A big response is expensive.** The 1 MiB cap protects the server, not the budget. At a rough four characters a token, a full response is about 250,000 tokens.
 - **No paging of the tool list,** and every listed tool costs tokens on every turn. `exclude` is the answer for now.
-- **Some clients may show a refusal less clearly.** Both official clients raise it as an exception. Claude Code and others haven't been tried, and Task 21 does that.
+- **Some clients may show a refusal less clearly.** Both official clients raise it as an exception. Claude Code never reached that point, because the tool wasn't listed. Other clients are in `docs/clients.md`.
 - **Validators differ by runtime,** Ajv on Node and cfworker on Workers, so the API behind Crumple must still validate its own input.
 - **On Workers, whether a disconnect cancels the upstream call is unconfirmed.** The deadline holds either way. Cancelling is only proved on Node.
 - **It hasn't run on Workers in this form.** The spike's script did, and Task 29 runs the real thing.

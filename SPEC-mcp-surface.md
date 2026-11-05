@@ -22,8 +22,10 @@ The part an agent actually talks to. It turns an OpenAPI document into MCP tools
 **The obvious design has a hole, and the spike used it.** The usual way is to register only the tools a caller may use, once per request.
 It gives a neat per-caller list, and calling a hidden tool gets "not found" from the SDK.
 
-But the SDK answers that **before any of our code runs**. So when an injected instruction makes an agent try `delete_customer`, nothing is
-recorded. The attempted delete is exactly the event C2 is about and the event an operator most wants to see.
+But the SDK answers that **before any of our code runs**. So when something tries `delete_customer` without permission, nothing is
+recorded, and that attempt is an event an operator wants to see.
+
+**Corrected on 2026-11-05, after Task 21.** This used to say an injected instruction would make an agent try it. A stock client can't: with no grant, the tool isn't in the list, so the model has nothing to call. The attempt comes from something calling an unlisted tool directly, such as a script with a stolen key or a stale tool list. See `docs/clients.md`. The design stands, and its reason is narrower.
 
 So there's one handler for `tools/list` and one for `tools/call`, written by us:
 

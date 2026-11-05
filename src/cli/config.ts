@@ -15,9 +15,14 @@ export interface Config {
   attemptTimeoutMs?: number;
   retry?: NonNullable<Upstream['retry']>;
   limits?: NonNullable<Upstream['limits']>;
+  /** Sent on every upstream request, which is how a test tells fault-api what to break. */
+  upstreamHeaders?: Record<string, string>;
 }
 
 type Json = Record<string, unknown>;
+
+// A secret has no field here, and this is the one field one could be typed into.
+const SECRET_HEADER = /auth|cookie|token|key|secret|password/i;
 
 const isObject = (value: unknown): value is Json => typeof value === 'object' && value !== null && !Array.isArray(value);
 
@@ -87,15 +92,25 @@ function numbersAt<Name extends string>(value: unknown, path: string, known: rea
   return out;
 }
 
+function headersAt(value: unknown): Record<string, string> {
+  if (!isObject(value)) throw failure('In your config, upstreamHeaders should be an object from each header to its value.');
+  for (const [name, header] of Object.entries(value)) {
+    if (typeof header !== 'string') throw failure(`In your config, upstreamHeaders.${name} should be text.`);
+    if (SECRET_HEADER.test(name)) throw failure(`In your config, upstreamHeaders.${name} looks like a secret, which doesn't belong in a file. Use CRUMPLE_UPSTREAM_CREDENTIAL.`);
+  }
+  return value as Record<string, string>;
+}
+
 /** Validates a config that's already parsed. */
 export function checkConfig(value: unknown): Config {
-  const raw = objectAt(value, 'the top level', ['jwt', 'deadlineMs', 'attemptTimeoutMs', 'retry', 'limits']);
+  const raw = objectAt(value, 'the top level', ['jwt', 'deadlineMs', 'attemptTimeoutMs', 'retry', 'limits', 'upstreamHeaders']);
   return {
     ...(raw.jwt === undefined ? {} : { jwt: jwtAt(raw.jwt) }),
     ...(raw.deadlineMs === undefined ? {} : { deadlineMs: positiveInt(raw.deadlineMs, 'deadlineMs') }),
     ...(raw.attemptTimeoutMs === undefined ? {} : { attemptTimeoutMs: positiveInt(raw.attemptTimeoutMs, 'attemptTimeoutMs') }),
     ...(raw.retry === undefined ? {} : { retry: numbersAt(raw.retry, 'retry', ['attempts', 'baseMs', 'capMs']) }),
     ...(raw.limits === undefined ? {} : { limits: numbersAt(raw.limits, 'limits', ['perCaller', 'perUpstream', 'queuePerCaller', 'queueUpstream']) }),
+    ...(raw.upstreamHeaders === undefined ? {} : { upstreamHeaders: headersAt(raw.upstreamHeaders) }),
   };
 }
 

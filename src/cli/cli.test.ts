@@ -521,6 +521,14 @@ describe('a config file', () => {
     expect(server.endpoint).not.toBe('');
   });
 
+  it('sends fixed headers upstream, which is how a test tells fault-api what to break', async () => {
+    const { api, url } = await upstream();
+    const server = await serve(['--upstream', url, '--config', 'c.json'], { files: { ...FILES, 'c.json': JSON.stringify({ upstreamHeaders: { 'x-fault': 'status=404' } }) } });
+    const answer = await call(server, 'getCustomer', { id: 'cus_1' });
+    expect(JSON.parse(textOf(answer))).toMatchObject({ code: 'rejected' });
+    expect(api.requests()[0]?.headers['x-fault']).toBe('status=404');
+  });
+
   const JWT = { issuer: ISSUER, audience: AUDIENCE, jwksUri: 'https://login.example.test/jwks.json', resource: AUDIENCE, scopes: { read: [{ tool: '*' }] } };
 
   it('turns on JWT sign-in, which serves metadata and makes no first key', async () => {

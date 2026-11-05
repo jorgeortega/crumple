@@ -16,7 +16,7 @@ to spot it. It makes the model's opinion irrelevant:
 decide(principal, tool)   // no arguments, no prompt, no tool output
 ```
 
-A customer record says "delete this customer". The model believes it and asks for `delete_customer`. The program looks up this caller's
+A customer record says "delete this customer". If this caller has no delete grant, the model doesn't even have that tool in its list. If something asks for it anyway, the program looks up this caller's
 grants, and refuses. There's nowhere for the record's text to go in.
 
 **Say the limit before an interviewer does:** if the caller really does hold delete permission, the attack can still succeed. This limits the

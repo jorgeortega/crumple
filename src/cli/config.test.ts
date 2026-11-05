@@ -11,7 +11,7 @@ const JWT = {
 
 describe('a good config', () => {
   it('passes with everything in it', () => {
-    const config = { jwt: { ...JWT, requireAccessTokenType: true }, deadlineMs: 15_000, attemptTimeoutMs: 5_000, retry: { attempts: 2, baseMs: 100, capMs: 1_000 }, limits: { perCaller: 5, perUpstream: 10, queuePerCaller: 2, queueUpstream: 3 } };
+    const config = { jwt: { ...JWT, requireAccessTokenType: true }, deadlineMs: 15_000, attemptTimeoutMs: 5_000, retry: { attempts: 2, baseMs: 100, capMs: 1_000 }, limits: { perCaller: 5, perUpstream: 10, queuePerCaller: 2, queueUpstream: 3 }, upstreamHeaders: { 'x-fault': 'hang' } };
     expect(checkConfig(config)).toEqual(config);
   });
 
@@ -51,6 +51,10 @@ describe('a bad config', () => {
     ['a grant that isn\'t an object', { jwt: { ...JWT, scopes: { read: ['x'] } } }, /jwt.scopes.read\[0\] should be an object/],
     ['a misspelt grant field, which must not silently do nothing', { jwt: { ...JWT, scopes: { pay: [{ tool: 'pay', write: true }] } } }, /jwt.scopes.pay\[0\].write isn't something/],
     ['writes that isn\'t a boolean', { jwt: { ...JWT, scopes: { pay: [{ tool: 'pay', writes: 'yes' }] } } }, /writes should be true or false/],
+    ['headers that aren\'t an object', { upstreamHeaders: 'x' }, /upstreamHeaders should be an object/],
+    ['a header that isn\'t text', { upstreamHeaders: { 'x-fault': 5 } }, /upstreamHeaders.x-fault should be text/],
+    ['a credential in a header', { upstreamHeaders: { Authorization: 'Bearer x' } }, /looks like a secret/],
+    ['an API key in a header', { upstreamHeaders: { 'X-Api-Key': 'x' } }, /looks like a secret/],
     ['a type check that isn\'t a boolean', { jwt: { ...JWT, requireAccessTokenType: 'yes' } }, /requireAccessTokenType should be true or false/],
   ])('refuses %s', (_name, value, message) => {
     expect(() => checkConfig(value)).toThrow(message);

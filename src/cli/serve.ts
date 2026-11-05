@@ -147,6 +147,7 @@ export async function serveCommand(args: string[], io: Io): Promise<number> {
           ...(config.attemptTimeoutMs === undefined ? {} : { attemptTimeoutMs: config.attemptTimeoutMs }),
           ...(config.retry ? { retry: config.retry } : {}),
           ...(config.limits ? { limits: config.limits } : {}),
+        ...(config.upstreamHeaders ? { headers: config.upstreamHeaders } : {}),
         },
         access: { keys, ...(config.jwt ? { jwt: config.jwt, fetch: io.fetch } : {}) },
         telemetry,

@@ -43,6 +43,10 @@ I'd written that the 18 MB install "is slow for a first `npx`", and planned a bu
 - **The key is printed once.** Log lines come from spans, so they can't hold an argument.
 - **`audit` reads a database that exists.** A misspelt path would otherwise make an empty one and report nothing to see, which looks exactly like "nothing happened".
 
+## The best evidence so far
+
+Real Claude Code, with every response to a payment lost on purpose. The model read `outcome_unknown`, called again with the key it was handed, and `fault-api` shows **one charge**. It's one run on one model, so it shows the design can work rather than how often it does, and `evals` will measure that. [clients.md](../clients.md) has the run. But it's the project's central claim happening with a real agent, for about half a cent.
+
 ## Sealing, and where it helps
 
 `credential set` seals the credential into the database, and the seal key stays in `CRUMPLE_SEAL_KEY`. It protects a file that gets backed up or copied. **On one machine, with the key and the file side by side, it adds little,** so the environment variable stays the normal way. Having both set is an error rather than a silent choice.
@@ -53,7 +57,7 @@ Commands take an `io` object and return an exit code, so most tests run in proce
 
 ## Honest limits
 
-- **No real client has connected yet.** The `claude mcp add` line comes from its help text. Task 21 is the real test, and HTTP-only may send us back here.
+- **Claude Code works, and it's the only app tried so far.** See [clients.md](../clients.md). HTTP-only and API keys were fine there, and other clients may differ.
 - **No stdio, TLS or hot reload.**
 - **No library entry point.** A public API is a promise, and nobody has asked for it.
 - **The key sits in your scrollback,** or in a log if the output is piped. That's the price of no setup.

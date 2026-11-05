@@ -92,9 +92,12 @@ Plus `--help` and `--version`. Parsing uses Node's own `parseArgs`, in strict mo
 ```json
 {
   "jwt": { "issuer": "https://login.example.com/", "audience": "https://mcp.example.com/mcp", "jwksUri": "https://login.example.com/jwks.json", "resource": "https://mcp.example.com/mcp", "scopes": { "read": [{ "tool": "*" }] } },
-  "deadlineMs": 15000
+  "deadlineMs": 15000,
+  "upstreamHeaders": { "x-fault": "drop;times=3" }
 }
 ```
+
+`upstreamHeaders` is how a test tells `fault-api` what to break, as its spec describes. Testing a real client found it missing. A header whose name looks like a secret is refused.
 
 Unknown fields are errors, naming the field, because a misspelt `writes` must not quietly do nothing. There's no field for a secret. Flags override the file. Validation is written by hand and is pure, with a table of tests, because `zod` isn't a dependency of ours.
 

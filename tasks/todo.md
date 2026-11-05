@@ -147,8 +147,9 @@ The only finding that could change the design.
 - Depends on: 18. Files: `src/cli/*`, `src/node.ts`, tests
 
 ### Task 21: Test with a real MCP client (S)
-- [ ] Claude Code connects to `serve` and calls a tool; at least one more client is tried
-- [ ] Exact setup steps are written down for each client that works
+- [x] Claude Code connects to `serve` and calls a tool (2026-11-05)
+- [ ] At least one more stock client is tried. The MCP Inspector's `npx` download was blocked by the permission system, so this waits for the owner
+- [x] Exact setup steps are written down for each client that works
 - Verify: a manual run, recorded in `docs/clients.md`
 - Depends on: 20. Files: `docs/clients.md`
 
@@ -195,7 +196,7 @@ The only finding that could change the design.
 
 ### Task 28: Build `evals` and the gate (M) — C2, C10, C13
 - [ ] **OWNER:** approve `SPEC-evals.md` first
-- [ ] Scenarios for right tool, right arguments, recovery after failure, and injected instructions
+- [ ] Scenarios for right tool, right arguments, recovery after failure, and injected instructions. A stock model can't attempt a tool it can't see (`docs/clients.md`), so C2 needs both a key without the grant and one with it
 - [ ] A deliberately broken tool description fails the gate. `eval --live` stops at `--max-usd`
 - [ ] **OWNER:** okay the first live recording run, under $1
 - Depends on: 27, 7. Files: `src/evals/*`, `scenarios/*`
