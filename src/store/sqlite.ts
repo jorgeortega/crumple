@@ -1,6 +1,6 @@
 import { chmodSync } from 'node:fs';
 import { DatabaseSync } from 'node:sqlite';
-import type { Grant, KeyRecord, KeyStore } from '../access-control/index.js';
+import type { Grant, KeyRecord, KeyStore, Sealed } from '../access-control/index.js';
 import type { AuditEvent, AuditSink } from '../telemetry/index.js';
 
 // Keys and audit events in one SQLite file, using the SQLite that comes with Node, so there's
@@ -12,6 +12,7 @@ const SCHEMA_VERSION = 1;
 const DEFAULT_MAX_AUDIT_EVENTS = 1_000_000;
 const OWNER_ONLY = 0o600;
 const IN_MEMORY = ':memory:';
+const UPSTREAM = 'upstream';
 
 const SCHEMA = `
   CREATE TABLE IF NOT EXISTS keys (
@@ -31,6 +32,14 @@ const SCHEMA = `
     decision TEXT NOT NULL,
     reason TEXT,
     trace_id TEXT
+  );
+  CREATE TABLE IF NOT EXISTS credentials (
+    id TEXT PRIMARY KEY,
+    kind TEXT NOT NULL,
+    name TEXT NOT NULL,
+    ciphertext TEXT NOT NULL,
+    iv TEXT NOT NULL,
+    updated_at INTEGER NOT NULL
   );
 `;
 
@@ -55,12 +64,27 @@ interface AuditRow {
 
 export interface SqliteAuditSink extends AuditSink {
   events(): AuditEvent[];
+  /** The newest events, oldest of them first. */
+  recent(options: { limit: number; deniedOnly?: boolean }): AuditEvent[];
   dropped(): number;
+}
+
+/** The upstream credential, sealed. The key that opens it is never stored here. */
+export interface StoredCredential {
+  kind: 'header' | 'query';
+  name: string;
+  sealed: Sealed;
+}
+
+export interface CredentialStore {
+  get(): StoredCredential | undefined;
+  set(credential: StoredCredential, at: number): void;
 }
 
 export interface SqliteStore {
   keys: KeyStore;
   audit: SqliteAuditSink;
+  credential: CredentialStore;
   close(): void;
 }
 
@@ -131,6 +155,10 @@ export function openSqliteStore(path: string, options: SqliteStoreOptions = {}):
   const insertEvent = db.prepare('INSERT INTO audit (at, caller, tool, decision, reason, trace_id) VALUES (?, ?, ?, ?, ?, ?)');
   const pruneEvents = db.prepare('DELETE FROM audit WHERE seq <= ?');
   const allEvents = db.prepare('SELECT at, caller, tool, decision, reason, trace_id FROM audit ORDER BY seq');
+  const recentEvents = db.prepare('SELECT at, caller, tool, decision, reason, trace_id FROM audit ORDER BY seq DESC LIMIT ?');
+  const recentDenied = db.prepare('SELECT at, caller, tool, decision, reason, trace_id FROM audit WHERE decision = \'deny\' ORDER BY seq DESC LIMIT ?');
+  const getCredential = db.prepare('SELECT kind, name, ciphertext, iv FROM credentials WHERE id = ?');
+  const setCredential = db.prepare('INSERT OR REPLACE INTO credentials (id, kind, name, ciphertext, iv, updated_at) VALUES (?, ?, ?, ?, ?, ?)');
 
   let dropped = 0;
 
@@ -156,8 +184,19 @@ export function openSqliteStore(path: string, options: SqliteStoreOptions = {}):
       dropped += Number(pruneEvents.run(Number(lastInsertRowid) - maxAuditEvents).changes);
     },
     events: () => (allEvents.all() as unknown as AuditRow[]).map(toEvent),
+    recent: ({ limit, deniedOnly = false }) => ((deniedOnly ? recentDenied : recentEvents).all(limit) as unknown as AuditRow[]).map(toEvent).reverse(),
     dropped: () => dropped,
   };
 
-  return { keys, audit, close: () => { db.close(); } };
+  const credential: CredentialStore = {
+    get() {
+      const row = getCredential.get(UPSTREAM) as unknown as { kind: 'header' | 'query'; name: string; ciphertext: string; iv: string } | undefined;
+      return row && { kind: row.kind, name: row.name, sealed: { ciphertext: row.ciphertext, iv: row.iv } };
+    },
+    set({ kind, name, sealed }, at) {
+      setCredential.run(UPSTREAM, kind, name, sealed.ciphertext, sealed.iv, at);
+    },
+  };
+
+  return { keys, audit, credential, close: () => { db.close(); } };
 }

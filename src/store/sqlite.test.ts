@@ -105,6 +105,45 @@ describe('a database file', () => {
   });
 });
 
+describe('the sealed credential', () => {
+  const CREDENTIAL = { kind: 'header' as const, name: 'authorization', sealed: { ciphertext: 'c2VhbGVk', iv: 'aXY=' } };
+
+  it('has none until one is set', () => {
+    expect(openStore().credential.get()).toBeUndefined();
+  });
+
+  it('comes back as it went in, and survives a restart', () => {
+    const path = tempFile();
+    const first = openStore(path);
+    first.credential.set(CREDENTIAL, 1);
+    first.close();
+    expect(openStore(path).credential.get()).toEqual(CREDENTIAL);
+  });
+
+  it('has one at a time, so setting again replaces it', () => {
+    const { credential } = openStore();
+    credential.set(CREDENTIAL, 1);
+    credential.set({ kind: 'query', name: 'api_key', sealed: { ciphertext: 'bmV3', iv: 'aXY=' } }, 2);
+    expect(credential.get()).toMatchObject({ kind: 'query', name: 'api_key' });
+  });
+});
+
+describe('reading the audit log', () => {
+  function withEvents() {
+    const { audit } = openStore();
+    for (const at of [1, 2, 3, 4]) audit.write({ at, caller: 'key_1', tool: 'get', decision: at % 2 === 0 ? 'deny' : 'allow' });
+    return audit;
+  }
+
+  it('gives the newest events, oldest of them first', () => {
+    expect(withEvents().recent({ limit: 2 }).map((event) => event.at)).toEqual([3, 4]);
+  });
+
+  it('can show only refusals', () => {
+    expect(withEvents().recent({ limit: 10, deniedOnly: true }).map((event) => event.at)).toEqual([2, 4]);
+  });
+});
+
 describe('failing closed', () => {
   function withStore(keys: KeyStore) {
     const telemetry = createTelemetry();

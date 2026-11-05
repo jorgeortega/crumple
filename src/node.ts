@@ -63,19 +63,29 @@ async function respond(handler: FetchHandler, base: string, req: IncomingMessage
   pipeline(Readable.fromWeb(response.body), res, () => undefined);
 }
 
+// An IPv6 address needs brackets in a URL.
+const urlHost = (host: string): string => (host.includes(':') ? `[${host}]` : host);
+
 export async function serveOnNode(handler: FetchHandler, options: ServeOptions = {}): Promise<NodeServer> {
   const { port = 0, host = '127.0.0.1' } = options;
 
   const server = createServer((req, res) => {
     const { port: actual } = server.address() as AddressInfo;
-    void respond(handler, `http://${host}:${actual}`, req, res);
+    void respond(handler, `http://${urlHost(host)}:${actual}`, req, res);
   });
 
-  await new Promise<void>((resolve) => server.listen(port, host, resolve));
+  // Without the 'error' listener, a port in use would crash the process with a raw stack trace.
+  await new Promise<void>((resolve, reject) => {
+    server.once('error', reject);
+    server.listen(port, host, () => {
+      server.off('error', reject);
+      resolve();
+    });
+  });
   const { port: actual } = server.address() as AddressInfo;
 
   return {
-    url: `http://${host}:${actual}`,
+    url: `http://${urlHost(host)}:${actual}`,
     close: () =>
       new Promise((resolve, reject) => {
         server.closeAllConnections();

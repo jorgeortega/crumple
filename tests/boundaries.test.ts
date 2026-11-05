@@ -39,7 +39,8 @@ const NO_PROTOCOL_LIBRARY = ['fault-api', 'telemetry', 'executor', 'access-contr
 const WEB_STANDARD_ONLY = [...NO_PROTOCOL_LIBRARY, 'mcp-surface'];
 
 function moduleOf(path: string): string | undefined {
-  if (path === 'src/node.ts') return 'cli';
+  // An import names the compiled file, so an import of it arrives here as node.js.
+  if (path === 'src/node.ts' || path === 'src/node.js') return 'cli';
   if (path.startsWith('workers/')) return 'hosted-demo';
   return /^src\/([^/]+)\//.exec(path)?.[1];
 }
