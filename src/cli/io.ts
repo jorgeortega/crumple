@@ -1,5 +1,6 @@
 import { existsSync, readFileSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
+import { dirname } from 'node:path';
 import { parseArgs, type ParseArgsConfig } from 'node:util';
 
 // Everything a command touches in the outside world comes through here, so a command can be
@@ -10,6 +11,8 @@ export interface Io {
   stderr(text: string): void;
   env: Record<string, string | undefined>;
   readFile(path: string): Promise<string>;
+  /** Makes the folder if it needs to. */
+  writeFile(path: string, text: string): Promise<void>;
   fileExists(path: string): boolean;
   fetch: typeof fetch;
   now(): number;
@@ -23,6 +26,10 @@ export function processIo(): Io {
     stderr: (text) => { process.stderr.write(`${text}\n`); },
     env: process.env,
     readFile: (path) => readFile(path, 'utf8'),
+    writeFile: async (path, text) => {
+      await mkdir(dirname(path), { recursive: true });
+      await writeFile(path, text);
+    },
     fileExists: existsSync,
     fetch: (input, init) => fetch(input, init),
     now: () => Date.now(),

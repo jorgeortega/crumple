@@ -1,7 +1,7 @@
 import { existsSync, mkdtempSync, rmSync } from 'node:fs';
-import { readFile } from 'node:fs/promises';
+import { mkdir, readFile, writeFile } from 'node:fs/promises';
 import { tmpdir } from 'node:os';
-import { join } from 'node:path';
+import { dirname, join } from 'node:path';
 import type { Io } from '../../src/cli/io.js';
 import { run } from '../../src/cli/main.js';
 
@@ -35,6 +35,10 @@ export function harness(options: { env?: Record<string, string>; files?: Record<
         const memory = files[path];
         if (memory !== undefined) return Promise.resolve(memory);
         return readFile(path, 'utf8');
+      },
+      writeFile: async (path, text) => {
+        await mkdir(dirname(path), { recursive: true });
+        await writeFile(path, text);
       },
       fileExists: (path) => existsSync(path),
       fetch: options.fetch ?? ((input, init) => fetch(input, init)),

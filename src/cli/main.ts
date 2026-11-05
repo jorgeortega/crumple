@@ -28,6 +28,9 @@ const HELP = `crumple-mcp: a crumple zone for AI agents.
   fault-api                                   The API that fails on command
       --port <n>                  Default: 8787
 
+  prove --self                                Crumple's claims, with failures on purpose
+      --out <folder>              Write the report here as Markdown, JSON and a badge
+
   --help, --version
 
 The upstream credential comes from CRUMPLE_UPSTREAM_CREDENTIAL, and it's never a flag.
@@ -63,6 +66,8 @@ async function dispatch(argv: string[], io: Io): Promise<number> {
       return (await import('./credentials.js')).credentialCommand(rest, io);
     case 'fault-api':
       return (await import('./fault-api.js')).faultApiCommand(rest, io);
+    case 'prove':
+      return (await import('./prove.js')).proveCommand(rest, io);
     default:
       throw usage(`There's no command called ${command}. Run crumple-mcp --help to see them.`);
   }

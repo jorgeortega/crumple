@@ -34,7 +34,7 @@ const isLoopback = (host: string): boolean => host === 'localhost' || host === '
 const clock = (at: number): string => new Date(at).toTimeString().slice(0, 8);
 
 /** One line a call, from spans, which is why it can't hold an argument. */
-function logSink(io: Io): SpanSink {
+export function logSink(io: Pick<Io, 'stderr'>): SpanSink {
   return {
     export(span) {
       const reason = span.attributes['crumple.decision.reason'];

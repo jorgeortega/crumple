@@ -32,6 +32,7 @@
     "prepack": "npm run build",
     "typecheck": "tsc --noEmit",
     "lint": "eslint .",
+    "prove": "npm run build && node scripts/prove.mjs",
     "test": "vitest run",
     "secrets": "node scripts/secret-scan.mjs",
     "test:coverage": "vitest run --coverage",
