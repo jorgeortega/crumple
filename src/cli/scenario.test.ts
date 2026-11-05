@@ -26,7 +26,8 @@ const payingModel = () => scriptedModel([
 
 const recorded = async () => recordScenario(SCENARIO, payingModel(), ABOUT);
 
-const withoutTimes = ({ toolCalls, ...rest }: Awaited<ReturnType<typeof recorded>>['run']) => ({ ...rest, toolCalls: toolCalls.map(({ name, args, outcome }) => ({ name, args, outcome })) });
+// A trace id and a time are meant to differ from run to run. Everything else has to match.
+const comparable = ({ toolCalls, traceId: _traceId, ...rest }: Awaited<ReturnType<typeof recorded>>['run']) => ({ ...rest, toolCalls: toolCalls.map(({ name, args, outcome }) => ({ name, args, outcome })) });
 
 describe('recording', () => {
   it('keeps every exchange, with what it needs to say where it came from', async () => {
@@ -68,7 +69,7 @@ describe('replaying', () => {
     for (const replayed of [first, second]) {
       expect(replayed.stale).toBeUndefined();
       expect(replayed.effects).toBe(1);
-      expect(withoutTimes(replayed.run)).toEqual(withoutTimes(run));
+      expect(comparable(replayed.run)).toEqual(comparable(run));
     }
   }, 20_000);
 

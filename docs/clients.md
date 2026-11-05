@@ -46,7 +46,7 @@ Each row is one run through `claude -p`, so these show what can happen rather th
 
 **The CLI had no way to set `x-fault`,** so a real client couldn't be tested against a failure. `upstreamHeaders` in the config file does that now.
 
-**Claude Code doesn't send `traceparent`** in `_meta`, in these runs, so Crumple starts a fresh trace for each call. C11's joined trace needs an agent that sends it, which ours will.
+**Claude Code doesn't send `traceparent`** in `_meta`, in these runs, so Crumple starts a fresh trace for each call. C11's joined trace needs an agent that sends it, and `agent-runner` does.
 
 **API keys and HTTP were fine here.** They were the risks named in the plan. A bad key didn't trigger an OAuth flow, and no stdio was needed.
 

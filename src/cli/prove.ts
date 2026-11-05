@@ -1,9 +1,10 @@
 import { arch, cpus, platform, totalmem } from 'node:os';
 import { join } from 'node:path';
+import { runAgent, type ModelClient } from '../agent-runner/index.js';
 import { createFaultApi, DEFAULT_CREDENTIAL, OPENAPI } from '../fault-api/index.js';
 import { convertOpenApi, createAudit, createKey, createMcpSurface, createTelemetry, formatTrace, memoryAuditSink, memoryKeyStore, memorySink, plainCredential } from '../mcp-surface/index.js';
 import { serveOnNode } from '../node.js';
-import { countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup } from '../prove/index.js';
+import { agentChecks, countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup, type TracingAgent } from '../prove/index.js';
 import { parseFlags, readVersion, usage, type Io } from './io.js';
 import { logSink } from './serve.js';
 
@@ -62,6 +63,7 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
     },
     observed: () => JSON.stringify([spans.spans(), audited.events(), lines]),
     denied: () => audited.events().filter((event) => event.decision === 'deny').map(({ tool, reason }) => ({ tool, ...(reason === undefined ? {} : { reason }) })),
+    spans: () => spans.spans(),
     trace() {
       const all = spans.spans();
       const last = all.findLast((span) => span.kind === 'server' && span.attributes['mcp.method.name'] === 'tools/call');
@@ -94,10 +96,35 @@ async function writeReport(report: ProveReport, folder: string, name: string, io
   io.stdout(`  Report: ${join(folder, `${name}.md`)}, with .json and .svg beside it.`);
 }
 
+/**
+ * The real agent loop, with a model that asks for one tool and stops. It needs no key and spends
+ * nothing, and it can only show the trace: what a real model does is for evals.
+ */
+const tracingAgent: TracingAgent = async (url, key) => {
+  const usage = { input_tokens: 0, output_tokens: 0 };
+  let turn = 0;
+  const model: ModelClient = {
+    name: 'claude-haiku-5-5',
+    complete() {
+      turn += 1;
+      return Promise.resolve({
+        ok: true,
+        message: turn === 1
+          ? { role: 'assistant', stop_reason: 'tool_use', usage, content: [{ type: 'tool_use', id: 'scripted', name: 'getCustomer', input: { id: 'cus_1' } }] }
+          : { role: 'assistant', stop_reason: 'end_turn', usage, content: [] },
+      });
+    },
+  };
+  const sink = memorySink();
+  const { traceId } = await runAgent({ task: 'Scripted: look up one customer.', mcp: { url, token: key }, model, telemetry: createTelemetry({ sinks: [sink] }) });
+  const call = sink.spans().find((span) => span.kind === 'client' && span.name === 'tools/call getCustomer');
+  return { traceId, callSpanId: call?.spanId ?? '' };
+};
+
 export async function runSelf(start: StartTarget, io: Io): Promise<ProveReport> {
   const startedAt = new Date(io.now()).toISOString();
   const began = performance.now();
-  const checks = await runChecks([...SELF_CHECKS, ...proverChecks()], start);
+  const checks = await runChecks([...SELF_CHECKS, ...proverChecks(), ...agentChecks(tracingAgent)], start);
   return {
     kind: 'self',
     target: 'self',

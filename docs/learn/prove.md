@@ -51,7 +51,7 @@ Only our own sentences and escaped tool names reach a report. Descriptions and e
 | fail | It ran, and didn't hold | Yes |
 | not run | It didn't run, with the reason | **Never** |
 
-A claim with a part checked elsewhere says "partly checked". The badge says `12 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
+A claim with a part checked elsewhere says "partly checked". The badge says `13 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
 
 ## Why a hand-written client
 

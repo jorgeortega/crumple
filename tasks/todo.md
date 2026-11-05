@@ -194,8 +194,10 @@ The only finding that could change the design.
 - Depends on: Checkpoint C. Files: `src/agent-runner/*`, `scenarios/recordings/*`
 
 ### Task 27: Add tokens, cost and joined traces (S) — C11, C12
-- [ ] Totals match the provider's usage in a recording, priced from a dated table
-- [ ] Agent and server spans share one trace id through `_meta`
+- [x] Costs priced from a dated table, per call. Tested on scripted usage (2026-11-05)
+- [ ] Totals match the provider's usage in a recording. Waits for the first real recording, which the owner put off on 2026-11-05 ("Continue without it"), so C12 stays not run
+- [x] Agent and server spans share one trace id through `_meta` (C11, 2026-11-05). `prove --self` and `demo` now check it
+- [ ] Compare the C18 estimate with real counts: `npm run tokens` is written, is free, and needs the owner's key
 - Depends on: 26, 9. Files: `src/agent-runner/usage.ts`, `prices.ts`, `tracing.ts`, tests
 
 ### Task 28: Build `evals` and the gate (M) — C2, C10, C13

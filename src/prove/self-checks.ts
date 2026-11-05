@@ -53,12 +53,25 @@ export interface Target {
   observed(): string;
   /** Who was refused what, from the audit log. */
   denied(): { tool: string; reason?: string }[];
+  /** The server's own spans. Only a server that keeps traces has any. */
+  spans?(): SpanSeen[];
   /** The last tool call as a tree, for people to read. Only a server that keeps traces has one. */
   trace?(): string;
   stop(): Promise<void>;
 }
 
 export type StartTarget = (setup: TargetSetup) => Promise<Target>;
+
+export interface SpanSeen {
+  traceId: string;
+  spanId: string;
+  parentSpanId?: string;
+  name: string;
+  kind: string;
+  startMs: number;
+  endMs: number;
+  attributes: Record<string, unknown>;
+}
 
 const DEADLINE_MARGIN_MS = 500;
 const CUSTOMER = { id: 'cus_1' };
@@ -403,6 +416,42 @@ export function proverChecks(prover: Prover = realProver): readonly Check<StartT
           const { tools } = await prover(target.url, target.keys.write, createBudget(DEFAULT_MAX_REQUESTS));
           if (!tools?.totalTokens || tools.perTool.length !== tools.count) return fail('It gave no estimate for each tool.');
           return pass(`About ${String(tools.totalTokens)} tokens per turn across ${String(tools.count)} tools, as an estimate.`, { estimated_tokens: tools.totalTokens, tools: tools.count });
+        }),
+    },
+  ];
+}
+
+/** What an agent says about the one tool call it made: its trace, and its own span for that call. */
+export interface AgentTrace {
+  traceId: string;
+  callSpanId: string;
+}
+
+/** prove can't import the agent, by the capability map, so the CLI hands one over. Only a test passes a broken one. */
+export type TracingAgent = (url: string, key: string) => Promise<AgentTrace>;
+
+export function agentChecks(agent: TracingAgent): readonly Check<StartTarget>[] {
+  return [
+    {
+      id: 'trace-joined',
+      title: 'One tool call, from the real agent loop to the API',
+      claim: 'C11',
+      run: (start) =>
+        withTarget(start, {}, async (target) => {
+          const { traceId, callSpanId } = await agent(target.url, target.keys.read);
+          const spans = target.spans?.() ?? [];
+          const server = spans.find((span) => span.kind === 'server' && span.name === 'tools/call getCustomer');
+          if (!server) return fail('The server kept no span for the call, so this shows nothing.');
+          if (server.traceId !== traceId) return fail('The agent and the server each started their own trace, so they can\'t be joined.');
+          if (server.parentSpanId !== callSpanId) return fail('The server\'s span is in the agent\'s trace, but not under the agent\'s call.');
+
+          const inTrace = spans.filter((span) => span.traceId === traceId);
+          const decided = inTrace.some((span) => span.attributes['crumple.decision'] === 'allow');
+          const attempts = inTrace.filter((span) => span.kind === 'client' && span.attributes['http.request.method'] !== undefined);
+          if (server.attributes['crumple.caller'] === undefined) return fail('The trace doesn\'t say who called.');
+          if (!decided) return fail('The trace doesn\'t show the permission decision.');
+          if (attempts.length === 0) return fail('The trace doesn\'t show the attempt that reached the API.');
+          return pass(`One trace, from the agent's call to the API, with the caller, the decision and ${count(attempts.length, 'attempt')}. It used the real agent loop with a scripted model, since joining a trace doesn't depend on what a model says.`, { attempts: attempts.length });
         }),
     },
   ];

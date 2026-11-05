@@ -1,6 +1,7 @@
 import { callResult, createBudget, createHttpTransport, openSession, type ListedTool, type Session } from '../mcp-client/client.js';
+import { createTelemetry, type Attributes, type Span, type Telemetry } from '../telemetry/index.js';
 import type { ClaudeMessage, ClaudeTool, ContentBlock, Message, ModelClient, ModelRequest, ToolResultBlock } from './model.js';
-import { hasPrice } from './prices.js';
+import { costOfCall, hasPrice } from './prices.js';
 import { createMeter, type UsageTotals } from './usage.js';
 
 // A task, a model and an MCP server: ask the model, run what it asks for, send back the results, and
@@ -43,10 +44,14 @@ export interface AgentOptions {
   mcp: { url: string; token?: string };
   model: ModelClient;
   limits?: AgentLimits;
+  /** Where the run's spans go. None means they're made and dropped, so the trace id still exists. */
+  telemetry?: Telemetry;
 }
 
 export interface AgentRun {
   stopped: Stopped;
+  /** The server's spans join this, through traceparent in each call's _meta. */
+  traceId: string;
   /** What the model said at the end, thinking left out. */
   text: string;
   toolCalls: ToolCallRecord[];
@@ -97,9 +102,18 @@ interface Ran {
 }
 
 /** Every way a tool call can go ends up as something the model can read. It decides what's next. */
-async function runTool(session: Session, call: Extract<ContentBlock, { type: 'tool_use' }>, remainingMs: () => number): Promise<Ran> {
-  const result = callResult(await session.callTool(call.name, call.input, { timeoutMs: Math.max(remainingMs(), 1) }));
-  const done = (outcome: ToolOutcome, text: string): Ran => ({
+async function runTool(session: Session, call: Extract<ContentBlock, { type: 'tool_use' }>, remainingMs: () => number, root: Span): Promise<Ran> {
+  const span = root.child(`tools/call ${call.name}`, {
+    kind: 'client',
+    attributes: { 'mcp.method.name': 'tools/call', 'gen_ai.tool.name': call.name, 'gen_ai.operation.name': 'execute_tool' },
+  });
+  // This is C11: it's what lets the server's spans join this trace. Arguments never go in a span.
+  const result = callResult(await session.callTool(call.name, call.input, { timeoutMs: Math.max(remainingMs(), 1) }, { traceparent: span.traceparent() }));
+  const done = (outcome: ToolOutcome, text: string): Ran => {
+    span.end(outcome === 'ok' ? {} : { errorType: outcome });
+    return ran(outcome, text);
+  };
+  const ran = (outcome: ToolOutcome, text: string): Ran => ({
     block: { type: 'tool_result', tool_use_id: call.id, content: capped(text), ...(outcome === 'ok' ? {} : { is_error: true as const }) },
     record: { name: call.name, args: call.input, outcome, ms: result.ms },
   });
@@ -120,7 +134,7 @@ async function runTool(session: Session, call: Extract<ContentBlock, { type: 'to
 }
 
 export async function runAgent(options: AgentOptions): Promise<AgentRun> {
-  const { task, mcp, model, limits = {} } = options;
+  const { task, mcp, model, limits = {}, telemetry = createTelemetry() } = options;
   const { maxTurns = 10, maxToolCalls = 30, deadlineMs = 120_000, maxUsd = DEFAULT_MAX_USD } = limits;
 
   const deadline = AbortSignal.timeout(deadlineMs);
@@ -129,9 +143,23 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
   // The clock as well as the signal: a tool's own timeout can land just before the signal does.
   const expired = (): boolean => deadline.aborted || remainingMs() < 1;
 
+  const modelAttributes: Attributes = { 'gen_ai.provider.name': 'anthropic', 'gen_ai.request.model': model.name };
+  const root = telemetry.startSpan('invoke_agent', { attributes: { ...modelAttributes, 'gen_ai.operation.name': 'invoke_agent' } });
+
   const meter = createMeter({ model: model.name, maxUsd });
-  const run: AgentRun = { stopped: 'done', text: '', toolCalls: [], turns: 0, notes: [], ...meter.result() };
-  const finish = (stopped: Stopped, more: Partial<AgentRun> = {}): AgentRun => Object.assign(run, { stopped }, meter.result(), more);
+  const run: AgentRun = { stopped: 'done', traceId: root.context.traceId, text: '', toolCalls: [], turns: 0, notes: [], ...meter.result() };
+  const finish = (stopped: Stopped, more: Partial<AgentRun> = {}): AgentRun => {
+    Object.assign(run, { stopped }, meter.result(), more);
+    root.end({
+      attributes: {
+        'gen_ai.usage.input_tokens': run.usage.input,
+        'gen_ai.usage.output_tokens': run.usage.output,
+        ...(run.costUsd === null ? {} : { 'crumple.cost_usd': run.costUsd }),
+      },
+      ...(stopped === 'done' ? {} : { errorType: stopped }),
+    });
+    return run;
+  };
 
   // A cap needs a price, so a model we have no price for doesn't get to spend anything.
   if (!hasPrice(model.name)) {
@@ -169,9 +197,11 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
       const request: ModelRequest = { model: model.name, max_tokens: MAX_TOKENS, system: SYSTEM, tools, messages, output_config: { effort: EFFORT } };
       meter.onRequest(request);
       run.turns += 1;
+      const chat = root.child(`chat ${model.name}`, { kind: 'client', attributes: { ...modelAttributes, 'gen_ai.operation.name': 'chat' } });
       const reply = await model.complete(request, { signal: deadline, mayAttempt: meter.mayAttempt, onLost: meter.onLost });
 
       if (!reply.ok) {
+        chat.end({ errorType: reply.code });
         if (reply.code === 'max_usd') return finish('max_usd');
         if (reply.code === 'stale') {
           run.notes.push(reply.detail ?? 'This doesn\'t match its recording.');
@@ -183,6 +213,18 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
 
       const { message } = reply;
       meter.onReply(message);
+      // Tokens live on the chat span, because an MCP server never sees them (C12).
+      const { input_tokens: input, output_tokens: output, cache_read_input_tokens: cacheRead, cache_creation_input_tokens: cacheWrite } = message.usage;
+      const cost = costOfCall(model.name, message.usage);
+      chat.end({
+        attributes: {
+          ...(input === undefined ? {} : { 'gen_ai.usage.input_tokens': input }),
+          ...(output === undefined ? {} : { 'gen_ai.usage.output_tokens': output }),
+          ...(cacheRead === undefined ? {} : { 'gen_ai.usage.cache_read.input_tokens': cacheRead }),
+          ...(cacheWrite === undefined ? {} : { 'gen_ai.usage.cache_write.input_tokens': cacheWrite }),
+          ...(cost === null ? {} : { 'crumple.cost_usd': cost }),
+        },
+      });
       run.text = textOf(message);
 
       switch (message.stop_reason) {
@@ -204,11 +246,13 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
 
       // All at once, and every result in one message, in the order asked. Anthropic's docs say that
       // splitting them teaches the model to stop calling tools in parallel.
-      const ran = await Promise.all(calls.map((call) => runTool(session, call, remainingMs)));
-      run.toolCalls.push(...ran.map(({ record }) => record));
-      messages.push({ role: 'assistant', content: message.content }, { role: 'user', content: ran.map(({ block }) => block) });
+      const results = await Promise.all(calls.map((call) => runTool(session, call, remainingMs, root)));
+      run.toolCalls.push(...results.map(({ record }) => record));
+      messages.push({ role: 'assistant', content: message.content }, { role: 'user', content: results.map(({ block }) => block) });
     }
   } finally {
+    // Only still open if something threw, and ending twice does nothing.
+    root.end({ errorType: 'crashed' });
     await session.close();
   }
 }
