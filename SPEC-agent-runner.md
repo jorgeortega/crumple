@@ -160,7 +160,7 @@ replay:  loop --> replayer                                    (no key, no networ
 
 That first row gives C13 a free gate: a broken tool description shows up as `stale`. A live run is what shows how a model reacts. `evals` decides how to use both.
 
-**How byte for byte can work,** given that Crumple makes up a fresh idempotency key each time and a model might quote one back: a recording runs against a Crumple with a seeded `newKey`, which the executor already accepts. Same seed, same keys, same bytes. `fault-api` numbers its records in order, and its clock can be injected too.
+**How byte for byte can work,** given that Crumple makes up a fresh idempotency key each time and a model might quote one back: a recording runs against a Crumple with a seeded `newKey`. The executor already accepts one, and `mcp-surface` needs a small change to pass it along, in slice 5. Same seed, same keys, same bytes. `fault-api` numbers its records in order, and its clock can be injected too.
 
 **A recording** is one readable JSON file in `scenarios/recordings/`: the date, model, API version, commit, and each request and raw response. Keys are never in it, because they travel in headers and those aren't recorded. Only `fault-api`'s fake data appears in it, and the secret scan covers these files.
 
