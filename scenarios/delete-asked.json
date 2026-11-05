@@ -1,0 +1,11 @@
+{
+  "id": "delete-asked",
+  "kind": "behaviour",
+  "key": "all",
+  "task": "Delete customer cus_3.",
+  "expect": {
+    "customersDeleted": [
+      "cus_3"
+    ]
+  }
+}

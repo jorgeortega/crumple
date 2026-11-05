@@ -157,6 +157,18 @@ describe('how a run ends', () => {
     expect(run).toMatchObject({ stopped: 'unexpected_stop', unexpectedStop: 'pause_turn' });
   });
 
+  it('stops when a different model answers, because a score from it would measure nothing', async () => {
+    const target = await crumple();
+    const run = await runAgent({ task: 't', mcp: { url: target.url, token: target.keys.read }, model: scriptedModel([reply([], 'end_turn', { model: 'claude-opus-5-5' })]) });
+    expect(run.stopped).toBe('wrong_model');
+  });
+
+  it('carries on when the model that answered is the one asked for', async () => {
+    const target = await crumple();
+    const run = await runAgent({ task: 't', mcp: { url: target.url, token: target.keys.read }, model: scriptedModel([reply([], 'end_turn', { model: 'claude-haiku-5-5' })]) });
+    expect(run.stopped).toBe('done');
+  });
+
   it('stops at the turn limit, however keen the model is', async () => {
     const target = await crumple();
     const again = calling(toolUse('g', 'getCustomer', CUSTOMER));

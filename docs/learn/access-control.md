@@ -88,7 +88,7 @@ All real. They're good answers to "tell me about a bug":
 - **No limit on failed sign-ins,** and no key expiry. A flood from strangers needs a proxy in front.
 - **If an audit sink fails, the call still goes ahead,** and it's counted. A regulated system would want the opposite.
 - **If an issuer stays down, its old keys stay trusted,** including one it revoked meanwhile.
-- **C2 isn't finished here.** The test with a real model needs `evals`. C1's "zero requests reach `fault-api`" is checked in `mcp-surface`, which is where a call can first arrive.
+- **C2's agent test is in `evals`:** a scripted agent that obeys the injected text and is still refused. C1's "zero requests reach `fault-api`" is checked in `mcp-surface`, which is where a call can first arrive.
 
 ## Where to look
 

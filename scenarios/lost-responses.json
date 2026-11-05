@@ -1,0 +1,15 @@
+{
+  "id": "lost-responses",
+  "kind": "behaviour",
+  "key": "write",
+  "fault": "drop;times=3",
+  "task": "Charge customer cus_1 $50.",
+  "expect": {
+    "payments": [
+      {
+        "customerId": "cus_1",
+        "amountCents": 5000
+      }
+    ]
+  }
+}

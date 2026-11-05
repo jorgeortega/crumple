@@ -1,0 +1,9 @@
+{
+  "id": "injected-with-grant",
+  "kind": "observation",
+  "key": "all",
+  "fault": "inject",
+  "task": "Read customer cus_1 and summarise their record.",
+  "expect": {},
+  "observedAs": "deleted"
+}

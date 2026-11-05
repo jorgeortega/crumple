@@ -1,10 +1,11 @@
 import { arch, cpus, platform, totalmem } from 'node:os';
 import { join } from 'node:path';
 import { runAgent, type ModelClient } from '../agent-runner/index.js';
+import { proveGateNoticesChange } from '../evals/gate.js';
 import { createFaultApi, DEFAULT_CREDENTIAL, OPENAPI } from '../fault-api/index.js';
 import { convertOpenApi, createAudit, createKey, createMcpSurface, createTelemetry, formatTrace, memoryAuditSink, memoryKeyStore, memorySink, plainCredential } from '../mcp-surface/index.js';
 import { serveOnNode } from '../node.js';
-import { agentChecks, countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup, type TracingAgent } from '../prove/index.js';
+import { agentChecks, gateChecks, countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup, type TracingAgent } from '../prove/index.js';
 import { parseFlags, readVersion, usage, type Io } from './io.js';
 import { logSink } from './serve.js';
 
@@ -15,10 +16,19 @@ const GRANTS = {
   read: [{ tool: '*' }],
   write: [{ tool: '*' }, { tool: 'createPayment', writes: true }],
   other: [{ tool: 'getCustomer' }],
+  all: [{ tool: '*' }, { tool: 'createPayment', writes: true }, { tool: 'createCustomer', writes: true }, { tool: 'deleteCustomer', writes: true }],
 };
 
 const allClaimingToBeReadOnly = () =>
   convertOpenApi(OPENAPI).tools.map((tool) => ({ ...tool, annotations: { ...tool.annotations, readOnlyHint: true } }));
+
+const withBrokenDescriptions = () =>
+  convertOpenApi(OPENAPI).tools.map((tool) => ({ ...tool, description: 'A tool.' }));
+
+function toolsFor(setup: TargetSetup) {
+  if (setup.breakDescriptions) return withBrokenDescriptions();
+  return setup.hintsLie ? allClaimingToBeReadOnly() : convertOpenApi(OPENAPI).tools;
+}
 
 export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Target> => {
   const api = createFaultApi();
@@ -31,10 +41,10 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
 
   const keys = memoryKeyStore();
   const makeKey = async (label: keyof typeof GRANTS): Promise<string> => (await createKey(keys, { label, grants: GRANTS[label] })).key;
-  const [read, write, other] = await Promise.all([makeKey('read'), makeKey('write'), makeKey('other')]);
+  const [read, write, other, all] = await Promise.all([makeKey('read'), makeKey('write'), makeKey('other'), makeKey('all')]);
 
   const surface = createMcpSurface({
-    tools: setup.hintsLie ? allClaimingToBeReadOnly() : convertOpenApi(OPENAPI).tools,
+    tools: toolsFor(setup),
     upstream: {
       baseUrl: upstream.url,
       getCredential: plainCredential('header', 'authorization', `Bearer ${DEFAULT_CREDENTIAL}`),
@@ -54,7 +64,7 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
 
   return {
     url: `${server.url}/mcp`,
-    keys: { read, write, other },
+    keys: { read, write, other, all },
     credential: DEFAULT_CREDENTIAL,
     upstream: {
       url: upstream.url,
@@ -76,7 +86,7 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
   };
 };
 
-function environment(io: Io): Environment {
+export function environment(io: Io): Environment {
   const commit = io.env.CRUMPLE_PROVE_COMMIT;
   return {
     version: readVersion(),
@@ -124,7 +134,7 @@ const tracingAgent: TracingAgent = async (url, key) => {
 export async function runSelf(start: StartTarget, io: Io): Promise<ProveReport> {
   const startedAt = new Date(io.now()).toISOString();
   const began = performance.now();
-  const checks = await runChecks([...SELF_CHECKS, ...proverChecks(), ...agentChecks(tracingAgent)], start);
+  const checks = await runChecks([...SELF_CHECKS, ...proverChecks(), ...agentChecks(tracingAgent), ...gateChecks(proveGateNoticesChange)], start);
   return {
     kind: 'self',
     target: 'self',

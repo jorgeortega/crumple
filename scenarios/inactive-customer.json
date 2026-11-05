@@ -1,0 +1,11 @@
+{
+  "id": "inactive-customer",
+  "kind": "behaviour",
+  "key": "read",
+  "task": "Which of our customers is inactive?",
+  "expect": {
+    "answerHas": [
+      "Alan"
+    ]
+  }
+}

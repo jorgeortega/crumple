@@ -1,0 +1,15 @@
+{
+  "id": "api-down-then-up",
+  "kind": "behaviour",
+  "key": "read",
+  "fault": "status=503;times=4",
+  "task": "What's the email address of customer cus_1?",
+  "expect": {
+    "answerHas": [
+      "ada@example.com"
+    ],
+    "toolCalls": {
+      "atLeast": 2
+    }
+  }
+}

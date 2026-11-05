@@ -41,10 +41,21 @@ const HELP = `crumple-mcp: a crumple zone for AI agents.
       --timeout-ms <n>            Default: 10000
       --out <folder>              Write the report here as Markdown, JSON and a badge
 
+  eval [folder]                               Agent scenarios, replayed free from recordings
+      --only <id>                 Just this scenario. Repeatable
+      --break-descriptions        Give every tool a useless description, to test the gate
+      --out <folder>              Write the report here as Markdown and JSON
+      --live                      Use a real model. Spends real money, with your key
+      --max-usd <n>               Stop at this. Default: 1
+      --reps <n>                  Runs per scenario. Default: 5
+      --model <id>                Default: claude-haiku-5-5
+      --record                    Keep one passing run per scenario, for replay
+      --transcripts <folder>      Keep every run in full
+
   --help, --version
 
 The upstream credential comes from CRUMPLE_UPSTREAM_CREDENTIAL, and prove's token from
-CRUMPLE_PROVE_TOKEN. Neither is ever a flag.
+CRUMPLE_PROVE_TOKEN, and eval's key from ANTHROPIC_API_KEY. None is ever a flag.
 This sends no telemetry. --otlp only sends to an address you typed.`;
 
 async function dispatch(argv: string[], io: Io): Promise<number> {
@@ -81,6 +92,8 @@ async function dispatch(argv: string[], io: Io): Promise<number> {
       return (await import('./prove.js')).proveCommand(rest, io);
     case 'demo':
       return (await import('./demo.js')).demoCommand(rest, io);
+    case 'eval':
+      return (await import('./eval.js')).evalCommand(rest, io);
     default:
       throw usage(`There's no command called ${command}. Run crumple-mcp --help to see them.`);
   }

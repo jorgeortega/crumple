@@ -8,6 +8,7 @@
   },
   "files": [
     "dist",
+    "scenarios",
     "LICENSE"
   ],
   "exports": {
@@ -34,8 +35,8 @@
     "lint": "eslint .",
     "prove": "npm run build && node scripts/prove.mjs",
     "prove:load": "npm run build && node scripts/prove.mjs --load",
-    "record": "npm run build && node scripts/record.mjs",
     "tokens": "npm run build && node scripts/compare-tool-tokens.mjs",
+    "eval:live": "npm run build && node scripts/prove.mjs --eval",
     "test": "vitest run",
     "secrets": "node scripts/secret-scan.mjs",
     "test:coverage": "vitest run --coverage",

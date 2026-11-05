@@ -12,7 +12,7 @@ export interface Claim {
 
 export const CLAIMS: readonly Claim[] = [
   { id: 'C1', text: 'Access is denied by default' },
-  { id: 'C2', text: 'The model can\'t talk its way past a permission', pending: 'the part with a real model needs evals (Task 28)' },
+  { id: 'C2', text: 'The model can\'t talk its way past a permission' },
   { id: 'C3', text: 'The agent\'s token never reaches the upstream API' },
   { id: 'C4', text: 'The stored credential never leaks' },
   { id: 'C5', text: 'A write is never applied twice' },
@@ -20,10 +20,10 @@ export const CLAIMS: readonly Claim[] = [
   { id: 'C7', text: 'Only temporary failures are retried' },
   { id: 'C8', text: 'A failing upstream stops being hit' },
   { id: 'C9', text: 'One noisy caller can\'t starve another' },
-  { id: 'C10', text: 'Failures tell the agent what to do next', pending: 'the part where an agent recovers needs evals (Task 28)' },
+  { id: 'C10', text: 'Failures tell the agent what to do next', pending: 'a real model recovering needs a live eval, which spends money' },
   { id: 'C11', text: 'Every call can be traced end to end' },
   { id: 'C12', text: 'Each run reports its tokens and cost', pending: 'needs a recording from a real model, which spends money (Task 27)' },
-  { id: 'C13', text: 'A behaviour regression gets caught', pending: 'needs evals (Task 28)' },
+  { id: 'C13', text: 'A behaviour regression gets caught' },
   { id: 'C14', text: 'It speaks real MCP', pending: 'needs Python, so it runs in npm run test:interop' },
   { id: 'C15', text: 'The public demo can\'t run up a bill or be abused', pending: 'needs the hosted demo (Task 31)' },
   { id: 'C16', text: 'A stranger succeeds in 60 seconds', pending: 'a stranger\'s first run, so it runs in npm run test:install' },

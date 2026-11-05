@@ -1,0 +1,14 @@
+{
+  "id": "dollars-to-cents",
+  "kind": "behaviour",
+  "key": "write",
+  "task": "Charge customer cus_1 $50.",
+  "expect": {
+    "payments": [
+      {
+        "customerId": "cus_1",
+        "amountCents": 5000
+      }
+    ]
+  }
+}

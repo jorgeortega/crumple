@@ -1,0 +1,14 @@
+{
+  "id": "exact-cents",
+  "kind": "behaviour",
+  "key": "write",
+  "task": "Charge customer cus_2 $12.34.",
+  "expect": {
+    "payments": [
+      {
+        "customerId": "cus_2",
+        "amountCents": 1234
+      }
+    ]
+  }
+}

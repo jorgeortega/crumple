@@ -15,6 +15,8 @@ export interface UsageTotals {
   usage: { input: number; output: number; cacheRead: number; cacheWrite: number };
   costUsd: number | null;
   costIsAtMost: boolean;
+  /** What counts against a budget: the worst case for anything that couldn't be known. */
+  budgetUsedUsd: number;
 }
 
 export interface Meter {
@@ -66,6 +68,6 @@ export function createMeter(options: { model: string; maxUsd: number }): Meter {
       usage.cacheWrite += reported.cache_creation_input_tokens ?? 0;
       lastPrompt = (reported.input_tokens ?? 0) + (reported.cache_read_input_tokens ?? 0) + (reported.cache_creation_input_tokens ?? 0);
     },
-    result: () => ({ usage: { ...usage }, costUsd: unknown ? null : spent, costIsAtMost: atMost }),
+    result: () => ({ usage: { ...usage }, costUsd: unknown ? null : spent, costIsAtMost: atMost, budgetUsedUsd: spent }),
   };
 }

@@ -80,7 +80,7 @@ export const wrongServer: StartTarget = async (setup: TargetSetup): Promise<Targ
 
   return {
     url: `${mcp.url}/mcp`,
-    keys: { read: 'wrong-read-key', write: 'wrong-write-key', other: 'wrong-other-key' },
+    keys: { read: 'wrong-read-key', write: 'wrong-write-key', other: 'wrong-other-key', all: 'wrong-all-key' },
     credential: DEFAULT_CREDENTIAL,
     upstream: {
       url: upstream.url,

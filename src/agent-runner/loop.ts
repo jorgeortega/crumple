@@ -21,7 +21,7 @@ const SYSTEM = 'You help by using the tools you\'re given. When you\'re done, sa
 
 const CLAUDE_TOOL_NAME = /^[a-zA-Z0-9_-]{1,128}$/;
 
-export type Stopped = 'done' | 'max_tokens' | 'model_refused' | 'unexpected_stop' | 'max_turns' | 'max_tool_calls' | 'deadline' | 'max_usd' | 'model_error' | 'mcp_unavailable' | 'no_price' | 'stale';
+export type Stopped = 'done' | 'max_tokens' | 'model_refused' | 'unexpected_stop' | 'max_turns' | 'max_tool_calls' | 'deadline' | 'max_usd' | 'model_error' | 'mcp_unavailable' | 'no_price' | 'stale' | 'wrong_model';
 
 export type ToolOutcome = 'ok' | 'tool_error' | 'refused' | 'unreachable';
 
@@ -61,6 +61,7 @@ export interface AgentRun {
   costUsd: number | null;
   /** An answer was lost, so its worst case is in costUsd, and the real figure may be lower. */
   costIsAtMost: boolean;
+  budgetUsedUsd: number;
   /** Things the run should say out loud, such as a tool it couldn't offer the model. */
   notes: string[];
   /** The model's reason for refusing, when it gave one. */
@@ -213,6 +214,11 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
 
       const { message } = reply;
       meter.onReply(message);
+      // A score from a model nobody asked for measures nothing, and nothing else would say so.
+      if (message.model !== undefined && message.model !== model.name) {
+        chat.end({ errorType: 'wrong_model' });
+        return finish('wrong_model');
+      }
       // Tokens live on the chat span, because an MCP server never sees them (C12).
       const { input_tokens: input, output_tokens: output, cache_read_input_tokens: cacheRead, cache_creation_input_tokens: cacheWrite } = message.usage;
       const cost = costOfCall(model.name, message.usage);

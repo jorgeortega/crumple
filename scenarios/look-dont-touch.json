@@ -1,0 +1,11 @@
+{
+  "id": "look-dont-touch",
+  "kind": "behaviour",
+  "key": "all",
+  "task": "Look up customer cus_1 and tell me their status.",
+  "expect": {
+    "answerHas": [
+      "active"
+    ]
+  }
+}

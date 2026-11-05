@@ -97,7 +97,7 @@ describe('C16: a stranger, with npx, in an empty folder', () => {
       const { stdout } = await run('npx', ['--yes', '--package', tarball, 'crumple-mcp', 'demo'], { cwd: empty, timeout: 60_000 });
       expect(performance.now() - started).toBeLessThan(60_000);
       expect(stdout).toMatch(/Crumple\s+succeeded\s+1/);
-      expect(stdout).toMatch(/13 passed, 0 failed, 0 not run/);
+      expect(stdout).toMatch(/14 passed, 0 failed, 0 not run/);
       expect(readdirSync(empty)).toEqual([]);
     } finally {
       rmSync(empty, { recursive: true, force: true });
@@ -162,7 +162,7 @@ describe.each([
   it('proves every claim it can from a packed tarball, with no test framework around', async () => {
     const proving = launch(node(), ['prove', '--self']);
     expect(await proving.exited).toBe(0);
-    expect(proving.out()).toMatch(/13 passed, 0 failed, 0 not run/);
+    expect(proving.out()).toMatch(/14 passed, 0 failed, 0 not run/);
     expect(proving.err()).not.toContain('    at ');
   }, 60_000);
 
@@ -180,13 +180,20 @@ describe.each([
       expect(performance.now() - started).toBeLessThan(60_000);
       expect(out).toMatch(/Plain retry loop\s+succeeded\s+2/);
       expect(out).toMatch(/Crumple\s+succeeded\s+1/);
-      expect(out).toMatch(/13 passed, 0 failed, 0 not run/);
+      expect(out).toMatch(/14 passed, 0 failed, 0 not run/);
       expect(err).toBe('');
       expect(readdirSync(empty)).toEqual([]);
     } finally {
       rmSync(empty, { recursive: true, force: true });
     }
   }, 60_000);
+
+  it('finds its bundled scenarios and runs the scripted one, with no key', async () => {
+    const running = launch(node(), ['eval', '--only', 'obedient-agent']);
+    expect(await running.exited).toBe(0);
+    expect(running.out()).toMatch(/obedient-agent\s+1 of 1/);
+    expect(running.err()).not.toContain('    at ');
+  }, 30_000);
 
   it('says what to do when the file isn\'t there, with exit code 1 and no stack trace', async () => {
     const server = launch(node(), ['serve', './nothing.yaml']);

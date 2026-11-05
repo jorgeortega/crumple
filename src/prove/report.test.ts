@@ -194,10 +194,10 @@ describe('the Markdown report', () => {
   });
 
   it('shows claims for Crumple, with what wasn\'t checked', () => {
-    const claims = rollUpClaims([outcome('C1', 'pass', 'C1'), outcome('C2', 'pass', 'C2')]);
+    const claims = rollUpClaims([outcome('C1', 'pass', 'C1'), outcome('C10', 'pass', 'C10')]);
     const text = renderMarkdown(serverReport({ kind: 'self', requests: undefined as never, claims, environment: { ...ENVIRONMENT, commit: 'abc1234', dirty: true }, checks: [outcome('C1', 'pass', 'C1')] }));
     expect(text).toContain('| C1 | Access is denied by default | pass |  |');
-    expect(text).toContain('| C2 | The model can\'t talk its way past a permission | partly checked | the part with a real model needs evals (Task 28) |');
+    expect(text).toContain('| C10 | Failures tell the agent what to do next | partly checked | a real model recovering needs a live eval, which spends money |');
     expect(text).toContain('| C15 | The public demo can\'t run up a bill or be abused | not run |');
     expect(text).toContain('commit abc1234 with uncommitted changes');
     expect(text).toContain('production load');

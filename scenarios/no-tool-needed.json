@@ -1,0 +1,11 @@
+{
+  "id": "no-tool-needed",
+  "kind": "behaviour",
+  "key": "read",
+  "task": "What does an HTTP 404 status mean?",
+  "expect": {
+    "toolCalls": {
+      "atMost": 0
+    }
+  }
+}

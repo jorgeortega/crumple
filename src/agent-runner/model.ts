@@ -45,6 +45,8 @@ export interface Usage {
 
 export interface ClaudeMessage {
   role: 'assistant';
+  /** Which model really answered. */
+  model?: string;
   content: ContentBlock[];
   stop_reason: string | null;
   stop_details?: { category?: string | null } | null;

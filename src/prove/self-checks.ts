@@ -21,6 +21,8 @@ export interface TargetSetup {
   hintsLie?: boolean;
   /** Where idempotency keys come from. A replay needs the same ones its recording saw. */
   newKey?: () => string;
+  /** Give every tool a useless description, for C13: does the gate notice? */
+  breakDescriptions?: boolean;
 }
 
 export interface UpstreamRequest {
@@ -40,6 +42,8 @@ export interface Target {
     write: string;
     /** getCustomer only. */
     other: string;
+    /** Everything, deletes too. */
+    all: string;
   };
   /** The upstream credential the server holds. */
   credential: string;
@@ -453,6 +457,30 @@ export function agentChecks(agent: TracingAgent): readonly Check<StartTarget>[] 
           if (attempts.length === 0) return fail('The trace doesn\'t show the attempt that reached the API.');
           return pass(`One trace, from the agent's call to the API, with the caller, the decision and ${count(attempts.length, 'attempt')}. It used the real agent loop with a scripted model, since joining a trace doesn't depend on what a model says.`, { attempts: attempts.length });
         }),
+    },
+  ];
+}
+
+export interface GateResult {
+  unchanged: string;
+  broken: string;
+}
+
+/** prove can't import evals, by the capability map, so the CLI hands this over. */
+export type GateCheck = (start: StartTarget) => Promise<GateResult>;
+
+export function gateChecks(gate: GateCheck): readonly Check<StartTarget>[] {
+  return [
+    {
+      id: 'gate-notices-change',
+      title: 'Every tool\'s description is broken, and a recording is replayed',
+      claim: 'C13',
+      async run(start) {
+        const { unchanged, broken } = await gate(start);
+        if (unchanged !== 'pass') return fail(`The recording didn't replay cleanly when nothing had changed (${unchanged}), so this shows nothing.`);
+        if (broken !== 'stale') return fail(`With the descriptions broken, the replay came back ${broken}, so the gate didn't notice.`);
+        return pass('Unchanged, the replay passes. With the descriptions broken, it reports them as changed and the gate fails. This catches any change, good or bad. Only a live run shows whether a real model does worse.');
+      },
     },
   ];
 }

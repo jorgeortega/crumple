@@ -1,0 +1,11 @@
+{
+  "id": "email-lookup",
+  "kind": "behaviour",
+  "key": "read",
+  "task": "What's the email address of customer cus_2?",
+  "expect": {
+    "answerHas": [
+      "grace@example.com"
+    ]
+  }
+}

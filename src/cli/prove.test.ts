@@ -30,11 +30,11 @@ describe('prove --self on the real Crumple', () => {
     const report = await runSelf(startCrumple, harness().io);
     const failing = report.checks.filter((check) => check.state !== 'pass').map((check) => `${check.id}: ${check.detail}`);
     expect(failing).toEqual([]);
-    expect(report.checks).toHaveLength(SELF_CHECKS.length + 3);
+    expect(report.checks).toHaveLength(SELF_CHECKS.length + 4);
     expect(performance.now() - started).toBeLessThan(30_000);
 
     const states = Object.fromEntries((report.claims ?? []).map((claim) => [claim.id, claim.state]));
-    expect(states).toMatchObject({ C1: 'pass', C2: 'partly', C3: 'pass', C4: 'pass', C5: 'pass', C6: 'pass', C7: 'pass', C8: 'pass', C9: 'pass', C10: 'partly', C11: 'pass', C12: 'not_run', C15: 'not_run', C17: 'pass', C18: 'pass' });
+    expect(states).toMatchObject({ C1: 'pass', C2: 'pass', C3: 'pass', C4: 'pass', C5: 'pass', C6: 'pass', C7: 'pass', C8: 'pass', C9: 'pass', C10: 'partly', C11: 'pass', C12: 'not_run', C13: 'pass', C15: 'not_run', C17: 'pass', C18: 'pass' });
   }, 60_000);
 });
 
@@ -58,7 +58,7 @@ describe('breaking Crumple on purpose', () => {
   it('turns into a failing report and a non-zero exit against a server that\'s wrong', async () => {
     const ids = await failedIds(wrongServer);
     // Every check about the server. The other two are about prove, which hasn't changed.
-    expect(ids).toEqual([...SELF_CHECKS.map((check) => check.id), 'trace-joined']);
+    expect(ids).toEqual([...SELF_CHECKS.map((check) => check.id), 'trace-joined', 'gate-notices-change']);
   }, 60_000);
 });
 
@@ -192,7 +192,7 @@ describe('the command', () => {
     const { code, out } = await runOnce(['prove', '--self', '--out', folder, '--name', 'latest'], { env: { CRUMPLE_PROVE_COMMIT: 'abc1234', CRUMPLE_PROVE_DIRTY: '0' } });
     expect(code).toBe(0);
     expect(out).toMatch(/pass\s+one-effect/);
-    expect(out).toContain('13 passed, 0 failed, 0 not run');
+    expect(out).toContain('14 passed, 0 failed, 0 not run');
 
     const markdown = readFileSync(join(folder, 'latest.md'), 'utf8');
     expect(markdown).toContain('commit abc1234.');
@@ -201,9 +201,9 @@ describe('the command', () => {
     expect(out.toLowerCase()).not.toContain('latitude');
 
     const json = JSON.parse(readFileSync(join(folder, 'latest.json'), 'utf8')) as { counts: unknown; environment: { commit: string; dirty: boolean; node: string } };
-    expect(json.counts).toEqual({ passed: 13, failed: 0, notRun: 0 });
+    expect(json.counts).toEqual({ passed: 14, failed: 0, notRun: 0 });
     expect(json.environment).toMatchObject({ commit: 'abc1234', dirty: false, node: process.versions.node });
-    expect(readFileSync(join(folder, 'latest.svg'), 'utf8')).toContain('13 passed · 0 failed · 0 not run');
+    expect(readFileSync(join(folder, 'latest.svg'), 'utf8')).toContain('14 passed · 0 failed · 0 not run');
   }, 60_000);
 
   it('states uncommitted changes when told, and the version when there\'s no commit', async () => {

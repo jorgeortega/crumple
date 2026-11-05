@@ -226,7 +226,7 @@ Replays go in `npm run check`, because they need no key or network beyond localh
 3. The Claude adapter: request shape, retries, errors.
 4. The money: prices, per-call cost and the cap.
 5. Record and replay, with a recording of the scripted fake.
-6. **Yours:** one command for the first real recording (decision 3).
+6. **Yours:** one command for the first real recording (decision 3). `SPEC-evals.md` replaced this with `npm run eval:live`, which does more with one run, and `npm run record` is gone.
 
 **Task 27**
 7. Totals against the real recording (C12).

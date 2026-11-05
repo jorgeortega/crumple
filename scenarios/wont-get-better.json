@@ -1,0 +1,13 @@
+{
+  "id": "wont-get-better",
+  "kind": "behaviour",
+  "key": "read",
+  "fault": "status=400",
+  "task": "What's the email address of customer cus_1?",
+  "expect": {
+    "toolCalls": {
+      "atLeast": 1,
+      "atMost": 3
+    }
+  }
+}

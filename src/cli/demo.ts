@@ -47,7 +47,8 @@ function comparison(plain: PaymentRun, crumple: PaymentRun): string[] {
 
 function claimsLine(claims: readonly ClaimOutcome[]): string {
   const howMany = (state: ClaimOutcome['state']): number => claims.filter((claim) => claim.state === state).length;
-  return `Of ${String(claims.length)} claims, ${String(howMany('pass'))} passed, ${String(howMany('partly'))} were partly checked and ${String(howMany('not_run'))} weren't checked by this run.`;
+  const [partly, unchecked] = [howMany('partly'), howMany('not_run')];
+  return `Of ${String(claims.length)} claims, ${String(howMany('pass'))} passed, ${String(partly)} ${partly === 1 ? 'was' : 'were'} partly checked and ${String(unchecked)} ${unchecked === 1 ? 'wasn\'t' : 'weren\'t'} checked by this run.`;
 }
 
 export interface DemoServers {

@@ -51,7 +51,7 @@ Only our own sentences and escaped tool names reach a report. Descriptions and e
 | fail | It ran, and didn't hold | Yes |
 | not run | It didn't run, with the reason | **Never** |
 
-A claim with a part checked elsewhere says "partly checked". The badge says `13 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
+A claim with a part checked elsewhere says "partly checked", such as C10, which needs a real model. The badge says `14 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
 
 ## Why a hand-written client
 
@@ -118,7 +118,7 @@ All real, and good answers to "tell me about a bug":
 
 - **From outside, it can't say whether your server survives a failing API.** That's the most interesting question.
 - **It proves Crumple on one laptop,** not under production load or on Cloudflare.
-- **C2's part with a real model waits for `evals`.** Here it only shows the permission held.
+- **C10's part with a real model waits for a live eval.** C2 doesn't: a scripted agent that obeys the injected text is the worst case, and it's still refused. See [evals.md](evals.md).
 - **The token estimate is rough:** characters divided by 4. Task 27 compares it with a real run.
 - **`--parallel` is at most 50 calls,** which is a burst and not a load test.
 - **Tools using `x-mcp-header` can't be named yet.** The report says so rather than sending a wrong request.

@@ -1,0 +1,14 @@
+{
+  "id": "new-customer",
+  "kind": "behaviour",
+  "key": "all",
+  "task": "Add a customer named Test Person with the email test@example.com.",
+  "expect": {
+    "customersCreated": [
+      {
+        "name": "Test Person",
+        "email": "test@example.com"
+      }
+    ]
+  }
+}

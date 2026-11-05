@@ -189,7 +189,7 @@ The only finding that could change the design.
 - [x] **OWNER:** approve `SPEC-agent-runner.md` first, after Claude reads the current Claude API reference (2026-11-05, "Approve all three")
 - [x] A minimal loop over MCP with a Claude adapter on plain `fetch`; replay needs no key or network (2026-11-05)
 - [x] Prices, per-call cost and a spending cap that holds against a model that always spends its whole allowance
-- [ ] **OWNER:** run the first real recording, capped at $0.10: `ANTHROPIC_API_KEY=... npm run record -- first-payment`
+- [ ] **OWNER:** run the first real recording. `npm run eval:live`, under Task 28, does this and more
 - Verify: a recorded run replays identically. Done with a scripted model, and the real recording is the true test
 - Depends on: Checkpoint C. Files: `src/agent-runner/*`, `scenarios/recordings/*`
 
@@ -201,10 +201,12 @@ The only finding that could change the design.
 - Depends on: 26, 9. Files: `src/agent-runner/usage.ts`, `prices.ts`, `tracing.ts`, tests
 
 ### Task 28: Build `evals` and the gate (M) — C2, C10, C13
-- [ ] **OWNER:** approve `SPEC-evals.md` first
-- [ ] Scenarios for right tool, right arguments, recovery after failure, and injected instructions. A stock model can't attempt a tool it can't see (`docs/clients.md`), so C2 needs both a key without the grant and one with it
-- [ ] A deliberately broken tool description fails the gate. `eval --live` stops at `--max-usd`
-- [ ] **OWNER:** okay the first live recording run, under $1
+- [x] **OWNER:** approve `SPEC-evals.md` first (2026-11-05, "Approve all")
+- [x] Fifteen scenarios for right tool, right arguments, recovery after failure, and injected instructions, tested with an oracle, a model that does nothing and plausible wrong answers (2026-11-05)
+- [x] C2 rests on a scripted agent that obeys the injected text, and C13 on replay. Both pass with nothing spent
+- [x] `eval --live` stops at `--max-usd`, and a run that couldn't be graded is never counted as a failure
+- [ ] **OWNER:** run the first live evals, whenever you choose, at about 4 cents by my estimate: `npm run eval:live` with `ANTHROPIC_API_KEY` set. It finishes Task 26's check, C10, C12 and the recordings
+- [ ] Bring the owner the failures and a few transcripts from that run: would they have scored any differently?
 - Depends on: 27, 7. Files: `src/evals/*`, `scenarios/*`
 
 ### Task 29: Add the Workers adapter and D1 storage (M)
@@ -226,7 +228,7 @@ The only finding that could change the design.
 
 ### Checkpoint D
 - [ ] All 18 claims pass in `npm run prove`
-- [ ] Claude writes `docs/learn/prove.md` (done 2026-11-05), `agent-runner.md`, `evals.md`, `hosted-demo.md`
+- [ ] Claude writes `docs/learn/prove.md`, `agent-runner.md`, `evals.md` (done 2026-11-05), `hosted-demo.md`
 - [ ] **OWNER:** read them and do four teach-backs
 
 ## Phase 4: Launch (days 16-20)
