@@ -1,16 +1,16 @@
 {
   "counts": {
-    "passed": 12,
+    "passed": 13,
     "failed": 0,
     "notRun": 0
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-05T20:16:55.122Z",
-  "durationMs": 4318,
+  "startedAt": "2026-11-05T21:24:00.004Z",
+  "durationMs": 4304,
   "environment": {
     "version": "0.1.0",
-    "commit": "8b82f1b",
+    "commit": "015d083",
     "dirty": false,
     "os": "darwin arm64",
     "cpu": "Apple M5",
@@ -70,10 +70,10 @@
       "title": "The API hangs, before and partway through its answer",
       "claim": "C6",
       "state": "pass",
-      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 804 ms, stall-body 804 ms.",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 804 ms, stall-body 803 ms.",
       "measured": {
         "hang_ms": 804,
-        "stall_body_ms": 804,
+        "stall_body_ms": 803,
         "deadline_ms": 800
       }
     },
@@ -110,7 +110,7 @@
         "flood_succeeded": 3,
         "flood_refused": 17,
         "other_succeeded": 3,
-        "other_slowest_ms": 226
+        "other_slowest_ms": 221
       }
     },
     {
@@ -141,6 +141,16 @@
       "measured": {
         "estimated_tokens": 467,
         "tools": 4
+      }
+    },
+    {
+      "id": "trace-joined",
+      "title": "One tool call, from the real agent loop to the API",
+      "claim": "C11",
+      "state": "pass",
+      "detail": "One trace, from the agent's call to the API, with the caller, the decision and 1 attempt. It used the real agent loop with a scripted model, since joining a trace doesn't depend on what a model says.",
+      "measured": {
+        "attempts": 1
       }
     }
   ],
@@ -230,16 +240,17 @@
     {
       "id": "C11",
       "text": "Every call can be traced end to end",
-      "state": "not_run",
-      "checks": [],
-      "pending": "needs the agent runner (Task 27)"
+      "state": "pass",
+      "checks": [
+        "trace-joined"
+      ]
     },
     {
       "id": "C12",
       "text": "Each run reports its tokens and cost",
       "state": "not_run",
       "checks": [],
-      "pending": "needs the agent runner (Task 27)"
+      "pending": "needs a recording from a real model, which spends money (Task 27)"
     },
     {
       "id": "C13",
