@@ -1,5 +1,5 @@
 import { spawn, type ChildProcessWithoutNullStreams } from 'node:child_process';
-import { MAX_RESPONSE_BYTES, type Budget, type JsonRpcReply, type SendOptions, type Transport, type WireReply } from './client.js';
+import { MAX_RESPONSE_BYTES, type Budget, type JsonRpcReply, type SendOptions, type Transport, type WireReply } from '../mcp-client/client.js';
 
 // MCP over a local process: newline-delimited JSON on its stdin and stdout. Many servers run this
 // way, and they could never be given a URL. Nothing goes through a shell: the words someone typed

@@ -176,7 +176,7 @@ Exact versions get pinned when the repo is set up, using what's current then.
 
 - **Package:** TypeScript (strict), Node 22.13 or newer, published as `crumple-mcp`, with `crumple` as a second command name after install.
 - **Demo:** Cloudflare Workers via Wrangler 4, D1.
-- **Agent:** plain `fetch` to model APIs, with no provider SDKs. Default model: Claude Haiku 5.5, confirmed in `SPEC-agent-runner.md`.
+- **Agent:** plain `fetch` to model APIs, with no provider SDKs. Default model: Claude Haiku 5.5, confirmed in `SPEC-agent-runner.md` on 2026-11-05.
 - **Tests:** Vitest; `@cloudflare/vitest-pool-workers` for the demo; Python 3.11 with `uv` and the official `mcp` SDK for C14.
 
 ## Commands
@@ -225,6 +225,7 @@ crumple/
     mcp-surface/        the protocol layer
     store/              saved keys and audit events
     fault-api/          ships in the package, for demo and prove
+    mcp-client/         the small client prove and the agent share
     prove/              the checks and their reports
     agent-runner/       the loop and model adapters
     evals/              scoring and the regression gate

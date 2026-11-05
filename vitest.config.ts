@@ -15,7 +15,7 @@ export default defineConfig({
         'src/access-control/**': { branches: 95 },
         // C17's safety promise: the budget and the rule about what may be called.
         'src/prove/external.ts': { branches: 95 },
-        'src/prove/client.ts': { branches: 95 },
+        'src/mcp-client/**': { branches: 95 },
       },
     },
   },

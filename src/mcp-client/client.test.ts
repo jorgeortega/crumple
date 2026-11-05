@@ -21,6 +21,41 @@ async function open(options: RecordingOptions = {}, transportOptions: { max?: nu
   return { server, transport, session: opened.session };
 }
 
+describe('a call\'s _meta', () => {
+  const bodies: { params?: { _meta?: Record<string, unknown> } }[] = [];
+  const capturing: typeof fetch = (input, init) => {
+    if (typeof init?.body === 'string' && init.body !== '') bodies.push(JSON.parse(init.body) as (typeof bodies)[number]);
+    return fetch(input, init);
+  };
+  const meta = { traceparent: '00-4bf92f3577b34da6a3ce929d0e0e4736-00f067aa0ba902b7-01' };
+
+  async function lastCall(options: RecordingOptions) {
+    bodies.length = 0;
+    const server = await recordingServer(options);
+    servers.push(server);
+    const opened = await openSession(createHttpTransport({ url: server.url, timeoutMs: 2_000, budget: createBudget(), fetch: capturing }));
+    if (!opened.ok) throw new Error(opened.reason);
+    await opened.session.callTool('getThing', { id: '1' }, {}, meta);
+    return bodies.at(-1)?.params?._meta;
+  }
+
+  it('sits beside what 2026-07-28 needs there, and replaces none of it', async () => {
+    expect(await lastCall({})).toMatchObject({ ...meta, 'io.modelcontextprotocol/protocolVersion': MODERN_VERSION });
+  });
+
+  it('goes out on the older protocol too', async () => {
+    expect(await lastCall({ era: 'legacy' })).toEqual(meta);
+  });
+
+  it('says who\'s calling when told', async () => {
+    const server = await recordingServer({});
+    servers.push(server);
+    const opened = await openSession(createHttpTransport({ url: server.url, timeoutMs: 2_000, budget: createBudget(), userAgent: 'crumple-mcp-agent' }), { clientName: 'crumple-mcp-agent' });
+    expect(opened.ok).toBe(true);
+    expect(server.calls[0]?.headers['user-agent']).toBe('crumple-mcp-agent');
+  });
+});
+
 describe('the two eras of MCP', () => {
   it('speaks 2026-07-28 with no handshake, and reuses the first answer', async () => {
     const { server, session } = await open();

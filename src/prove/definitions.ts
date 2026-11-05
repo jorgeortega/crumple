@@ -1,4 +1,4 @@
-import type { ListedTool } from './client.js';
+import type { ListedTool } from '../mcp-client/client.js';
 import type { ToolSummary } from './report.js';
 import { safeName } from './report.js';
 

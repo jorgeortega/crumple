@@ -1,5 +1,5 @@
 import { MALICIOUS_TEXT } from '../fault-api/index.js';
-import { callResult, createBudget, createHttpTransport, openSession, type Budget, type CallResult, type Session } from './client.js';
+import { callResult, createBudget, createHttpTransport, openSession, type Budget, type CallResult, type Session } from '../mcp-client/client.js';
 import { fail, pass, type Check, type CheckResult } from './checks.js';
 import { DEFAULT_MAX_REQUESTS, proveServer, type ExternalResult } from './external.js';
 

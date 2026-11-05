@@ -1,4 +1,4 @@
-import { callResult, createBudget, createHttpTransport, openSession, type Session } from './client.js';
+import { callResult, createBudget, createHttpTransport, openSession, type Session } from '../mcp-client/client.js';
 import { CREDIT_MARKDOWN, type Environment } from './report.js';
 import { structured, type StartTarget, type Target, type TargetSetup } from './self-checks.js';
 

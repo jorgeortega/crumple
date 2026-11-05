@@ -1,7 +1,8 @@
 import type { ReadableStreamDefaultReader } from 'node:stream/web';
 
-// A small MCP client, written by hand on purpose. The official one hides what prove is checking,
-// such as a 401 or a 403, and has no way to send something deliberately wrong.
+// A small MCP client, written by hand on purpose, shared by prove and agent-runner. The official one
+// hides what prove is checking, such as a 401 or a 403, and has no way to send something deliberately
+// wrong. It would also be a third runtime dependency.
 //
 // Whatever is on the other end isn't trusted: it can hang, send forever or redirect to take the
 // token elsewhere. So every read is capped and timed, and a redirect is reported, never followed.
@@ -10,7 +11,6 @@ export const MODERN_VERSION = '2026-07-28';
 export const LEGACY_VERSION = '2025-11-25';
 export const MAX_RESPONSE_BYTES = 1024 * 1024;
 export const USER_AGENT = 'crumple-mcp-prove';
-const CLIENT_INFO = { name: USER_AGENT, version: '1' };
 
 export interface JsonRpcReply {
   id?: unknown;
@@ -74,6 +74,8 @@ export interface HttpTransportOptions {
   fetch?: typeof fetch;
   timeoutMs: number;
   budget: Budget;
+  /** Says who's calling, so a server's logs can tell prove from the agent. */
+  userAgent?: string;
 }
 
 const encodeName = (name: string): string =>
@@ -105,7 +107,7 @@ function findInEvents(text: string, id: unknown): JsonRpcReply | undefined {
 }
 
 export function createHttpTransport(options: HttpTransportOptions): HttpTransport {
-  const { url, token, timeoutMs, budget, fetch: doFetch = (input, init) => fetch(input, init) } = options;
+  const { url, token, timeoutMs, budget, userAgent = USER_AGENT, fetch: doFetch = (input, init) => fetch(input, init) } = options;
 
   async function post(body: string, id: unknown, method: string | undefined, name: string | undefined, sendOptions: SendOptions, httpMethod = 'POST'): Promise<WireReply> {
     if (!budget.take()) return { kind: 'budget', ms: 0 };
@@ -125,7 +127,7 @@ export function createHttpTransport(options: HttpTransportOptions): HttpTranspor
         redirect: 'manual',
         signal: abort.signal,
         headers: {
-          'user-agent': USER_AGENT,
+          'user-agent': userAgent,
           'content-type': 'application/json',
           accept: 'application/json, text/event-stream',
           ...(protocol ? { 'mcp-protocol-version': protocol } : {}),
@@ -219,7 +221,8 @@ export interface Session {
   readonly sendOptions: SendOptions;
   request(method: string, params?: Record<string, unknown>, options?: SendOptions): Promise<WireReply>;
   listTools(maxPages: number): Promise<ToolList>;
-  callTool(name: string, args: Record<string, unknown>, options?: SendOptions): Promise<WireReply>;
+  /** meta goes in the call's _meta, which is how a trace crosses from an agent to a server. */
+  callTool(name: string, args: Record<string, unknown>, options?: SendOptions, meta?: Record<string, unknown>): Promise<WireReply>;
   close(): Promise<void>;
 }
 
@@ -232,7 +235,8 @@ export type OpenResult =
  * Tries 2026-07-28 first, because it needs no handshake, and falls back to initialize the way the
  * spec describes. The fallback is what most servers will need for a while.
  */
-export async function openSession(transport: Transport, options: { probeTimeoutMs?: number } = {}): Promise<OpenResult> {
+export async function openSession(transport: Transport, options: { probeTimeoutMs?: number; clientName?: string } = {}): Promise<OpenResult> {
+  const clientInfo = { name: options.clientName ?? USER_AGENT, version: '1' };
   let nextId = 1;
   const takeId = (): number => {
     const id = nextId;
@@ -242,7 +246,7 @@ export async function openSession(transport: Transport, options: { probeTimeoutM
 
   const modernMeta = {
     'io.modelcontextprotocol/protocolVersion': MODERN_VERSION,
-    'io.modelcontextprotocol/clientInfo': CLIENT_INFO,
+    'io.modelcontextprotocol/clientInfo': clientInfo,
     'io.modelcontextprotocol/clientCapabilities': {},
   };
 
@@ -250,7 +254,7 @@ export async function openSession(transport: Transport, options: { probeTimeoutM
     jsonrpc: '2.0',
     id: takeId(),
     method,
-    params: protocol === MODERN_VERSION ? { ...params, _meta: modernMeta } : params,
+    params: protocol === MODERN_VERSION ? { ...params, _meta: { ...modernMeta, ...(params._meta as Record<string, unknown> | undefined) } } : params,
   });
 
   function session(protocol: string, sessionId: string | undefined, firstPage: WireReply | undefined): Session {
@@ -264,7 +268,7 @@ export async function openSession(transport: Transport, options: { probeTimeoutM
       transport,
       sendOptions,
       request,
-      callTool: (name, args, options = {}) => request('tools/call', { name, arguments: args }, options),
+      callTool: (name, args, options = {}, meta) => request('tools/call', { name, arguments: args, ...(meta ? { _meta: meta } : {}) }, options),
       close: () => transport.close(sendOptions),
       async listTools(maxPages) {
         const tools: ListedTool[] = [];
@@ -306,7 +310,7 @@ export async function openSession(transport: Transport, options: { probeTimeoutM
   }
 
   const init = await transport.send(
-    message(LEGACY_VERSION, 'initialize', { protocolVersion: LEGACY_VERSION, capabilities: {}, clientInfo: CLIENT_INFO }),
+    message(LEGACY_VERSION, 'initialize', { protocolVersion: LEGACY_VERSION, capabilities: {}, clientInfo }),
     {},
   );
   const initStopped = refusal(init);
@@ -324,14 +328,15 @@ export async function openSession(transport: Transport, options: { probeTimeoutM
 /** What a tool call came to, in the terms a check cares about. */
 export type CallResult =
   | { kind: 'result'; text: string; isError: boolean; ms: number }
-  | { kind: 'protocol_error'; code: unknown; ms: number }
+  /** message comes from the server, so it can go to a model, and it never goes in a report. */
+  | { kind: 'protocol_error'; code: unknown; message: unknown; ms: number }
   | { kind: 'http_error'; status: number; ms: number }
   | { kind: 'no_answer'; why: Exclude<WireReply['kind'], 'answered'>; ms: number };
 
 export function callResult(reply: WireReply): CallResult {
   if (reply.kind !== 'answered') return { kind: 'no_answer', why: reply.kind, ms: reply.ms };
   const { message, status, ms } = reply;
-  if (message?.error) return { kind: 'protocol_error', code: message.error.code, ms };
+  if (message?.error) return { kind: 'protocol_error', code: message.error.code, message: message.error.message, ms };
   if (status < 200 || status >= 300 || !message?.result) return { kind: 'http_error', status, ms };
   const content = Array.isArray(message.result.content) ? (message.result.content as { text?: unknown }[]) : [];
   return {

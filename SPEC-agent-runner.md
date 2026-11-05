@@ -1,6 +1,6 @@
 # Spec: `agent-runner`
 
-Status: draft for the owner's approval, 2026-11-05. Module on [the map](CAPABILITY-MAP.md), depending on `telemetry` and speaking to servers over MCP only. Covers Tasks 26 and 27.
+Status: approved by the owner on 2026-11-05 ("Approve all three"), including the three decisions at the end, each with its recommended choice. Module on [the map](CAPABILITY-MAP.md), depending on `telemetry` and `mcp-client`. Covers Tasks 26 and 27.
 
 ## What it is
 
@@ -160,7 +160,7 @@ replay:  loop --> replayer                                    (no key, no networ
 
 That first row gives C13 a free gate: a broken tool description shows up as `stale`. A live run is what shows how a model reacts. `evals` decides how to use both.
 
-**How byte for byte can work,** given that Crumple makes up a fresh idempotency key each time and a model might quote one back: a recording runs against a Crumple with a seeded `newKey`. The executor already accepts one, and `mcp-surface` needs a small change to pass it along, in slice 5. Same seed, same keys, same bytes. `fault-api` numbers its records in order, and its clock can be injected too.
+**How byte for byte can work,** given that Crumple makes up a fresh idempotency key each time and a model might quote one back: a recording runs against a Crumple with a seeded `newKey`. The executor already accepts one, and `mcp-surface` already passes its upstream options along, so only the code starting that Crumple changes. Same seed, same keys, same bytes. `fault-api` numbers its records in order, and its clock can be injected too.
 
 **A recording** is one readable JSON file in `scenarios/recordings/`: the date, model, API version, commit, and each request and raw response. Keys are never in it, because they travel in headers and those aren't recorded. Only `fault-api`'s fake data appears in it, and the secret scan covers these files.
 
@@ -242,7 +242,9 @@ Replays go in `npm run check`, because they need no key or network beyond localh
 - **One run on one model proves little.** That's still true with this. `evals` has to run scenarios more than once, and say how many.
 - **Prices change.** Costs are as of the date in the table, and the test only makes sure someone looks.
 
-## Decisions for the owner
+## Decided
+
+The owner chose the recommended option in all three: Haiku 5.5 as the default, a shared `mcp-client` module (map revision 4), and a first real recording capped at $0.10, run by the owner once slices 1 to 5 are done.
 
 **1. The default model.** The main spec says Claude Haiku 5.5, "confirmed in this spec". Anthropic's reference makes Opus 5.5 its general default, so I'm asking rather than assuming. Anyone can choose another model per run.
 

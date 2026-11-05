@@ -1,6 +1,6 @@
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
-import { createBudget, openSession } from './client.js';
+import { createBudget, openSession } from '../mcp-client/client.js';
 import { proveServer, type NamedCall } from './external.js';
 import { createStdioTransport } from './stdio.js';
 

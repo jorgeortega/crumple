@@ -1,7 +1,7 @@
 import { afterEach, describe, expect, it } from 'vitest';
 import { recordingServer, type FakeTool, type RecordingOptions, type RecordingServer, SOME_TOOLS } from '../../tests/helpers/recording-server.js';
 import type { CheckOutcome } from './checks.js';
-import { createBudget, createHttpTransport } from './client.js';
+import { createBudget, createHttpTransport } from '../mcp-client/client.js';
 import { definitionProblems, estimateTokens, summariseTools } from './definitions.js';
 import { DEFAULT_MAX_REQUESTS, proveServer, OUT_OF_REACH, type NamedCall } from './external.js';
 import { renderJson, renderMarkdown, renderTerminal, type ProveReport } from './report.js';

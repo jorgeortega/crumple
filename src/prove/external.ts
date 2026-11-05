@@ -1,4 +1,4 @@
-import { callResult, type Budget, type CallResult, type HttpTransport, type ListedTool, type OpenResult, type Session, type Transport, type WireReply, openSession } from './client.js';
+import { callResult, type Budget, type CallResult, type HttpTransport, type ListedTool, type OpenResult, type Session, type Transport, type WireReply, openSession } from '../mcp-client/client.js';
 import { fail, notRun, pass, runChecks, type Check, type CheckOutcome, type CheckResult } from './checks.js';
 import { definitionProblems, summariseTools } from './definitions.js';
 import { safeName, type ToolSummary } from './report.js';

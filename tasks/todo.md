@@ -186,7 +186,7 @@ The only finding that could change the design.
 - Depends on: 22. Files: `src/prove/load.ts`
 
 ### Task 26: Build the agent loop with record and replay (M)
-- [ ] **OWNER:** approve `SPEC-agent-runner.md` first, after Claude reads the current Claude API reference
+- [x] **OWNER:** approve `SPEC-agent-runner.md` first, after Claude reads the current Claude API reference (2026-11-05, "Approve all three")
 - [ ] A minimal loop over MCP with a Claude adapter on plain `fetch`; replay needs no key or network
 - Verify: a recorded run replays identically
 - Depends on: Checkpoint C. Files: `src/agent-runner/*`, `scenarios/recordings/*`

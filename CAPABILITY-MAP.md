@@ -1,9 +1,11 @@
 # Capability Map: Crumple
 
-Status: revision 3, approved by the owner on 2026-11-04. Revision 1 was approved on
+Status: revision 4, approved by the owner on 2026-11-05. Revision 1 was approved on
 2026-11-03. Revision 2 changed it because the owner set the goal as a popular GitHub
 repo and an open source npm package. Revision 3 adds `store` ("Yes, add store"), which
-the plan needed in Task 19 and the map had left out.
+the plan needed in Task 19 and the map had left out. Revision 4 adds `mcp-client`
+("Approve all three", on `SPEC-agent-runner.md`), so `prove` and `agent-runner` can share
+one client without depending on each other.
 
 This is the index of what exists. Each module gets its own spec,
 `SPEC-<module-id>.md`, next to this file. Module ids are stable: they don't get
@@ -33,8 +35,9 @@ renamed. Arrows point one way, and there are no cycles.
 | `mcp-surface` | Turns OpenAPI into tools and serves the MCP endpoint | `executor`, `access-control`, `telemetry` |
 | `store` | Saved keys and audit events, behind the interfaces `access-control` and `telemetry` define: SQLite on Node, D1 on the demo | `access-control`, `telemetry` |
 | `cli` | The installable package: config, `demo`, `serve`, and the wiring for the other commands | `mcp-surface`, `fault-api`, `store` |
-| `prove` | The checks: run against Crumple or any MCP server, with results to share, including load runs | `fault-api` (speaks to servers over MCP only) |
-| `agent-runner` | Minimal agent loop, model adapters, record and replay, tokens and cost | `telemetry` (speaks to servers over MCP only) |
+| `mcp-client` | A small hand-written MCP client: both protocol eras, capped and timed reads, no redirects followed | none |
+| `prove` | The checks: run against Crumple or any MCP server, with results to share, including load runs | `fault-api`, `mcp-client` (speaks to servers over MCP only) |
+| `agent-runner` | Minimal agent loop, model adapters, record and replay, tokens and cost | `telemetry`, `mcp-client` (speaks to servers over MCP only) |
 | `evals` | Scored agent scenarios, run with `eval` | `agent-runner`, `fault-api` |
 | `hosted-demo` | Public deployment, abuse limits, the trace and results page | `mcp-surface`, `telemetry`, `fault-api`, `store` |
 
@@ -46,7 +49,7 @@ renamed. Arrows point one way, and there are no cycles.
 2. `executor`, `access-control`
 3. `mcp-surface`
 4. `store`, `cli`
-5. `prove`, `agent-runner`
+5. `mcp-client`, `prove`, `agent-runner`
 6. `evals`, `hosted-demo`
 
 `access-control` comes before `mcp-surface` on purpose: nothing is ever exposed

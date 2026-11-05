@@ -99,12 +99,14 @@ function sourceFiles(folder: string): SourceFile[] {
 const MAP = readMap(readFileSync(join(ROOT, 'CAPABILITY-MAP.md'), 'utf8'));
 
 describe('the capability map', () => {
-  it('lists all eleven modules with their dependencies', () => {
-    expect(Object.keys(MAP)).toHaveLength(11);
+  it('lists all twelve modules with their dependencies', () => {
+    expect(Object.keys(MAP)).toHaveLength(12);
     expect(MAP['store']).toEqual(['access-control', 'telemetry']);
     expect(MAP['executor']).toEqual(['telemetry']);
     expect(MAP['fault-api']).toEqual([]);
-    expect(MAP['prove']).toEqual(['fault-api']);
+    expect(MAP['prove']).toEqual(['fault-api', 'mcp-client']);
+    expect(MAP['agent-runner']).toEqual(['telemetry', 'mcp-client']);
+    expect(MAP['mcp-client']).toEqual([]);
     expect(MAP['mcp-surface']).toEqual(['executor', 'access-control', 'telemetry']);
   });
 
@@ -123,6 +125,9 @@ describe('findViolations', () => {
     ['access control importing the executor', 'src/access-control/policy.ts', "import type { x } from '../executor/call.js';"],
     ['the agent reaching into the server', 'src/agent-runner/loop.ts', "const m = await import('../mcp-surface/server.js');"],
     ['prove reaching into the server', 'src/prove/run.ts', "import { x } from '../mcp-surface/server.js';"],
+    ['the agent reaching into prove', 'src/agent-runner/loop.ts', "import { x } from '../prove/report.js';"],
+    ['prove reaching into the agent', 'src/prove/run.ts', "import { x } from '../agent-runner/loop.js';"],
+    ['the public demo reaching a paid model', 'workers/index.ts', "import { x } from '../src/agent-runner/claude.js';"],
     ['telemetry using a Node-only API', 'src/telemetry/spans.ts', "import { x } from 'node:fs';"],
     ['the protocol layer using a Node-only API', 'src/mcp-surface/server.ts', "import { x } from 'crypto';"],
     ['a folder the map doesn\'t know', 'src/helpers/util.ts', 'export const a = 1;'],
@@ -135,6 +140,7 @@ describe('findViolations', () => {
     ['a module importing itself', 'src/executor/call.ts', "import { x } from './errors.js';"],
     ['the protocol layer using its library', 'src/mcp-surface/server.ts', "import { x } from '@modelcontextprotocol/server';"],
     ['prove using an MCP client', 'src/prove/run.ts', "import { x } from '@modelcontextprotocol/client';"],
+    ['the agent using the shared client', 'src/agent-runner/loop.ts', "import { x } from '../mcp-client/client.js';"],
     ['the CLI using Node', 'src/cli/main.ts', "import { x } from 'node:fs';"],
     ['the CLI wiring the commands', 'src/cli/main.ts', "import { x } from '../prove/run.js';"],
     ['the Node adapter using the protocol layer', 'src/node.ts', "import { x } from './mcp-surface/server.js';"],

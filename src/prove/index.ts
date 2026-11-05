@@ -6,8 +6,8 @@ export { renderBadge, renderCheckRows, renderCounts, renderJson, renderMarkdown,
 export type { Environment, ProveReport, ToolCost, ToolSummary } from './report.js';
 export { proverChecks, SELF_CHECKS } from './self-checks.js';
 export type { Prover, StartTarget, Target, TargetSetup, UpstreamRequest } from './self-checks.js';
-export { callResult, createBudget, createHttpTransport, openSession } from './client.js';
-export type { CallResult } from './client.js';
+export { callResult, createBudget, createHttpTransport, openSession } from '../mcp-client/client.js';
+export type { CallResult } from '../mcp-client/client.js';
 export { DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer } from './external.js';
 export type { ExternalResult, NamedCall } from './external.js';
 export { createStdioTransport } from './stdio.js';

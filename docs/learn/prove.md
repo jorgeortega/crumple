@@ -126,7 +126,7 @@ All real, and good answers to "tell me about a bug":
 
 ## Where to look
 
-Start with [self-checks.ts](../../src/prove/self-checks.ts), which reads like the claims. [external.ts](../../src/prove/external.ts) holds the safety rule. [client.ts](../../src/prove/client.ts) is the hand-written client. [wrong-server.ts](../../src/cli/wrong-server.ts) is short and worth reading, because its comment lists mistakes a first version could easily make.
+Start with [self-checks.ts](../../src/prove/self-checks.ts), which reads like the claims. [external.ts](../../src/prove/external.ts) holds the safety rule. [client.ts](../../src/mcp-client/client.ts) is the hand-written client. [wrong-server.ts](../../src/cli/wrong-server.ts) is short and worth reading, because its comment lists mistakes a first version could easily make.
 
 ## Teach-back
 
