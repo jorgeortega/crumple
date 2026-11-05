@@ -1,0 +1,262 @@
+{
+  "counts": {
+    "passed": 10,
+    "failed": 0,
+    "notRun": 0
+  },
+  "kind": "self",
+  "target": "self",
+  "startedAt": "2026-11-05T14:43:03.018Z",
+  "durationMs": 4289,
+  "environment": {
+    "version": "0.1.0",
+    "commit": "a9abe00",
+    "dirty": false,
+    "os": "darwin arm64",
+    "cpu": "Apple M5",
+    "memoryGb": 16,
+    "node": "26.10.0"
+  },
+  "checks": [
+    {
+      "id": "denied-by-default",
+      "title": "No key, a wrong key and a key without the grant",
+      "claim": "C1",
+      "state": "pass",
+      "detail": "All three refused, and the API received no requests. The same call with a good key went through.",
+      "measured": {
+        "upstream_requests": 0
+      }
+    },
+    {
+      "id": "permission-holds",
+      "title": "A record says to delete, and a read-only key tries it directly",
+      "claim": "C2",
+      "state": "pass",
+      "detail": "Refused, nothing deleted, and the audit log has the attempt.",
+      "measured": {
+        "effects": 0
+      }
+    },
+    {
+      "id": "token-stays-here",
+      "title": "What reaches the API on a normal call",
+      "claim": "C3",
+      "state": "pass",
+      "detail": "The agent's key appears nowhere in what arrived, and the stored credential did arrive.",
+      "measured": {
+        "upstream_requests": 1
+      }
+    },
+    {
+      "id": "credential-stays-hidden",
+      "title": "The API repeats the credential back",
+      "claim": "C4",
+      "state": "pass",
+      "detail": "The API repeated it, and it's absent from the tool's output, spans, audit events and logs."
+    },
+    {
+      "id": "one-effect",
+      "title": "A payment applies, then its response is lost",
+      "claim": "C5",
+      "state": "pass",
+      "detail": "One effect when a retry recovered it, and one when every response was lost and the caller retried with the key it was given.",
+      "measured": {
+        "effects": 1
+      }
+    },
+    {
+      "id": "deadline-holds",
+      "title": "The API hangs, before and partway through its answer",
+      "claim": "C6",
+      "state": "pass",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 805 ms, stall-body 804 ms.",
+      "measured": {
+        "hang_ms": 805,
+        "stall_body_ms": 804,
+        "deadline_ms": 800
+      }
+    },
+    {
+      "id": "right-retries",
+      "title": "A 400, a 503, and a 503 with Retry-After",
+      "claim": "C7",
+      "state": "pass",
+      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1002 ms.",
+      "measured": {
+        "attempts_after_400": 1,
+        "attempts_after_503": 3,
+        "waited_ms": 1002
+      }
+    },
+    {
+      "id": "breaker-opens",
+      "title": "The API keeps failing, then recovers",
+      "claim": "C8",
+      "state": "pass",
+      "detail": "After 3 failures, a call failed fast with no request reaching the API, and calls worked again by themselves after 400 ms.",
+      "measured": {
+        "upstream_requests_while_open": 0
+      }
+    },
+    {
+      "id": "noisy-caller",
+      "title": "One caller floods a slow API, while another keeps working",
+      "claim": "C9",
+      "state": "pass",
+      "detail": "Of 20 flooding calls, 3 went through and 17 were refused with overloaded. The other caller got all 3 through.",
+      "measured": {
+        "flood": 20,
+        "flood_succeeded": 3,
+        "flood_refused": 17,
+        "other_succeeded": 3,
+        "other_slowest_ms": 229
+      }
+    },
+    {
+      "id": "errors-say-what-next",
+      "title": "Each kind of failure, read as an agent would",
+      "claim": "C10",
+      "state": "pass",
+      "detail": "Each error has a code, a message and advice on retrying: rejected (no), unavailable (later), rate_limited (later), invalid_response (no), timeout (later)."
+    }
+  ],
+  "claims": [
+    {
+      "id": "C1",
+      "text": "Access is denied by default",
+      "state": "pass",
+      "checks": [
+        "denied-by-default"
+      ]
+    },
+    {
+      "id": "C2",
+      "text": "The model can't talk its way past a permission",
+      "state": "partly",
+      "checks": [
+        "permission-holds"
+      ],
+      "pending": "the part with a real model needs evals (Task 28)"
+    },
+    {
+      "id": "C3",
+      "text": "The agent's token never reaches the upstream API",
+      "state": "pass",
+      "checks": [
+        "token-stays-here"
+      ]
+    },
+    {
+      "id": "C4",
+      "text": "The stored credential never leaks",
+      "state": "pass",
+      "checks": [
+        "credential-stays-hidden"
+      ]
+    },
+    {
+      "id": "C5",
+      "text": "A write is never applied twice",
+      "state": "pass",
+      "checks": [
+        "one-effect"
+      ]
+    },
+    {
+      "id": "C6",
+      "text": "No call outlives its deadline",
+      "state": "pass",
+      "checks": [
+        "deadline-holds"
+      ]
+    },
+    {
+      "id": "C7",
+      "text": "Only temporary failures are retried",
+      "state": "pass",
+      "checks": [
+        "right-retries"
+      ]
+    },
+    {
+      "id": "C8",
+      "text": "A failing upstream stops being hit",
+      "state": "pass",
+      "checks": [
+        "breaker-opens"
+      ]
+    },
+    {
+      "id": "C9",
+      "text": "One noisy caller can't starve another",
+      "state": "pass",
+      "checks": [
+        "noisy-caller"
+      ]
+    },
+    {
+      "id": "C10",
+      "text": "Failures tell the agent what to do next",
+      "state": "partly",
+      "checks": [
+        "errors-say-what-next"
+      ],
+      "pending": "the part where an agent recovers needs evals (Task 28)"
+    },
+    {
+      "id": "C11",
+      "text": "Every call can be traced end to end",
+      "state": "not_run",
+      "checks": [],
+      "pending": "needs the agent runner (Task 27)"
+    },
+    {
+      "id": "C12",
+      "text": "Each run reports its tokens and cost",
+      "state": "not_run",
+      "checks": [],
+      "pending": "needs the agent runner (Task 27)"
+    },
+    {
+      "id": "C13",
+      "text": "A behaviour regression gets caught",
+      "state": "not_run",
+      "checks": [],
+      "pending": "needs evals (Task 28)"
+    },
+    {
+      "id": "C14",
+      "text": "It speaks real MCP",
+      "state": "not_run",
+      "checks": [],
+      "pending": "needs Python, so it runs in npm run test:interop"
+    },
+    {
+      "id": "C15",
+      "text": "The public demo can't run up a bill or be abused",
+      "state": "not_run",
+      "checks": [],
+      "pending": "needs the hosted demo (Task 31)"
+    },
+    {
+      "id": "C16",
+      "text": "A stranger succeeds in 60 seconds",
+      "state": "not_run",
+      "checks": [],
+      "pending": "needs the demo command (Task 24)"
+    },
+    {
+      "id": "C17",
+      "text": "prove is safe to point at a real server",
+      "state": "not_run",
+      "checks": []
+    },
+    {
+      "id": "C18",
+      "text": "Tool definitions have a visible cost",
+      "state": "not_run",
+      "checks": []
+    }
+  ]
+}
