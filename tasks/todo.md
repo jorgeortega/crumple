@@ -162,15 +162,17 @@ The only finding that could change the design.
 ## Phase 3: Proof, agent, hosted demo (days 12-15)
 
 ### Task 22: Build `prove` against Crumple (M) — C1 to C9
-- [ ] **OWNER:** approve `SPEC-prove.md` first
-- [ ] Checks are data; `npm run prove` runs them all and writes `proof/latest.md` and `.json`, with commit, date and machine
+- [x] **OWNER:** approve `SPEC-prove.md` first (2026-11-05, "Approve all three")
+- [x] Checks are data; `npm run prove` runs them all and writes `proof/latest.md` and `.json`, with commit, date and machine (2026-11-05)
 - Verify: break a behaviour on purpose and confirm the report fails
 - Depends on: Checkpoint C. Files: `src/prove/*`, `proof/`
 
 ### Task 23: Point `prove` at any MCP server (M) — C17, C18
-- [ ] A request budget, no write calls unless named, and reports listing what didn't run
+- [ ] A request budget, no real tool called unless named (with `--parallel` only on a tool hinted read-only), and reports listing what didn't run
 - [ ] Estimated token cost for each tool definition, labelled as an estimate
 - [ ] A shareable Markdown report and badge
+- [ ] Local servers over stdio, the last slice and the first to cut
+- [ ] Run on the owner's two servers (approved with the spec), results in `docs/clients.md`
 - Verify: test against a recording server that counts every call
 - Depends on: 22. Files: `src/prove/external.ts`, `report.ts`, tests
 

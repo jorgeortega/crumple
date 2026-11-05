@@ -31,7 +31,7 @@ claim it makes is a check you can run.
 
 ```bash
 npx crumple-mcp demo                       # 60 seconds, no API key: break things, see what held
-npx crumple-mcp prove https://you/mcp      # how does MY MCP server hold up? (servers you own)
+npx crumple-mcp prove https://you/mcp      # what can be learned about MY MCP server from outside? (servers you own)
 npx crumple-mcp serve ./openapi.yaml       # put the crumple zone in front of my API
 ```
 
@@ -80,7 +80,7 @@ measured, never written by hand.
 | C14 | It speaks real MCP | The official Python SDK, a separate implementation, lists and calls tools | `mcp-surface` |
 | C15 | The public demo can't run up a bill or be abused | Rate limit and daily cap trigger, data resets, and no public path reaches a paid model call | `hosted-demo` |
 | C16 | A stranger succeeds in 60 seconds | On a clean machine with Node, `npx crumple-mcp demo` prints results with no account, key or config | `cli`, `prove` |
-| C17 | `prove` is safe to point at a real server | Against a test server, it never calls a tool that writes unless told to by name, and it stays within a stated request budget | `prove` |
+| C17 | `prove` is safe to point at a real server | Against a test server with lying hints, it calls no real tool unless told to by name, and it stays within a stated request budget | `prove` |
 | C18 | Tool definitions have a visible cost | `prove` reports the estimated tokens each tool's definition adds to every turn, labelled as an estimate | `prove` |
 
 **About tokens:** an MCP server never sees token counts, because they belong to
@@ -88,9 +88,12 @@ the model call. So C12 measures real tokens in our agent, and C18 is an estimate
 any server can get without an agent's help.
 
 **What `prove` can and can't check on someone else's server.** From outside it can
-test access control, protocol behaviour, error shape and tool definition cost. The
-failure claims (C5 to C9) need the server's upstream pointed at `fault-api`. The
-report states which checks ran and which didn't, and never scores what it didn't run.
+test access control, protocol behaviour, error shape, tool definition cost and tools
+the user names. It can't test the failure claims (C5 to C9), because those need control
+of the API behind the server, and an earlier version of this spec was wrong to suggest
+pointing a server at `fault-api` would do it ([SPEC-prove.md](SPEC-prove.md)). Those
+claims are proved on Crumple itself with `prove --self`. The report states which checks
+ran and which didn't, and never scores what it didn't run.
 
 ## Popularity and leads
 
@@ -182,7 +185,8 @@ For people using it:
 
 ```bash
 npx crumple-mcp demo                                # the 60-second tour
-npx crumple-mcp prove https://you/mcp               # checks a server you own
+npx crumple-mcp prove --self                        # all of Crumple's claims, with failures on purpose
+npx crumple-mcp prove https://you/mcp               # checks a server you own, from outside
 npx crumple-mcp serve ./openapi.yaml --upstream https://api.you.com
 npx crumple-mcp eval ./scenarios                    # replays recordings unless --live
 npx crumple-mcp eval ./scenarios --live --max-usd 1 # stops at the budget
@@ -325,7 +329,7 @@ or 5 to 8 hours across all ten.
 
 **Never:**
 - Send telemetry from the package, or add nagging prompts.
-- Let `prove` run a write tool without the user naming it, or present it as a tool
+- Let `prove` call any real tool without the user naming it, or present it as a tool
   for testing servers you don't own.
 - Commit secrets or real customer data, or use real credentials in the demo.
 - Let a public path trigger a paid model call.

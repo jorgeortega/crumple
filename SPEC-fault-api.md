@@ -144,6 +144,7 @@ abandoned.
 
 ## Decided
 
-**A fifth command, `npx crumple-mcp fault-api`.** The owner approved it on 2026-11-04. Someone running
-`prove` on their own server can only test C5 to C9 by pointing their server's upstream at `fault-api`,
-so they have to be able to run it. It listens on `127.0.0.1` only. Task 20 builds the command.
+**A fifth command, `npx crumple-mcp fault-api`.** The owner approved it on 2026-11-04. It listens on
+`127.0.0.1` only. Task 20 built it. It was approved partly so people could point their own server's
+upstream at it for C5 to C9, and `SPEC-prove.md` found that works for almost nobody, because their tools
+call their own API's paths. It stays, as the way to try `serve` with failures on command.

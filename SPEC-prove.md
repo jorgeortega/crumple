@@ -1,6 +1,6 @@
 # Spec: `prove`
 
-Status: draft for the owner's review, 2026-11-05. Module on [the map](CAPABILITY-MAP.md), depending on `fault-api` and speaking to servers over MCP only. Covers Tasks 22 and 23.
+Status: approved by the owner on 2026-11-05 ("Approve all three"), including the three decisions at the end, each with its recommended choice. Module on [the map](CAPABILITY-MAP.md), depending on `fault-api` and speaking to servers over MCP only. Covers Tasks 22 and 23.
 
 ## What it is
 
@@ -214,7 +214,7 @@ crumple-mcp prove  https://you/mcp
 ```
 
 - **Exit codes:** 0 when nothing failed, 1 when something did, 2 for a usage error. "Not run" doesn't fail, so it can go in CI.
-- **Files:** `--out` writes Markdown and JSON from the same data. `npm run prove` runs `--self` and writes `proof/latest.md` and `.json` with the commit, date, OS, CPU, memory and Node version. **It leaves out the machine's name,** because this goes in a public repo. A dirty working tree is stated, and the numbers come from the run, never by hand.
+- **Files:** `--out` writes Markdown and JSON from the same data. `npm run prove` runs `--self` and writes `proof/latest.md`, `.json` and `.svg` with the commit, date, OS, CPU, memory and Node version. **It leaves out the machine's name,** because this goes in a public repo. A dirty working tree is stated, and the numbers come from the run, never by hand.
 - **Query strings are stripped** from the URL in a report, because that's where people put keys.
 
 **The badge is a file, not a service.** `prove.svg` is written locally and says `3 passed · 1 failed · 7 not run`, never just "passing". A hosted badge would be a request to someone's server each time a README loads, which isn't what this package does. **The limit:** it's self-reported, so anyone could edit it. It's only as good as the JSON beside it and being able to run the command again.
@@ -254,16 +254,16 @@ Also worth doing, though it belongs to C14: run the official conformance suite a
 
 Task 22 is `--self`. Task 23 is `<url>`, the report's sharing parts and the real server runs.
 
-## Decisions for the owner
+## Decided
 
 **1. What should `prove <url>` promise?** The main spec's "point your server at `fault-api`" barely works, for the reasons above.
 
-- **A, recommended:** outside checks plus named tools, with `--parallel` as the honest part of "does it hold up?", and every failure check listed as not run. `SPEC.md`'s paragraph and README wording get corrected to match. What we give up: the punchy promise.
-- **B, also later if there's interest:** a *fault proxy*, sitting between someone's server and their real API and failing on command. It would properly answer the question for anyone's server. It's new work, and on writes it would be risky against a real API, so I'd save it until someone asks after launch.
+- **A, chosen:** outside checks plus named tools, with `--parallel` as the honest part of "does it hold up?", and every failure check listed as not run. `SPEC.md`'s paragraph and README wording get corrected to match. What we give up: the punchy promise.
+- **B, later if there's interest:** a *fault proxy*, sitting between someone's server and their real API and failing on command. It would properly answer the question for anyone's server. It's new work, and on writes it would be risky against a real API, so I'd save it until someone asks after launch.
 
-**2. Nothing is called unless named?** Stricter than C17 as written. **Recommended: yes,** and C17's wording gets updated. The alternative is calling tools marked read-only by default, which gives a richer first run and relies on the hint MCP's spec says not to trust.
+**2. Nothing is called unless named?** Stricter than C17 as written. **Chosen: yes,** and C17's wording is updated. The alternative is calling tools marked read-only by default, which gives a richer first run and relies on the hint MCP's spec says not to trust.
 
-**3. Local servers over stdio?** Many MCP servers run as a local process rather than a URL, and they couldn't use this as written: `npx crumple-mcp prove -- node server.js`. I haven't measured how many. It's about 60 more lines, with no dependency, and the HTTP-only checks would show as not run. **Recommended: yes, as the last slice of Task 23,** and the first thing to cut if time runs short. It widens who can try this at all, which is the point of the popularity goal.
+**3. Local servers over stdio?** Many MCP servers run as a local process rather than a URL, and they couldn't use this as written: `npx crumple-mcp prove -- node server.js`. I haven't measured how many. It's about 60 more lines, with no dependency, and the HTTP-only checks would show as not run. **Chosen: yes, as the last slice of Task 23,** and the first thing to cut if time runs short. It widens who can try this at all, which is the point of the popularity goal.
 
 ## Verified on 2026-11-05
 
