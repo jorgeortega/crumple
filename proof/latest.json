@@ -1,16 +1,16 @@
 {
   "counts": {
-    "passed": 13,
+    "passed": 14,
     "failed": 0,
     "notRun": 0
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-05T21:24:00.004Z",
-  "durationMs": 4304,
+  "startedAt": "2026-11-05T22:05:42.530Z",
+  "durationMs": 4333,
   "environment": {
     "version": "0.1.0",
-    "commit": "015d083",
+    "commit": "8ca05d3",
     "dirty": false,
     "os": "darwin arm64",
     "cpu": "Apple M5",
@@ -70,10 +70,10 @@
       "title": "The API hangs, before and partway through its answer",
       "claim": "C6",
       "state": "pass",
-      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 804 ms, stall-body 803 ms.",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 807 ms, stall-body 804 ms.",
       "measured": {
-        "hang_ms": 804,
-        "stall_body_ms": 803,
+        "hang_ms": 807,
+        "stall_body_ms": 804,
         "deadline_ms": 800
       }
     },
@@ -82,11 +82,11 @@
       "title": "A 400, a 503, and a 503 with Retry-After",
       "claim": "C7",
       "state": "pass",
-      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1002 ms.",
+      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1005 ms.",
       "measured": {
         "attempts_after_400": 1,
         "attempts_after_503": 3,
-        "waited_ms": 1002
+        "waited_ms": 1005
       }
     },
     {
@@ -110,7 +110,7 @@
         "flood_succeeded": 3,
         "flood_refused": 17,
         "other_succeeded": 3,
-        "other_slowest_ms": 221
+        "other_slowest_ms": 223
       }
     },
     {
@@ -152,6 +152,13 @@
       "measured": {
         "attempts": 1
       }
+    },
+    {
+      "id": "gate-notices-change",
+      "title": "Every tool's description is broken, and a recording is replayed",
+      "claim": "C13",
+      "state": "pass",
+      "detail": "Unchanged, the replay passes. With the descriptions broken, it reports them as changed and the gate fails. This catches any change, good or bad. Only a live run shows whether a real model does worse."
     }
   ],
   "claims": [
@@ -166,11 +173,10 @@
     {
       "id": "C2",
       "text": "The model can't talk its way past a permission",
-      "state": "partly",
+      "state": "pass",
       "checks": [
         "permission-holds"
-      ],
-      "pending": "the part with a real model needs evals (Task 28)"
+      ]
     },
     {
       "id": "C3",
@@ -235,7 +241,7 @@
       "checks": [
         "errors-say-what-next"
       ],
-      "pending": "the part where an agent recovers needs evals (Task 28)"
+      "pending": "a real model recovering needs a live eval, which spends money"
     },
     {
       "id": "C11",
@@ -255,9 +261,10 @@
     {
       "id": "C13",
       "text": "A behaviour regression gets caught",
-      "state": "not_run",
-      "checks": [],
-      "pending": "needs evals (Task 28)"
+      "state": "pass",
+      "checks": [
+        "gate-notices-change"
+      ]
     },
     {
       "id": "C14",
