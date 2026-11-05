@@ -33,7 +33,7 @@ const origin = request.headers.get('origin');
 if (origin !== null && !allowedOrigins.includes(origin)) return new Response(null, { status: 403 });
 ```
 
-Clients that aren't browsers send no `Origin`, so they aren't affected.
+Clients that aren't browsers usually send no `Origin`, so this doesn't touch them. One that does send an `Origin` you don't allow would start getting a 403, so check the clients you know about before you ship.
 
 **How much this matters depends on the server.** It's most serious for a server on `localhost`, or one that signs in with cookies, because a website can reach those from inside someone's browser. It matters less for a public server with bearer keys, since a browser won't add one by itself. It's still a MUST in the spec, and the fix is a few lines.
 

@@ -172,7 +172,7 @@ The only finding that could change the design.
 - [x] Estimated token cost for each tool definition, labelled as an estimate
 - [x] A shareable Markdown report and badge
 - [x] Local servers over stdio, the last slice and the first to cut
-- [ ] Run on the owner's two servers (approved with the spec), results in `docs/clients.md`. The docs server is done. The hosted MCP server is withdrawn, so the second waits for the owner to name a replacement
+- [x] Run on the owner's two servers (approved with the spec), results in `docs/clients.md`: the docs server and, since the hosted MCP server is withdrawn, the readiness server the owner chose (2026-11-05)
 - Verify: test against a recording server that counts every call
 - Depends on: 22. Files: `src/prove/external.ts`, `report.ts`, tests
 

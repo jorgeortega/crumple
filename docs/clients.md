@@ -66,12 +66,16 @@ Run automatically, so these stay true:
 
 | Server | Date | Protocol | Requests | Result |
 |---|---|---|---|---|
-| Latitude 10's docs server, `https://docs.latitude10.tech/mcp` | 2026-11-05 | 2026-07-28 | 4 of 30 | 4 passed, 1 failed, 5 not run. About 196 tokens per turn across 3 tools (estimate) |
+| Latitude 10's docs server, `https://docs.latitude10.tech/mcp`, first run | 2026-11-05 | 2026-07-28 | 4 of 30 | 4 passed, 1 failed, 5 not run. About 196 tokens per turn across 3 tools (estimate) |
+| The same server, after the fix | 2026-11-05 | 2026-07-28 | 4 of 30 | 5 passed, 0 failed, 5 not run |
+| Latitude 10's readiness server, `https://latitude10.tech/mcp/readiness`, after the fix | 2026-11-05 | 2026-07-28 | 4 of 30 | 5 passed, 0 failed, 5 not run. About 238 tokens per turn for its 1 tool (estimate) |
 | A local server on the official TypeScript SDK, over stdio | 2026-11-05 | 2025-11-25 | 5 of 30 | 3 passed, 0 failed, 7 not run |
 
-**The failure is a true finding.** The docs server answered a request from an unknown website with a 200, and MCP's spec requires a 403. All of Latitude 10's `/mcp` routes share that handler. The practical risk looks low, since they use bearer keys or are public, so a browser can't add anything sensitive by itself. Still a MUST.
+**The failure was a true finding, and it's fixed.** The docs server answered a request from an unknown website with a 200, and MCP's spec requires a 403. All of Latitude 10's `/mcp` routes share that handler, so the fix went there, and the rerun got a 403. The practical risk looked low, since those routes use bearer keys or are public, so a browser can't add anything sensitive by itself. Still a MUST.
 
-Not tried: Latitude 10's hosted MCP server, which the owner approved, because `docs/runbooks/dogfood.md` in that repo says it's withdrawn on its own API.
+**What these runs don't show.** The two Latitude 10 servers are public, so with no token the authentication checks didn't run. No tool was named, so no tool was called. Neither run says whether a tool works, or how a server behaves when its API fails.
+
+Not tried: Latitude 10's hosted MCP server, which the owner approved, because `docs/runbooks/dogfood.md` in that repo says it's withdrawn on its own API. The owner chose the readiness server instead.
 
 ## Not tried yet
 
