@@ -75,7 +75,7 @@ Inside the module, not a public API: the package has no library entry point. `ev
 | `refusal` | Stop, and keep its category | `model_refused` |
 | Anything else | Stop and name it. We use no server tools, so `pause_turn` shouldn't happen | `unexpected_stop` |
 
-And from the limits: `max_turns`, `max_tool_calls`, `deadline`, `max_usd`, `model_error`. **A loop that can spend money always has a way out.**
+And from the limits and failures: `max_turns`, `max_tool_calls`, `deadline`, `max_usd`, `model_error`, `mcp_unavailable`, `no_price`, `stale`. **A loop that can spend money always has a way out.**
 
 ### Two different things are called a refusal
 
@@ -117,9 +117,11 @@ Each live run has a `maxUsd`, default $0.25. Spending is only known after a call
 
 ```
 spent so far
-+ (characters in this request, as an over-count of its tokens) x input price
++ (characters in this request + the last prompt's tokens + 1,000) x input price
 + max_tokens x output price
 ```
+
+That input figure is deliberately too high. A character is usually less than a token, but replayed thinking counts as input even when its text comes back empty, and using tools adds a hidden system prompt.
 
 If that's over the cap, the run stops with `max_usd` and makes no call. A response that was lost counts at that same worst case, since we can't know what it cost, and the run's cost is reported as "at most". **Tests hold this to a scripted model that always uses its whole allowance.**
 

@@ -19,6 +19,8 @@ export interface TargetSetup {
   limits?: { perCaller?: number; perUpstream?: number; queuePerCaller?: number; queueUpstream?: number };
   /** List every tool as read-only, writes too, for C17: a hint must never give prove permission. */
   hintsLie?: boolean;
+  /** Where idempotency keys come from. A replay needs the same ones its recording saw. */
+  newKey?: () => string;
 }
 
 export interface UpstreamRequest {

@@ -1,5 +1,7 @@
 import { callResult, createBudget, createHttpTransport, openSession, type ListedTool, type Session } from '../mcp-client/client.js';
 import type { ClaudeMessage, ClaudeTool, ContentBlock, Message, ModelClient, ModelRequest, ToolResultBlock } from './model.js';
+import { hasPrice } from './prices.js';
+import { createMeter, type UsageTotals } from './usage.js';
 
 // A task, a model and an MCP server: ask the model, run what it asks for, send back the results, and
 // repeat until it finishes. It's for measuring, and it isn't a framework. It exists so C11, C12 and
@@ -8,6 +10,7 @@ import type { ClaudeMessage, ClaudeTool, ContentBlock, Message, ModelClient, Mod
 export const MAX_TOKENS = 8_000;
 export const EFFORT = 'medium';
 export const MAX_RESULT_CHARS = 100_000;
+export const DEFAULT_MAX_USD = 0.25;
 const CLIENT_NAME = 'crumple-mcp-agent';
 const MAX_TOOL_PAGES = 10;
 
@@ -17,7 +20,7 @@ const SYSTEM = 'You help by using the tools you\'re given. When you\'re done, sa
 
 const CLAUDE_TOOL_NAME = /^[a-zA-Z0-9_-]{1,128}$/;
 
-export type Stopped = 'done' | 'max_tokens' | 'model_refused' | 'unexpected_stop' | 'max_turns' | 'max_tool_calls' | 'deadline' | 'max_usd' | 'model_error' | 'mcp_unavailable';
+export type Stopped = 'done' | 'max_tokens' | 'model_refused' | 'unexpected_stop' | 'max_turns' | 'max_tool_calls' | 'deadline' | 'max_usd' | 'model_error' | 'mcp_unavailable' | 'no_price' | 'stale';
 
 export type ToolOutcome = 'ok' | 'tool_error' | 'refused' | 'unreachable';
 
@@ -32,6 +35,7 @@ export interface AgentLimits {
   maxTurns?: number;
   maxToolCalls?: number;
   deadlineMs?: number;
+  maxUsd?: number;
 }
 
 export interface AgentOptions {
@@ -39,14 +43,6 @@ export interface AgentOptions {
   mcp: { url: string; token?: string };
   model: ModelClient;
   limits?: AgentLimits;
-  /** Each answer, as it arrives. */
-  onReply?: (message: ClaudeMessage) => void;
-  /** Asked before each model attempt. */
-  mayAttempt?: () => boolean;
-  /** An attempt's answer was lost. */
-  onLost?: () => void;
-  /** Called with each request before it's sent. The money runs on this. */
-  onRequest?: (request: ModelRequest) => void;
 }
 
 export interface AgentRun {
@@ -55,6 +51,11 @@ export interface AgentRun {
   text: string;
   toolCalls: ToolCallRecord[];
   turns: number;
+  usage: UsageTotals['usage'];
+  /** Null when it can't be known. Never 0 for "unknown". */
+  costUsd: number | null;
+  /** An answer was lost, so its worst case is in costUsd, and the real figure may be lower. */
+  costIsAtMost: boolean;
   /** Things the run should say out loud, such as a tool it couldn't offer the model. */
   notes: string[];
   /** The model's reason for refusing, when it gave one. */
@@ -119,8 +120,8 @@ async function runTool(session: Session, call: Extract<ContentBlock, { type: 'to
 }
 
 export async function runAgent(options: AgentOptions): Promise<AgentRun> {
-  const { task, mcp, model, limits = {}, onReply, onRequest, mayAttempt = () => true, onLost = () => undefined } = options;
-  const { maxTurns = 10, maxToolCalls = 30, deadlineMs = 120_000 } = limits;
+  const { task, mcp, model, limits = {} } = options;
+  const { maxTurns = 10, maxToolCalls = 30, deadlineMs = 120_000, maxUsd = DEFAULT_MAX_USD } = limits;
 
   const deadline = AbortSignal.timeout(deadlineMs);
   const started = performance.now();
@@ -128,8 +129,15 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
   // The clock as well as the signal: a tool's own timeout can land just before the signal does.
   const expired = (): boolean => deadline.aborted || remainingMs() < 1;
 
-  const run: AgentRun = { stopped: 'done', text: '', toolCalls: [], turns: 0, notes: [] };
-  const finish = (stopped: Stopped, more: Partial<AgentRun> = {}): AgentRun => Object.assign(run, { stopped }, more);
+  const meter = createMeter({ model: model.name, maxUsd });
+  const run: AgentRun = { stopped: 'done', text: '', toolCalls: [], turns: 0, notes: [], ...meter.result() };
+  const finish = (stopped: Stopped, more: Partial<AgentRun> = {}): AgentRun => Object.assign(run, { stopped }, meter.result(), more);
+
+  // A cap needs a price, so a model we have no price for doesn't get to spend anything.
+  if (!hasPrice(model.name)) {
+    run.notes.push(`There's no price for ${model.name}, so its spending couldn't be capped.`);
+    return finish('no_price');
+  }
 
   // Nothing has been spent yet, so a server that can't list its tools costs nothing.
   const opened = await openSession(
@@ -159,18 +167,22 @@ export async function runAgent(options: AgentOptions): Promise<AgentRun> {
       if (expired()) return finish('deadline');
 
       const request: ModelRequest = { model: model.name, max_tokens: MAX_TOKENS, system: SYSTEM, tools, messages, output_config: { effort: EFFORT } };
-      onRequest?.(request);
+      meter.onRequest(request);
       run.turns += 1;
-      const reply = await model.complete(request, { signal: deadline, mayAttempt, onLost });
+      const reply = await model.complete(request, { signal: deadline, mayAttempt: meter.mayAttempt, onLost: meter.onLost });
 
       if (!reply.ok) {
         if (reply.code === 'max_usd') return finish('max_usd');
+        if (reply.code === 'stale') {
+          run.notes.push(reply.detail ?? 'This doesn\'t match its recording.');
+          return finish('stale');
+        }
         if (expired()) return finish('deadline');
         return finish('model_error', { modelError: { code: reply.code, ...(reply.status === undefined ? {} : { status: reply.status }), ...(reply.requestId === undefined ? {} : { requestId: reply.requestId }) } });
       }
 
       const { message } = reply;
-      onReply?.(message);
+      meter.onReply(message);
       run.text = textOf(message);
 
       switch (message.stop_reason) {

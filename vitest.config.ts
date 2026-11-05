@@ -16,6 +16,8 @@ export default defineConfig({
         // C17's safety promise: the budget and the rule about what may be called.
         'src/prove/external.ts': { branches: 95 },
         'src/mcp-client/**': { branches: 95 },
+        // A mistake here spends real money.
+        'src/agent-runner/**': { branches: 95 },
       },
     },
   },

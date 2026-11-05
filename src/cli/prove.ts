@@ -43,6 +43,7 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
       ...(setup.retry ? { retry: setup.retry } : {}),
       ...(setup.breaker ? { breaker: setup.breaker } : {}),
       ...(setup.limits ? { limits: setup.limits } : {}),
+      ...(setup.newKey ? { newKey: setup.newKey } : {}),
     },
     access: { keys },
     telemetry,

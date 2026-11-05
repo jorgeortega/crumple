@@ -34,6 +34,7 @@
     "lint": "eslint .",
     "prove": "npm run build && node scripts/prove.mjs",
     "prove:load": "npm run build && node scripts/prove.mjs --load",
+    "record": "npm run build && node scripts/record.mjs",
     "test": "vitest run",
     "secrets": "node scripts/secret-scan.mjs",
     "test:coverage": "vitest run --coverage",

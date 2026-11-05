@@ -51,11 +51,11 @@ export interface ClaudeMessage {
   usage: Usage;
 }
 
-export type ModelErrorCode = 'auth' | 'bad_request' | 'rate_limited' | 'overloaded' | 'server_error' | 'timeout' | 'unreachable' | 'invalid_response' | 'max_usd';
+export type ModelErrorCode = 'auth' | 'bad_request' | 'rate_limited' | 'overloaded' | 'server_error' | 'timeout' | 'unreachable' | 'invalid_response' | 'max_usd' | 'stale';
 
 export type ModelReply =
   | { ok: true; message: ClaudeMessage }
-  | { ok: false; code: ModelErrorCode; status?: number; requestId?: string };
+  | { ok: false; code: ModelErrorCode; status?: number; requestId?: string; detail?: string };
 
 export interface ModelCallOptions {
   signal: AbortSignal;

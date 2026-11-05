@@ -187,8 +187,10 @@ The only finding that could change the design.
 
 ### Task 26: Build the agent loop with record and replay (M)
 - [x] **OWNER:** approve `SPEC-agent-runner.md` first, after Claude reads the current Claude API reference (2026-11-05, "Approve all three")
-- [ ] A minimal loop over MCP with a Claude adapter on plain `fetch`; replay needs no key or network
-- Verify: a recorded run replays identically
+- [x] A minimal loop over MCP with a Claude adapter on plain `fetch`; replay needs no key or network (2026-11-05)
+- [x] Prices, per-call cost and a spending cap that holds against a model that always spends its whole allowance
+- [ ] **OWNER:** run the first real recording, capped at $0.10: `ANTHROPIC_API_KEY=... npm run record -- first-payment`
+- Verify: a recorded run replays identically. Done with a scripted model, and the real recording is the true test
 - Depends on: Checkpoint C. Files: `src/agent-runner/*`, `scenarios/recordings/*`
 
 ### Task 27: Add tokens, cost and joined traces (S) — C11, C12
