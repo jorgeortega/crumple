@@ -26,7 +26,7 @@ claude -p "your request" --mcp-config ./crumple.json --strict-mcp-config --allow
 
 ### What happened
 
-Each row is one run through `claude -p`, so these show what can happen rather than how often. Each cost under a cent, as Claude Code reported it, about 3 cents altogether.
+Each row is one run through `claude -p`, so these show what can happen rather than how often. Each cost under a cent, as Claude Code reported it, about 3 cents altogether. **All of it was one-shot mode.** An interactive session hasn't been tried, and it may behave differently, especially around a bad key. The `claude mcp add` line was only tried with `--scope project`, and it connected through `--mcp-config`, with the same address and header.
 
 | Tried | What happened |
 |---|---|
