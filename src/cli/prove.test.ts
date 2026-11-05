@@ -5,7 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import { harness, runOnce } from '../../tests/helpers/cli.js';
 import { recordingServer, type RecordingServer } from '../../tests/helpers/recording-server.js';
-import { wrongServer } from '../../tests/helpers/wrong-server.js';
+import { wrongServer } from './wrong-server.js';
 import { SELF_CHECKS, type StartTarget } from '../prove/index.js';
 import { runSelf, startCrumple } from './prove.js';
 

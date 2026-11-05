@@ -5,6 +5,8 @@ import { CliError, readVersion, usage, type Io } from './io.js';
 
 const HELP = `crumple-mcp: a crumple zone for AI agents.
 
+  demo                  Break an API on purpose and see what held. No key, under a minute
+
   serve <file or URL>   Put the crumple zone in front of your API
       --upstream <url>            Where your API is. Default: the document's first server
       --port <n>                  Default: 3333
@@ -75,6 +77,8 @@ async function dispatch(argv: string[], io: Io): Promise<number> {
       return (await import('./fault-api.js')).faultApiCommand(rest, io);
     case 'prove':
       return (await import('./prove.js')).proveCommand(rest, io);
+    case 'demo':
+      return (await import('./demo.js')).demoCommand(rest, io);
     default:
       throw usage(`There's no command called ${command}. Run crumple-mcp --help to see them.`);
   }

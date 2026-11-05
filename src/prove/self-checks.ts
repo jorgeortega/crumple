@@ -49,6 +49,8 @@ export interface Target {
   observed(): string;
   /** Who was refused what, from the audit log. */
   denied(): { tool: string; reason?: string }[];
+  /** The last tool call as a tree, for people to read. Only a server that keeps traces has one. */
+  trace?(): string;
   stop(): Promise<void>;
 }
 

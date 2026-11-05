@@ -73,7 +73,7 @@ export function safeTarget(target: string): string {
 const LABEL: Record<CheckOutcome['state'], string> = { pass: 'pass', fail: 'FAIL', not_run: 'not run' };
 const CLAIM_LABEL: Record<ClaimState, string> = { pass: 'pass', partly: 'partly checked', fail: 'FAIL', not_run: 'not run' };
 
-const summary = (counts: Counts): string => `${String(counts.passed)} passed, ${String(counts.failed)} failed, ${String(counts.notRun)} not run`;
+export const renderCounts = (counts: Counts): string => `${String(counts.passed)} passed, ${String(counts.failed)} failed, ${String(counts.notRun)} not run`;
 
 const seconds = (ms: number): string => `${(ms / 1000).toFixed(1)} s`;
 
@@ -88,19 +88,21 @@ function environmentLine(environment: Environment): string {
   return `${source}. ${os}, ${cpu}, ${String(memoryGb)} GB, Node ${node}.`;
 }
 
+export function renderCheckRows(checks: readonly CheckOutcome[]): string[] {
+  const width = Math.max(...checks.map((check) => check.id.length), 0);
+  return checks.map((check) => `${LABEL[check.state].padEnd(8)} ${check.id.padEnd(width)}  ${check.detail}`);
+}
+
 export function renderTerminal(report: ProveReport): string {
   const counts = countChecks(report.checks);
-  const width = Math.max(...report.checks.map((check) => check.id.length), 0);
   const lines = [`crumple-mcp prove  ${report.kind === 'self' ? 'Crumple itself, on this machine' : safeTarget(report.target)}`];
 
   if (report.protocol) lines.push(`  Protocol ${report.protocol}`);
   if (report.tools) lines.push(`  ${toolsLine(report.tools)}`);
   lines.push('');
-  for (const check of report.checks) {
-    lines.push(`  ${LABEL[check.state].padEnd(8)} ${check.id.padEnd(width)}  ${check.detail}`);
-  }
+  for (const row of renderCheckRows(report.checks)) lines.push(`  ${row}`);
   for (const note of report.notes ?? []) lines.push('', `  Note: ${note}`);
-  lines.push('', `  ${summary(counts)}.${report.requests ? ` ${String(report.requests.used)} of ${String(report.requests.max)} requests used.` : ` ${seconds(report.durationMs)}.`}`);
+  lines.push('', `  ${renderCounts(counts)}.${report.requests ? ` ${String(report.requests.used)} of ${String(report.requests.max)} requests used.` : ` ${seconds(report.durationMs)}.`}`);
 
   if (report.outOfReach?.length) lines.push(`  Can't be checked from outside: ${report.outOfReach.map((item) => item.claim).join(', ')}. --out writes a report that says why.`);
   if (counts.failed > 0) lines.push(`  How to fix these: ${FIX_GUIDE}`);
@@ -115,7 +117,7 @@ export function renderMarkdown(report: ProveReport): string {
   const lines: string[] = [
     `# crumple-mcp prove: ${report.kind === 'self' ? 'Crumple itself' : `\`${safeTarget(report.target)}\``}`,
     '',
-    `**${summary(counts)}.**${report.requests ? ` ${String(report.requests.used)} of ${String(report.requests.max)} requests used.` : ''}`,
+    `**${renderCounts(counts)}.**${report.requests ? ` ${String(report.requests.used)} of ${String(report.requests.max)} requests used.` : ''}`,
     '',
     `Run ${report.startedAt}, taking ${seconds(report.durationMs)}, with crumple-mcp ${report.environment.version}: ${environmentLine(report.environment)}`,
     '',

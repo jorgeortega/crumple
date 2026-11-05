@@ -50,7 +50,7 @@ The main spec's five, plus three small ones this spec adds, because a key needs 
 | **`keys create\|list\|revoke --db <file>`** | Manages keys in a database | Task 20 |
 | **`audit --db <file>`** | Prints who did what, with `--denied` and `--limit`. It's how an operator sees the attempted delete | Task 20 |
 | **`credential set --db <file>`** | Seals the upstream credential into a database. Decision 3 | Task 20 |
-| `demo` | The 60-second tour, and until then an unknown command | Task 24 |
+| `demo` | The 60-second tour | Task 24 |
 | `prove <url>` | The checks | Task 22 |
 | `eval <folder>` | The agent evaluations | Task 28 |
 

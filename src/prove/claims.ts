@@ -26,7 +26,7 @@ export const CLAIMS: readonly Claim[] = [
   { id: 'C13', text: 'A behaviour regression gets caught', pending: 'needs evals (Task 28)' },
   { id: 'C14', text: 'It speaks real MCP', pending: 'needs Python, so it runs in npm run test:interop' },
   { id: 'C15', text: 'The public demo can\'t run up a bill or be abused', pending: 'needs the hosted demo (Task 31)' },
-  { id: 'C16', text: 'A stranger succeeds in 60 seconds', pending: 'needs the demo command (Task 24)' },
+  { id: 'C16', text: 'A stranger succeeds in 60 seconds', pending: 'a stranger\'s first run, so it runs in npm run test:install' },
   { id: 'C17', text: 'prove is safe to point at a real server' },
   { id: 'C18', text: 'Tool definitions have a visible cost' },
 ];

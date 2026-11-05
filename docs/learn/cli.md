@@ -63,7 +63,7 @@ Commands take an `io` object and return an exit code, so most tests run in proce
 - **The key sits in your scrollback,** or in a log if the output is piped. That's the price of no setup.
 - **With `--db` on Node 22, you'll see an `ExperimentalWarning`** from SQLite. Without `--db`, you won't.
 - **In memory, audit events aren't kept at all.** The log lines show refusals, and `--db` is how to keep them.
-- **`demo`, `prove` and `eval` aren't here yet.** They come in Tasks 22 to 28.
+- **`eval` isn't here yet.** It comes in Task 28. `demo` and `prove` are explained in [prove.md](prove.md).
 
 ## Where to look
 

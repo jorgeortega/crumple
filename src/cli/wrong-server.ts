@@ -1,9 +1,12 @@
-import { createFaultApi, DEFAULT_CREDENTIAL } from '../../src/fault-api/index.js';
-import { serveOnNode } from '../../src/node.js';
-import type { StartTarget, Target, TargetSetup } from '../../src/prove/self-checks.js';
+import { createFaultApi, DEFAULT_CREDENTIAL } from '../fault-api/index.js';
+import { serveOnNode } from '../node.js';
+import type { StartTarget, Target, TargetSetup } from '../prove/index.js';
 
 // An MCP server that does everything wrong, on purpose, in front of the real fault-api. A check that
 // can't fail proves nothing, so every check in prove has to fail against this.
+//
+// It ships in the package for one reason: demo shows its double charge next to Crumple, measured on
+// each run. It's only ever started on 127.0.0.1, in front of fault-api, and isn't exported.
 //
 // It's written by us to be bad, and it isn't a stand-in for any real project. Each habit below is a
 // mistake a first version could easily make:

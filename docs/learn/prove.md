@@ -21,7 +21,7 @@ npx crumple-mcp prove https://you/mcp     # your server, from outside
 
 A module whose job is printing "pass" has one big risk: a check that can't print anything else. So there are two defences.
 
-**A server that's wrong on purpose.** About 100 lines, in the tests: no auth, forwards the agent's token, retries writes with no key, no deadline, no breaker. Every check must fail against it, for the reason it exists.
+**A server that's wrong on purpose.** About 100 lines: no auth, forwards the agent's token, retries writes with no key, no deadline, no breaker. Every check must fail against it, for the reason it exists.
 
 **Controls inside the checks.** C3 says the agent's key never reaches the API. If nothing reached the API at all, the key wouldn't be there either, and the check would pass by seeing nothing. So it also requires the stored credential to have arrived. Most checks have a line like "so this shows nothing".
 
@@ -59,6 +59,27 @@ The official client hides status codes, and a 401 or a 403 is often what's being
 
 **The risk is that ours could be wrong on a real server.** So it's tested on both eras of the protocol, over HTTP and stdio, against the official SDK's server. The first real run was against Latitude 10's docs server, and it connected on 2026-07-28 first time.
 
+## The demo: `prove --self`, with a reason to care
+
+```bash
+npx crumple-mcp demo
+```
+
+A list of passes doesn't show why any of it matters, so `demo` opens with the one failure anyone understands: a payment goes through, its response is lost, and the retry charges again.
+
+| | Agent is told | Charges |
+|---|---|---|
+| Plain retry loop | succeeded | 2 |
+| Crumple | succeeded | 1 |
+
+**The agent is told "succeeded" both times.** That's the part worth saying out loud. Nothing looks wrong to the agent or in its logs, and the customer paid twice. Crumple avoids it by sending the same idempotency key on each attempt, so the API knows it's the same payment.
+
+**Nothing on that screen is typed in.** Both rows are measured on each run. If the plain loop stopped charging twice, `demo` would say the comparison shows nothing and exit 1. The trace underneath is Crumple's own, showing `POST /payments` losing its connection and then being retried.
+
+**The obvious objection is that we wrote the losing side.** We did, and the output says so. That's why it's one comparison of a very common mistake and not ten rows of us beating a server we made bad. For the same reason, the output also says how many claims this run doesn't check.
+
+**It's a real cost:** about 100 lines of deliberately bad code now ship in the package, because `demo` starts that server. It isn't exported, it's only ever started on `127.0.0.1`, and the tests use the same copy.
+
 ## Stories from building it
 
 All real, and good answers to "tell me about a bug":
@@ -80,7 +101,7 @@ All real, and good answers to "tell me about a bug":
 
 ## Where to look
 
-Start with [self-checks.ts](../../src/prove/self-checks.ts), which reads like the claims. [external.ts](../../src/prove/external.ts) holds the safety rule. [client.ts](../../src/prove/client.ts) is the hand-written client. [wrong-server.ts](../../tests/helpers/wrong-server.ts) is short and worth reading, because its comment lists mistakes a first version could easily make.
+Start with [self-checks.ts](../../src/prove/self-checks.ts), which reads like the claims. [external.ts](../../src/prove/external.ts) holds the safety rule. [client.ts](../../src/prove/client.ts) is the hand-written client. [wrong-server.ts](../../src/cli/wrong-server.ts) is short and worth reading, because its comment lists mistakes a first version could easily make.
 
 ## Teach-back
 
@@ -88,4 +109,5 @@ Start with [self-checks.ts](../../src/prove/self-checks.ts), which reads like th
 2. A server marks `delete_everything` as `readOnlyHint: true`. What does `prove` do with that tool, with no flags, and with `--call delete_everything --parallel 10`? Why?
 3. C3 checks that the agent's key isn't in what reached the API. Why does it also check that the stored credential arrived?
 4. How do you know a check in here can actually fail? Give two separate reasons.
-5. **Where would you change this?** "We want to test failures on our own server, with our real API." What would you build, what could go wrong with writes, and which of `prove`'s safety rules would have to change?
+5. In `demo`, the agent is told "succeeded" in both rows. Why is that worse than an error, and what does Crumple send that the plain loop doesn't?
+6. **Where would you change this?** "We want to test failures on our own server, with our real API." What would you build, what could go wrong with writes, and which of `prove`'s safety rules would have to change?

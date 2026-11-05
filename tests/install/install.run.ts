@@ -1,5 +1,5 @@
 import { execFile, spawn, type ChildProcess } from 'node:child_process';
-import { mkdtempSync, rmSync, writeFileSync } from 'node:fs';
+import { mkdtempSync, readdirSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
 import { fileURLToPath } from 'node:url';
@@ -23,6 +23,7 @@ interface Running {
 }
 
 let folder: string;
+let tarball: string;
 let bin: string;
 let oldestNode: string;
 
@@ -60,8 +61,9 @@ beforeAll(async () => {
   folder = mkdtempSync(join(tmpdir(), 'crumple-install-'));
   const { stdout } = await run('npm', ['pack', '--pack-destination', folder, '--json'], { cwd: ROOT });
   const [{ filename }] = JSON.parse(stdout.slice(stdout.indexOf('['))) as [{ filename: string }];
+  tarball = join(folder, filename);
   writeFileSync(join(folder, 'package.json'), '{"name":"a-stranger","private":true}');
-  await run('npm', ['install', '--no-audit', '--no-fund', join(folder, filename)], { cwd: folder });
+  await run('npm', ['install', '--no-audit', '--no-fund', tarball], { cwd: folder });
   bin = join(folder, 'node_modules/crumple-mcp/dist/cli/bin.js');
   const located = await run('npx', ['-y', '-p', 'node@22.13.1', 'which', 'node'], { cwd: folder });
   oldestNode = located.stdout.trim().split('\n')[0] ?? '';
@@ -85,6 +87,22 @@ describe('what ships', () => {
     const { stdout } = await run(join(folder, 'node_modules/.bin/crumple-mcp'), ['--version'], { cwd: folder });
     expect(stdout.trim()).toMatch(/^\d+\.\d+\.\d+$/);
   });
+});
+
+describe('C16: a stranger, with npx, in an empty folder', () => {
+  it('prints results from the packed tarball within 60 seconds, download included', async () => {
+    const empty = mkdtempSync(join(tmpdir(), 'crumple-stranger-'));
+    try {
+      const started = performance.now();
+      const { stdout } = await run('npx', ['--yes', '--package', tarball, 'crumple-mcp', 'demo'], { cwd: empty, timeout: 60_000 });
+      expect(performance.now() - started).toBeLessThan(60_000);
+      expect(stdout).toMatch(/Crumple\s+succeeded\s+1/);
+      expect(stdout).toMatch(/12 passed, 0 failed, 0 not run/);
+      expect(readdirSync(empty)).toEqual([]);
+    } finally {
+      rmSync(empty, { recursive: true, force: true });
+    }
+  }, 70_000);
 });
 
 describe.each([
@@ -146,6 +164,28 @@ describe.each([
     expect(await proving.exited).toBe(0);
     expect(proving.out()).toMatch(/12 passed, 0 failed, 0 not run/);
     expect(proving.err()).not.toContain('    at ');
+  }, 60_000);
+
+  it('runs the demo with no key, no config and nothing left behind', async () => {
+    const empty = mkdtempSync(join(tmpdir(), 'crumple-demo-'));
+    try {
+      const started = performance.now();
+      const child = spawn(node(), [bin, 'demo'], { cwd: empty, env: { PATH: process.env.PATH ?? '' } });
+      let out = '';
+      let err = '';
+      child.stdout.on('data', (chunk: Buffer) => { out += chunk.toString(); });
+      child.stderr.on('data', (chunk: Buffer) => { err += chunk.toString(); });
+      const code = await new Promise<number | null>((resolve) => { child.once('exit', resolve); });
+      expect(code).toBe(0);
+      expect(performance.now() - started).toBeLessThan(60_000);
+      expect(out).toMatch(/Plain retry loop\s+succeeded\s+2/);
+      expect(out).toMatch(/Crumple\s+succeeded\s+1/);
+      expect(out).toMatch(/12 passed, 0 failed, 0 not run/);
+      expect(err).toBe('');
+      expect(readdirSync(empty)).toEqual([]);
+    } finally {
+      rmSync(empty, { recursive: true, force: true });
+    }
   }, 60_000);
 
   it('says what to do when the file isn\'t there, with exit code 1 and no stack trace', async () => {

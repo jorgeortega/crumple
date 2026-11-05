@@ -1,5 +1,5 @@
 import { describe, expect, it } from 'vitest';
-import { wrongServer } from '../../tests/helpers/wrong-server.js';
+import { wrongServer } from '../cli/wrong-server.js';
 import { runChecks } from './checks.js';
 import { proverChecks, SELF_CHECKS, type Prover } from './self-checks.js';
 

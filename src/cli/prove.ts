@@ -1,7 +1,7 @@
 import { arch, cpus, platform, totalmem } from 'node:os';
 import { join } from 'node:path';
 import { createFaultApi, DEFAULT_CREDENTIAL, OPENAPI } from '../fault-api/index.js';
-import { convertOpenApi, createAudit, createKey, createMcpSurface, createTelemetry, memoryAuditSink, memoryKeyStore, memorySink, plainCredential } from '../mcp-surface/index.js';
+import { convertOpenApi, createAudit, createKey, createMcpSurface, createTelemetry, formatTrace, memoryAuditSink, memoryKeyStore, memorySink, plainCredential } from '../mcp-surface/index.js';
 import { serveOnNode } from '../node.js';
 import { countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderMarkdown, renderTerminal, rollUpClaims, runChecks, SELF_CHECKS, type Environment, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup } from '../prove/index.js';
 import { parseFlags, readVersion, usage, type Io } from './io.js';
@@ -60,6 +60,11 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
     },
     observed: () => JSON.stringify([spans.spans(), audited.events(), lines]),
     denied: () => audited.events().filter((event) => event.decision === 'deny').map(({ tool, reason }) => ({ tool, ...(reason === undefined ? {} : { reason }) })),
+    trace() {
+      const all = spans.spans();
+      const last = all.findLast((span) => span.kind === 'server' && span.attributes['mcp.method.name'] === 'tools/call');
+      return last ? formatTrace(all.filter((span) => span.traceId === last.traceId)) : '';
+    },
     async stop() {
       await server.close();
       await upstream.close();

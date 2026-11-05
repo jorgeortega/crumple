@@ -177,7 +177,7 @@ The only finding that could change the design.
 - Depends on: 22. Files: `src/prove/external.ts`, `report.ts`, tests
 
 ### Task 24: Build the `demo` command (S) — C16
-- [ ] Starts everything, breaks things on purpose, prints a clear result table, and exits, in 60 seconds with no key
+- [x] Starts everything, breaks things on purpose, prints a clear result table, and exits, in 60 seconds with no key (2026-11-05). The owner approved one headline comparison, the double charge next to Crumple, so `src/cli/wrong-server.ts` now ships in the package
 - Verify: `tests/install/` runs it with `npx` from a packed tarball in an empty folder
 - Depends on: 22. Files: `src/cli/demo.ts`, `tests/install/*`
 

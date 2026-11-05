@@ -147,9 +147,9 @@ Short deadlines and a short breaker window keep it quick, because C16 gives `dem
 
 A check that can't fail proves nothing, and that's the main risk with a module whose job is printing "pass". So **every check has a test running it against a server that's deliberately wrong**, and the test requires it to fail.
 
-That server is a small MCP server of about 100 lines, in the tests, with the bad habits on switches: no auth, forwards the agent's token, puts the credential in its output, retries everything, no deadline, no breaker, no limits. It's written by us to be bad, and it isn't a stand-in for any real project.
+That server is a small MCP server of about 100 lines, with the bad habits on switches: no auth, forwards the agent's token, puts the credential in its output, retries everything, no deadline, no breaker, no limits. It's written by us to be bad, and it isn't a stand-in for any real project.
 
-A nice side effect: with `drop`, it really does charge twice. Task 24 could show that next to Crumple in `demo`. That's for that task's approval, and not part of this spec.
+A side effect: with `drop`, it really does charge twice. The owner approved showing that next to Crumple in `demo` (Task 24, 2026-11-05), so the server now lives at `src/cli/wrong-server.ts` and ships in the package.
 
 ## How it fits the map
 
@@ -250,7 +250,7 @@ Also worth doing, though it belongs to C14: run the official conformance suite a
 
 ## Files
 
-`src/prove/`: `client.ts`, `checks.ts` (types), `self-checks.ts`, `external.ts`, `definitions.ts` (pure, C18), `runner.ts` (budget, states, a crashing check is a `fail`), `report.ts` (pure: Markdown, JSON, SVG), `index.ts`. `src/cli/prove.ts` is the wiring and the real `Target`. `tests/helpers/wrong-server.ts` and `recording-server.ts`. `npm run prove`. `proof/latest.md` and `.json`, committed. `docs/fixing-prove-failures.md`, then `docs/learn/prove.md`.
+`src/prove/`: `client.ts`, `checks.ts` (types), `self-checks.ts`, `external.ts`, `definitions.ts` (pure, C18), `runner.ts` (budget, states, a crashing check is a `fail`), `report.ts` (pure: Markdown, JSON, SVG), `index.ts`. `src/cli/prove.ts` is the wiring and the real `Target`. `src/cli/wrong-server.ts` and `tests/helpers/recording-server.ts`. `npm run prove`. `proof/latest.md` and `.json`, committed. `docs/fixing-prove-failures.md`, then `docs/learn/prove.md`.
 
 Task 22 is `--self`. Task 23 is `<url>`, the report's sharing parts and the real server runs.
 
