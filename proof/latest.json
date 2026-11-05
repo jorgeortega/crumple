@@ -1,16 +1,16 @@
 {
   "counts": {
-    "passed": 10,
+    "passed": 12,
     "failed": 0,
     "notRun": 0
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-05T14:43:03.018Z",
-  "durationMs": 4289,
+  "startedAt": "2026-11-05T14:53:35.194Z",
+  "durationMs": 4316,
   "environment": {
     "version": "0.1.0",
-    "commit": "a9abe00",
+    "commit": "956a0b5",
     "dirty": false,
     "os": "darwin arm64",
     "cpu": "Apple M5",
@@ -70,10 +70,10 @@
       "title": "The API hangs, before and partway through its answer",
       "claim": "C6",
       "state": "pass",
-      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 805 ms, stall-body 804 ms.",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 804 ms, stall-body 805 ms.",
       "measured": {
-        "hang_ms": 805,
-        "stall_body_ms": 804,
+        "hang_ms": 804,
+        "stall_body_ms": 805,
         "deadline_ms": 800
       }
     },
@@ -82,11 +82,11 @@
       "title": "A 400, a 503, and a 503 with Retry-After",
       "claim": "C7",
       "state": "pass",
-      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1002 ms.",
+      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1005 ms.",
       "measured": {
         "attempts_after_400": 1,
         "attempts_after_503": 3,
-        "waited_ms": 1002
+        "waited_ms": 1005
       }
     },
     {
@@ -110,7 +110,7 @@
         "flood_succeeded": 3,
         "flood_refused": 17,
         "other_succeeded": 3,
-        "other_slowest_ms": 229
+        "other_slowest_ms": 231
       }
     },
     {
@@ -119,6 +119,29 @@
       "claim": "C10",
       "state": "pass",
       "detail": "Each error has a code, a message and advice on retrying: rejected (no), unavailable (later), rate_limited (later), invalid_response (no), timeout (later)."
+    },
+    {
+      "id": "prove-is-safe",
+      "title": "prove on a server whose tools all claim to be read-only, writes included",
+      "claim": "C17",
+      "state": "pass",
+      "detail": "4 tools claimed to be read-only, and none was called: the API received nothing. 6 of 30 requests used.",
+      "measured": {
+        "requests": 6,
+        "budget": 30,
+        "upstream_requests": 0
+      }
+    },
+    {
+      "id": "tool-cost-shown",
+      "title": "What the tool definitions cost",
+      "claim": "C18",
+      "state": "pass",
+      "detail": "About 467 tokens per turn across 4 tools, as an estimate.",
+      "measured": {
+        "estimated_tokens": 467,
+        "tools": 4
+      }
     }
   ],
   "claims": [
@@ -249,14 +272,18 @@
     {
       "id": "C17",
       "text": "prove is safe to point at a real server",
-      "state": "not_run",
-      "checks": []
+      "state": "pass",
+      "checks": [
+        "prove-is-safe"
+      ]
     },
     {
       "id": "C18",
       "text": "Tool definitions have a visible cost",
-      "state": "not_run",
-      "checks": []
+      "state": "pass",
+      "checks": [
+        "tool-cost-shown"
+      ]
     }
   ]
 }
