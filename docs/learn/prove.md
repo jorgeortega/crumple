@@ -80,6 +80,31 @@ A list of passes doesn't show why any of it matters, so `demo` opens with the on
 
 **It's a real cost:** about 100 lines of deliberately bad code now ship in the package, because `demo` starts that server. It isn't exported, it's only ever started on `127.0.0.1`, and the tests use the same copy.
 
+## Load runs: numbers with their limits attached
+
+```bash
+npm run prove:load       # writes proof/load-<date>.md and .json
+npx crumple-mcp prove --load
+```
+
+It takes about half a minute and measures three things. The latest result is in `proof/`.
+
+| Question | How | Why this way |
+|---|---|---|
+| What does Crumple add to one call? | The same read, directly and through Crumple, taking turns | Turns stop one side getting a warmer process |
+| How many calls per second? | 1, 10 and 50 callers, each calling again when the last call ends, limits raised | It measures the path, and the raised limits are stated |
+| Does a noisy caller starve another? (C9) | 100 callers flood a 200 ms API while one more keeps working, **default limits** | The defaults are what someone actually gets |
+
+**Say this first, before anyone asks.** The program making the calls, Crumple and the API all share one Node process and one thread, and the API does no real work. So calls per second isn't Crumple's limit and isn't a production number. Added latency is the useful one, since a real API's time comes on top. Nothing here says anything about Cloudflare.
+
+**How to read the noisy caller result.** A flooding caller gets its 10 slots, and 10 slots on a 200 ms API is about 50 calls a second, so about 250 in 5 seconds. The report shows 260, which you can check on the back of an envelope, and that's a good sign the limit is doing what it says. Everything past that was refused with `overloaded`.
+
+**It can fail.** It exits 1 if calls fail, if nothing is refused, if the other caller loses a call, or if the API saw fewer calls than were made. Each has a test. A server with no limits fails it, so the run isn't only a printer of numbers.
+
+**A number I didn't believe.** A call across two local HTTP hops came back in 0.2 ms, which looked too good, and a cache or a shortcut would look exactly like that. So I counted: 500 calls, and 500 reached the API. It's real, because the API does almost nothing and the laptop is fast. That count is now part of every run, and a mismatch reports that the times show nothing.
+
+**Not measured:** writes, `--db`, memory, a long soak, or more than one process.
+
 ## Stories from building it
 
 All real, and good answers to "tell me about a bug":
@@ -110,4 +135,5 @@ Start with [self-checks.ts](../../src/prove/self-checks.ts), which reads like th
 3. C3 checks that the agent's key isn't in what reached the API. Why does it also check that the stored credential arrived?
 4. How do you know a check in here can actually fail? Give two separate reasons.
 5. In `demo`, the agent is told "succeeded" in both rows. Why is that worse than an error, and what does Crumple send that the plain loop doesn't?
-6. **Where would you change this?** "We want to test failures on our own server, with our real API." What would you build, what could go wrong with writes, and which of `prove`'s safety rules would have to change?
+6. Someone reads "4,000 calls a second" in the load report and calls that Crumple's capacity. What do you tell them, and which number in that report would you quote instead?
+7. **Where would you change this?** "We want to test failures on our own server, with our real API." What would you build, what could go wrong with writes, and which of `prove`'s safety rules would have to change?

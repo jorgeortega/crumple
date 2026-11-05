@@ -31,6 +31,8 @@ const HELP = `crumple-mcp: a crumple zone for AI agents.
       --port <n>                  Default: 8787
 
   prove --self                                Crumple's claims, with failures on purpose
+  prove --load                                Crumple under load, on this machine
+      --step-ms <n>               How long each step runs. Default: 5000
   prove <url>                                 Check a server you own, from outside
   prove -- <command>                          The same, for a local server over stdio
       --call <tool>  --args <json>  The one tool that may be called. None is otherwise

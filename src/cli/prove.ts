@@ -3,7 +3,7 @@ import { join } from 'node:path';
 import { createFaultApi, DEFAULT_CREDENTIAL, OPENAPI } from '../fault-api/index.js';
 import { convertOpenApi, createAudit, createKey, createMcpSurface, createTelemetry, formatTrace, memoryAuditSink, memoryKeyStore, memorySink, plainCredential } from '../mcp-surface/index.js';
 import { serveOnNode } from '../node.js';
-import { countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderMarkdown, renderTerminal, rollUpClaims, runChecks, SELF_CHECKS, type Environment, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup } from '../prove/index.js';
+import { countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup } from '../prove/index.js';
 import { parseFlags, readVersion, usage, type Io } from './io.js';
 import { logSink } from './serve.js';
 
@@ -55,6 +55,7 @@ export const startCrumple: StartTarget = async (setup: TargetSetup): Promise<Tar
     keys: { read, write, other },
     credential: DEFAULT_CREDENTIAL,
     upstream: {
+      url: upstream.url,
       requests: () => api.requests(),
       effects: () => api.effects(),
     },
@@ -105,6 +106,22 @@ export async function runSelf(start: StartTarget, io: Io): Promise<ProveReport> 
     checks,
     claims: rollUpClaims(checks),
   };
+}
+
+async function runLoadCommand(stepMs: number | undefined, folder: string | undefined, name: string | undefined, io: Io): Promise<number> {
+  const startedAt = new Date(io.now()).toISOString();
+  const began = performance.now();
+  io.stdout('Measuring Crumple under load on this machine. This takes about half a minute.\n');
+  const result = await runLoad(startCrumple, stepMs === undefined ? {} : { stepMs });
+  const report: LoadReport = { ...result, startedAt, durationMs: Math.round(performance.now() - began), environment: environment(io) };
+  io.stdout(renderLoadTerminal(report));
+  if (folder !== undefined) {
+    const file = name ?? `load-${startedAt.slice(0, 10)}`;
+    await io.writeFile(join(folder, `${file}.md`), renderLoadMarkdown(report));
+    await io.writeFile(join(folder, `${file}.json`), renderLoadJson(report));
+    io.stdout(`  Report: ${join(folder, `${file}.md`)}, with .json beside it.`);
+  }
+  return result.problems.length > 0 ? 1 : 0;
 }
 
 const TOKEN_ENV = 'CRUMPLE_PROVE_TOKEN';
@@ -187,8 +204,10 @@ export async function proveCommand(args: string[], io: Io): Promise<number> {
   const command = separator === -1 ? undefined : args.slice(separator + 1);
   const { values, positionals } = parseFlags(separator === -1 ? args : args.slice(0, separator), {
     self: { type: 'boolean', default: false },
+    load: { type: 'boolean', default: false },
+    'step-ms': { type: 'string' },
     out: { type: 'string' },
-    name: { type: 'string', default: 'prove' },
+    name: { type: 'string' },
     call: { type: 'string' },
     args: { type: 'string' },
     parallel: { type: 'string' },
@@ -196,12 +215,15 @@ export async function proveCommand(args: string[], io: Io): Promise<number> {
     'timeout-ms': { type: 'string' },
   });
 
-  if (!/^[A-Za-z0-9_-]+$/.test(values.name)) throw usage('--name should be letters, digits, dashes and underscores, because it becomes file names.');
+  if (values.name !== undefined && !/^[A-Za-z0-9_-]+$/.test(values.name)) throw usage('--name should be letters, digits, dashes and underscores, because it becomes file names.');
   const [target] = positionals;
-  const chosen = [values.self, target !== undefined, command !== undefined].filter(Boolean).length;
-  if (chosen === 0) throw usage('Say what to check: prove --self for Crumple, prove https://you.example/mcp for a server, or prove -- node server.js for a local one.');
-  if (chosen > 1) throw usage('Choose one thing to check: --self, an address, or a command after --.');
+  const chosen = [values.self, values.load, target !== undefined, command !== undefined].filter(Boolean).length;
+  if (chosen === 0) throw usage('Say what to check: prove --self for Crumple, prove --load for Crumple under load, prove https://you.example/mcp for a server, or prove -- node server.js for a local one.');
+  if (chosen > 1) throw usage('Choose one thing to check: --self, --load, an address, or a command after --.');
   if (command?.length === 0) throw usage('Put the command to run after --, such as prove -- node server.js.');
+
+  if (values['step-ms'] !== undefined && !values.load) throw usage('--step-ms goes with --load.');
+  if (values.load) return runLoadCommand(wholeNumber(values['step-ms'], '--step-ms', undefined, 60_000), values.out, values.name, io);
 
   let report: ProveReport;
   if (values.self) {
@@ -214,6 +236,6 @@ export async function proveCommand(args: string[], io: Io): Promise<number> {
   }
 
   io.stdout(renderTerminal(report));
-  if (values.out !== undefined) await writeReport(report, values.out, values.name, io);
+  if (values.out !== undefined) await writeReport(report, values.out, values.name ?? 'prove', io);
   return countChecks(report.checks).failed > 0 ? 1 : 0;
 }

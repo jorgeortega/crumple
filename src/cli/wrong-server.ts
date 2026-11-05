@@ -83,6 +83,7 @@ export const wrongServer: StartTarget = async (setup: TargetSetup): Promise<Targ
     keys: { read: 'wrong-read-key', write: 'wrong-write-key', other: 'wrong-other-key' },
     credential: DEFAULT_CREDENTIAL,
     upstream: {
+      url: upstream.url,
       requests: () => api.requests(),
       effects: () => api.effects(),
     },

@@ -11,3 +11,5 @@ export type { CallResult } from './client.js';
 export { DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer } from './external.js';
 export type { ExternalResult, NamedCall } from './external.js';
 export { createStdioTransport } from './stdio.js';
+export { percentile, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, runLoad } from './load.js';
+export type { LoadOptions, LoadReport, LoadResult } from './load.js';

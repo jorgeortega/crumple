@@ -42,6 +42,8 @@ export interface Target {
   /** The upstream credential the server holds. */
   credential: string;
   upstream: {
+    /** Where the API is, so a load run can compare a direct call with one through the server. */
+    url: string;
     requests(): UpstreamRequest[];
     effects(): { kind: string; id: string }[];
   };
@@ -87,7 +89,7 @@ interface StructuredError {
 }
 
 /** A failure the agent can read, or undefined when there isn't one. */
-function structured(result: CallResult): StructuredError | undefined {
+export function structured(result: CallResult): StructuredError | undefined {
   if (result.kind !== 'result' || !result.isError) return undefined;
   try {
     const parsed: unknown = JSON.parse(result.text);

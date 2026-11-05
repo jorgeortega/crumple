@@ -182,7 +182,7 @@ The only finding that could change the design.
 - Depends on: 22. Files: `src/cli/demo.ts`, `tests/install/*`
 
 ### Task 25: Add local load runs (S) — C9
-- [ ] `npm run prove:load` writes a dated report stating the machine and the commit
+- [x] `npm run prove:load` writes a dated report stating the machine and the commit (2026-11-05). Overhead, throughput and C9 under a sustained flood; it exits 1 when something that had to hold didn't
 - Depends on: 22. Files: `src/prove/load.ts`
 
 ### Task 26: Build the agent loop with record and replay (M)

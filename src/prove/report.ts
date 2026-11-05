@@ -52,7 +52,7 @@ export const FIX_GUIDE = 'https://github.com/jorgeortega/crumple/blob/main/docs/
 export const CONFORMANCE_HINT = 'Protocol conformance isn\'t checked here. For that: npx @modelcontextprotocol/conformance';
 export const NOT_AN_AUDIT = 'This checks a few things from outside. It isn\'t a security audit, and a clean report doesn\'t mean the server is secure.';
 
-const CREDIT_MARKDOWN = 'Made with [crumple-mcp](https://github.com/jorgeortega/crumple), open source from [Latitude 10](https://latitude10.tech/platform/mcp), which also hosts MCP servers.';
+export const CREDIT_MARKDOWN = 'Made with [crumple-mcp](https://github.com/jorgeortega/crumple), open source from [Latitude 10](https://latitude10.tech/platform/mcp), which also hosts MCP servers.';
 
 /** A tool name, safe to show anyone. MCP's spec limits names to these characters, though only with a SHOULD. */
 export function safeName(name: string): string {
