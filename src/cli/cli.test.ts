@@ -632,7 +632,7 @@ describe('errors', () => {
 });
 
 describe('help and version', () => {
-  it.each([[[]], [['--help']], [['-h']], [['help']]])('shows help for %j', async (argv) => {
+  it.each([[[]], [['--help']], [['-h']], [['help']], [['serve', '--help']], [['serve', './api.yaml', '-h']], [['keys', 'create', '--help']], [['fault-api', '--help']]])('shows help for %j', async (argv) => {
     const { code, out } = await runOnce(argv);
     expect(code).toBe(0);
     for (const command of ['serve', 'keys', 'audit', 'credential', 'fault-api']) expect(out).toContain(command);

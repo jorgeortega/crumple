@@ -36,6 +36,12 @@ This sends no telemetry. --otlp only sends to an address you typed.`;
 async function dispatch(argv: string[], io: Io): Promise<number> {
   const [command, ...rest] = argv;
 
+  // After a command, a request for help is still a request for help, and never a bad flag.
+  if (rest.includes('--help') || rest.includes('-h')) {
+    io.stdout(HELP);
+    return 0;
+  }
+
   switch (command) {
     case undefined:
     case '--help':
