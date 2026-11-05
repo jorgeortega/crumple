@@ -49,6 +49,13 @@ async function respond(handler: FetchHandler, base: string, req: IncomingMessage
     return;
   }
 
+  // The caller left while this was being worked out. pipeline throws on a closed stream, and from
+  // here that would be an unhandled rejection, which stops the process over one caller giving up.
+  if (res.destroyed) {
+    void response.body?.cancel().catch(() => undefined);
+    return;
+  }
+
   res.writeHead(response.status, Object.fromEntries(response.headers));
   // Node holds headers back until the first body write. A body that fails first would lose
   // them too, so a failure partway through would look like no response at all.

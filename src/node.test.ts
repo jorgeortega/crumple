@@ -32,3 +32,40 @@ describe('serveOnNode', () => {
     expect(await (await fetch(server.url)).text()).toBe('hello');
   });
 });
+
+describe('a caller who leaves', () => {
+  it('doesn\'t take the process down when the answer comes after they\'ve gone', async () => {
+    const unhandled: unknown[] = [];
+    const notice = (reason: unknown): void => { unhandled.push(reason); };
+    process.on('unhandledRejection', notice);
+
+    let arrived: () => void = () => undefined;
+    let finish: () => void = () => undefined;
+    const seen = new Promise<void>((resolve) => { arrived = resolve; });
+    const answer = new Promise<void>((resolve) => { finish = resolve; });
+    const server = await serveOnNode(async (request) => {
+      if (new URL(request.url).pathname === '/ok') return new Response('still here');
+      arrived();
+      await answer;
+      return new Response('too late');
+    });
+
+    try {
+      const abort = new AbortController();
+      const leaving = fetch(`${server.url}/slow`, { signal: abort.signal }).catch(() => 'left');
+      await seen;
+      abort.abort();
+      await leaving;
+      // Long enough for the server to notice the connection closed.
+      await new Promise((resolve) => setTimeout(resolve, 50));
+      finish();
+      await new Promise((resolve) => setTimeout(resolve, 50));
+
+      expect(unhandled).toEqual([]);
+      expect(await (await fetch(`${server.url}/ok`)).text()).toBe('still here');
+    } finally {
+      process.off('unhandledRejection', notice);
+      await server.close();
+    }
+  });
+});
