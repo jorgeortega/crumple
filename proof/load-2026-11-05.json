@@ -1,0 +1,91 @@
+{
+  "stepMs": 5000,
+  "overhead": {
+    "direct": {
+      "calls": 500,
+      "failed": 0,
+      "p50Ms": 0.1,
+      "p95Ms": 0.2,
+      "p99Ms": 0.5,
+      "maxMs": 1.7
+    },
+    "through": {
+      "calls": 500,
+      "failed": 0,
+      "p50Ms": 0.4,
+      "p95Ms": 0.9,
+      "p99Ms": 1.7,
+      "maxMs": 3.9
+    },
+    "reachedApi": 1000,
+    "addedP50Ms": 0.3,
+    "addedP95Ms": 0.7
+  },
+  "throughput": [
+    {
+      "concurrency": 1,
+      "perSecond": 3668,
+      "calls": 18341,
+      "failed": 0,
+      "p50Ms": 0.2,
+      "p95Ms": 0.3,
+      "p99Ms": 1.5,
+      "maxMs": 3.9
+    },
+    {
+      "concurrency": 10,
+      "perSecond": 4070,
+      "calls": 20353,
+      "failed": 0,
+      "p50Ms": 2.1,
+      "p95Ms": 4.1,
+      "p99Ms": 6.4,
+      "maxMs": 16.6
+    },
+    {
+      "concurrency": 50,
+      "perSecond": 4266,
+      "calls": 21349,
+      "failed": 0,
+      "p50Ms": 11.7,
+      "p95Ms": 14.3,
+      "p99Ms": 21.3,
+      "maxMs": 40
+    }
+  ],
+  "noisy": {
+    "delayMs": 200,
+    "floodConcurrency": 100,
+    "floodAnswered": 260,
+    "floodRefused": 34534,
+    "floodOther": 0,
+    "quietAlone": {
+      "calls": 25,
+      "failed": 0,
+      "p50Ms": 203.7,
+      "p95Ms": 208.4,
+      "p99Ms": 210.5,
+      "maxMs": 210.5
+    },
+    "quietDuring": {
+      "calls": 23,
+      "failed": 0,
+      "p50Ms": 218.1,
+      "p95Ms": 225.3,
+      "p99Ms": 348.7,
+      "maxMs": 348.7
+    }
+  },
+  "problems": [],
+  "startedAt": "2026-11-05T20:51:27.470Z",
+  "durationMs": 28964,
+  "environment": {
+    "version": "0.1.0",
+    "commit": "9fdd516",
+    "dirty": false,
+    "os": "darwin arm64",
+    "cpu": "Apple M5",
+    "memoryGb": 16,
+    "node": "26.10.0"
+  }
+}
