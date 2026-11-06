@@ -2,15 +2,19 @@ import { existsSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import { describe, expect, it } from 'vitest';
+import { DEFAULT_BREAKER } from '../src/executor/breaker.js';
+import { DEFAULT_ATTEMPT_TIMEOUT_MS, DEFAULT_ATTEMPTS, DEFAULT_BACKOFF, DEFAULT_DEADLINE_MS, MAX_RESPONSE_BYTES } from '../src/executor/call.js';
+import { DEFAULT_LIMITS } from '../src/executor/limits.js';
 import { runOnce } from './helpers/cli.js';
 
-// The README's numbers come from proof/, never from a person. Each generated block is worked out here
-// from the report it quotes, and this fails when they differ. To update them after a new report:
+// The README's numbers come from proof/ and the code, never from a person. Each generated block is
+// worked out here from what it quotes, and this fails when they differ. To update them:
 //   UPDATE_README=1 npx vitest run tests/readme-numbers.test.ts
 
 const ROOT = fileURLToPath(new URL('../', import.meta.url));
 const README = join(ROOT, 'README.md');
-const readJson = (path: string): unknown => JSON.parse(readFileSync(join(ROOT, path), 'utf8'));
+const readText = (path: string): string => readFileSync(join(ROOT, path), 'utf8');
+const readJson = (path: string): unknown => JSON.parse(readText(path));
 
 interface Latest {
   startedAt: string;
@@ -65,22 +69,50 @@ function loadBlock(): string {
   return `Crumple added ${String(overhead.addedP50Ms)} ms at p50 and ${String(overhead.addedP95Ms)} ms at p95 to a call. ${String(busiest.concurrency)} concurrent callers got ${String(busiest.perSecond)} calls/s, with ${String(busiest.failed)} failed. While ${String(noisy.floodConcurrency)} callers on one key flooded a slow API, ${String(noisy.floodRefused)} of their calls were refused, and another caller got ${String(through)} of ${String(quietDuring.calls)} through, at a p95 of ${String(quietDuring.p95Ms)} ms against ${String(quietAlone.p95Ms)} ms alone. On ${day(startedAt)}.`;
 }
 
-const BLOCKS: Record<string, () => string> = { claims: claimsBlock, evals: evalsBlock, load: loadBlock };
+function defaultsBlock(): string {
+  const { windowSize, minimumCalls, failureRate, openMs } = DEFAULT_BREAKER;
+  const { perCaller, queuePerCaller, perUpstream, queueUpstream } = DEFAULT_LIMITS;
+  const rows: [string, string, string][] = [
+    ['Deadline for a whole call', `${String(DEFAULT_DEADLINE_MS)} ms`, '`deadlineMs`'],
+    ['Timeout for one attempt', `${String(DEFAULT_ATTEMPT_TIMEOUT_MS)} ms`, '`attemptTimeoutMs`'],
+    ['Attempts', String(DEFAULT_ATTEMPTS), '`retry.attempts`'],
+    ['Backoff', `doubling from ${String(DEFAULT_BACKOFF.baseMs)} ms, capped at ${String(DEFAULT_BACKOFF.capMs)} ms`, '`retry.baseMs`, `retry.capMs`'],
+    ['Calls at once, per caller', `${String(perCaller)}, then ${String(queuePerCaller)} queued`, '`limits.perCaller`, `limits.queuePerCaller`'],
+    ['Calls at once, to the API', `${String(perUpstream)}, then ${String(queueUpstream)} queued`, '`limits.perUpstream`, `limits.queueUpstream`'],
+    ['Circuit breaker opens', `at ${String(failureRate * 100)}% failures of the last ${String(windowSize)} calls, after at least ${String(minimumCalls)}`, ''],
+    ['Circuit breaker stays open', `${String(openMs)} ms, then tries one call`, ''],
+    ['Largest answer from the API', `${String(MAX_RESPONSE_BYTES)} bytes`, ''],
+  ];
+  return ['| | Default | Config field |', '|---|---|---|', ...rows.map((row) => `| ${row.join(' | ')} |`)].join('\n');
+}
 
-const block = (name: string): RegExp => new RegExp(`(<!-- generated:${name} -->\\n)[\\s\\S]*?(\\n<!-- /generated -->)`);
+async function helpBlock(): Promise<string> {
+  const { out } = await runOnce(['--help']);
+  return ['```', out.trimEnd(), '```'].join('\n');
+}
+
+const BLOCKS: Record<string, () => string | Promise<string>> = { defaults: defaultsBlock, claims: claimsBlock, evals: evalsBlock, load: loadBlock, help: helpBlock };
+
+const block = (name: string): RegExp => new RegExp(`(<!-- generated:${name} -->\\n)[\\s\\S]*?(<!-- /generated -->)`);
 
 if (process.env.UPDATE_README === '1') {
   let text = readFileSync(README, 'utf8');
-  for (const [name, render] of Object.entries(BLOCKS)) text = text.replace(block(name), (_, open: string, close: string) => `${open}${render()}${close}`);
+  for (const [name, render] of Object.entries(BLOCKS)) {
+    const rendered = await render();
+    text = text.replace(block(name), (_, open: string, close: string) => `${open}${rendered}\n${close}`);
+  }
   writeFileSync(README, text);
 }
 
 const readme = readFileSync(README, 'utf8');
 const bodyOf = (name: string): string | undefined => block(name).exec(readme)?.[0].split('\n').slice(1, -1).join('\n');
 
+/** GitHub's anchors: lower case, spaces to dashes, and punctuation gone. */
+const anchor = (heading: string): string => heading.toLowerCase().replace(/[^\w\s-]/g, '').trim().replace(/\s+/g, '-');
+
 describe('the README', () => {
-  it.each(Object.keys(BLOCKS))('quotes the %s report exactly', (name) => {
-    expect(bodyOf(name)).toBe(BLOCKS[name]?.());
+  it.each(Object.keys(BLOCKS))('quotes %s exactly', async (name) => {
+    expect(bodyOf(name)).toBe(await BLOCKS[name]?.());
   });
 
   it('quotes the comparison from a real run of the demo', async () => {
@@ -95,16 +127,40 @@ describe('the README', () => {
     const prose = readme
       .replace(/<!-- generated:[\s\S]*?<!-- \/generated -->/g, '')
       .replace(/```[\s\S]*?```/g, '');
-    // "up to $100" is an example of a rule Crumple can't express, and not a result.
-    const measured = prose.replace('up to $100', '').match(/\$\d[\d.]*|\b\d[\d,.]* ?(?:ms|tokens?|calls\/s)\b|\b\d+ of \d+\b|\b\d+(?:\.\d+)?%/g);
+    // These two are rules, and not results: a rule Crumple can't express, and the coverage bars.
+    const measured = prose.replace('up to $100', '').replace('The bar is 85% branch coverage, and 95%', '').match(/\$\d[\d.]*|\b\d[\d,.]* ?(?:ms|tokens?|calls\/s)\b|\b\d+ of \d+\b|\b\d+(?:\.\d+)?%/g);
     expect(measured).toBeNull();
   });
 
-  it('links only to files that exist', () => {
+  it('links only to files and headings that exist', () => {
     const links = [...readme.matchAll(/\]\(([^)]+)\)/g)].map((match) => match[1] ?? '').filter((link) => !/^https?:/.test(link));
     expect(links.length).toBeGreaterThan(0);
-    const missing = links.filter((link) => !existsSync(join(dirname(README), link)));
+    const headings = new Set([...readme.matchAll(/^#{1,6} (.+)$/gm)].map((match) => anchor(match[1] ?? '')));
+    const missing = links.filter((link) => (link.startsWith('#') ? !headings.has(link.slice(1)) : !existsSync(join(dirname(README), link))));
     expect(missing).toEqual([]);
+  });
+
+  it('documents every error code the executor can return', () => {
+    const union = /export type ErrorCode =([\s\S]*?);/.exec(readText('src/executor/errors.ts'))?.[1] ?? '';
+    const codes = [...union.matchAll(/'(\w+)'/g)].map((match) => match[1]);
+    expect(codes.length).toBeGreaterThan(0);
+    for (const code of codes) expect(readme).toContain(`| \`${String(code)}\` |`);
+  });
+
+  it('documents every failure fault-api can be asked for', () => {
+    const faults = readText('src/fault-api/faults.ts');
+    const numbers = /const NUMBERS[\s\S]*?\n};/.exec(faults)?.[0] ?? '';
+    const flags = /const FLAGS[\s\S]*?\n};/.exec(faults)?.[0] ?? '';
+    const names = [...[...numbers.matchAll(/^ {2}'?([a-z-]+)'?\(fault/gm)].map((match) => match[1]), ...[...flags.matchAll(/^ {2}'?([a-z-]+)'?:/gm)].map((match) => match[1])];
+    expect(names.length).toBeGreaterThan(5);
+    for (const name of names) expect(readme).toMatch(new RegExp(`\\| \`${String(name)}(=\\d+)?\` \\|`));
+  });
+
+  it('names every module on the capability map', () => {
+    const map = readText('CAPABILITY-MAP.md');
+    const modules = [...map.matchAll(/^\| `([a-z-]+)` \|/gm)].map((match) => match[1]);
+    expect(modules.length).toBeGreaterThan(10);
+    for (const module of modules) expect(readme).toContain(`| \`${String(module)}\` |`);
   });
 
   it('says who wrote the code', () => {
@@ -120,5 +176,10 @@ describe('the README', () => {
   it('never calls itself production-proven or battle-tested', () => {
     expect(readme).not.toMatch(/battle-tested/i);
     expect(readme.replace('It isn\'t production-proven', '')).not.toMatch(/production-proven/i);
+  });
+
+  it('says it isn\'t on npm yet, until the release removes this test and the line', () => {
+    const { private: unpublished } = readJson('package.json') as { private?: boolean };
+    expect(readme.includes('Not yet on npm')).toBe(unpublished === true);
   });
 });

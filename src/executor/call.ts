@@ -7,11 +7,11 @@ import type { Credential, Operation } from './operation.js';
 import { buildPlan, CallRefused, credentialForms, parseBaseUrl, redact, toRequest, type RequestPlan } from './request.js';
 import { backoffMs, parseRetryAfter, type BackoffLimits } from './retry.js';
 
-const DEFAULT_DEADLINE_MS = 30_000;
-const DEFAULT_ATTEMPT_TIMEOUT_MS = 10_000;
-const DEFAULT_ATTEMPTS = 3;
-const DEFAULT_BACKOFF: BackoffLimits = { baseMs: 200, capMs: 5_000 };
-const MAX_RESPONSE_BYTES = 1024 * 1024;
+export const DEFAULT_DEADLINE_MS = 30_000;
+export const DEFAULT_ATTEMPT_TIMEOUT_MS = 10_000;
+export const DEFAULT_ATTEMPTS = 3;
+export const DEFAULT_BACKOFF: BackoffLimits = { baseMs: 200, capMs: 5_000 };
+export const MAX_RESPONSE_BYTES = 1024 * 1024;
 const MAX_DETAIL_BYTES = 2048;
 const TEXT_TYPE = /^text\/|json|xml|javascript|yaml|csv|x-www-form-urlencoded/i;
 

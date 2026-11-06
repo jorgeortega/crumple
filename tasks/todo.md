@@ -257,6 +257,7 @@ The only finding that could change the design.
 ### Task 36: Release (owner actions)
 - [ ] Final secret scan, including history, and the install test from a packed tarball
 - [ ] Record `assets/demo.gif` again with a real `npx`, removing the tape's Hide block, once the package is on npm
+- [ ] Take "Not yet on npm" out of the README's Status when `"private": true` goes, and update the rest of Status (a test fails until both match)
 - [ ] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
 - [ ] Links added to outreach messages; a link from latitude10.tech goes through its Build Gate
