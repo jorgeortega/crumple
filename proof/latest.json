@@ -6,12 +6,12 @@
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-05T22:05:42.530Z",
-  "durationMs": 4333,
+  "startedAt": "2026-11-06T06:20:16.642Z",
+  "durationMs": 4314,
   "environment": {
     "version": "0.1.0",
-    "commit": "8ca05d3",
-    "dirty": false,
+    "commit": "8553612",
+    "dirty": true,
     "os": "darwin arm64",
     "cpu": "Apple M5",
     "memoryGb": 16,
@@ -70,10 +70,10 @@
       "title": "The API hangs, before and partway through its answer",
       "claim": "C6",
       "state": "pass",
-      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 807 ms, stall-body 804 ms.",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 806 ms, stall-body 806 ms.",
       "measured": {
-        "hang_ms": 807,
-        "stall_body_ms": 804,
+        "hang_ms": 806,
+        "stall_body_ms": 806,
         "deadline_ms": 800
       }
     },
@@ -82,11 +82,11 @@
       "title": "A 400, a 503, and a 503 with Retry-After",
       "claim": "C7",
       "state": "pass",
-      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1005 ms.",
+      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1003 ms.",
       "measured": {
         "attempts_after_400": 1,
         "attempts_after_503": 3,
-        "waited_ms": 1005
+        "waited_ms": 1003
       }
     },
     {
@@ -275,10 +275,10 @@
     },
     {
       "id": "C15",
-      "text": "The public demo can't run up a bill or be abused",
+      "text": "The demo's own limits hold, no public path reaches a paid model, and abuse can't cost more than Cloudflare's per-request price",
       "state": "not_run",
       "checks": [],
-      "pending": "needs the hosted demo (Task 31)"
+      "pending": "needs the Worker, so it runs in npm run test:workers"
     },
     {
       "id": "C16",

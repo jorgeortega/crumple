@@ -2,7 +2,7 @@
 
 **14 passed, 0 failed, 0 not run.**
 
-Run 2026-11-05T22:05:42.530Z, taking 4.3 s, with crumple-mcp 0.1.0: commit 8ca05d3. darwin arm64, Apple M5, 16 GB, Node 26.10.0.
+Run 2026-11-06T06:20:16.642Z, taking 4.3 s, with crumple-mcp 0.1.0: commit 8553612 with uncommitted changes. darwin arm64, Apple M5, 16 GB, Node 26.10.0.
 
 Measured on one machine, with failures caused on purpose. It says nothing about production load.
 
@@ -24,7 +24,7 @@ Measured on one machine, with failures caused on purpose. It says nothing about 
 | C12 | Each run reports its tokens and cost | not run | needs a recording from a real model, which spends money (Task 27) |
 | C13 | A behaviour regression gets caught | pass |  |
 | C14 | It speaks real MCP | not run | needs Python, so it runs in npm run test:interop |
-| C15 | The public demo can't run up a bill or be abused | not run | needs the hosted demo (Task 31) |
+| C15 | The demo's own limits hold, no public path reaches a paid model, and abuse can't cost more than Cloudflare's per-request price | not run | needs the Worker, so it runs in npm run test:workers |
 | C16 | A stranger succeeds in 60 seconds | not run | a stranger's first run, so it runs in npm run test:install |
 | C17 | prove is safe to point at a real server | pass |  |
 | C18 | Tool definitions have a visible cost | pass |  |
@@ -38,8 +38,8 @@ Measured on one machine, with failures caused on purpose. It says nothing about 
 | `token-stays-here` What reaches the API on a normal call | pass | The agent's key appears nowhere in what arrived, and the stored credential did arrive. |
 | `credential-stays-hidden` The API repeats the credential back | pass | The API repeated it, and it's absent from the tool's output, spans, audit events and logs. |
 | `one-effect` A payment applies, then its response is lost | pass | One effect when a retry recovered it, and one when every response was lost and the caller retried with the key it was given. |
-| `deadline-holds` The API hangs, before and partway through its answer | pass | A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 807 ms, stall-body 804 ms. |
-| `right-retries` A 400, a 503, and a 503 with Retry-After | pass | A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1005 ms. |
+| `deadline-holds` The API hangs, before and partway through its answer | pass | A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 806 ms, stall-body 806 ms. |
+| `right-retries` A 400, a 503, and a 503 with Retry-After | pass | A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1003 ms. |
 | `breaker-opens` The API keeps failing, then recovers | pass | After 3 failures, a call failed fast with no request reaching the API, and calls worked again by themselves after 400 ms. |
 | `noisy-caller` One caller floods a slow API, while another keeps working | pass | Of 20 flooding calls, 3 went through and 17 were refused with overloaded. The other caller got all 3 through. |
 | `errors-say-what-next` Each kind of failure, read as an agent would | pass | Each error has a code, a message and advice on retrying: rejected (no), unavailable (later), rate_limited (later), invalid_response (no), timeout (later). |

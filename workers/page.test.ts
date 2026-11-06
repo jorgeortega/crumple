@@ -1,0 +1,52 @@
+import { readFileSync } from 'node:fs';
+import { describe, expect, it } from 'vitest';
+import { CHARGE_KEY, READ_KEY } from './surface.js';
+import { SCENARIOS } from './try.js';
+
+const read = (name: string): string => readFileSync(new URL(`public/${name}`, import.meta.url), 'utf8');
+const html = read('index.html');
+const script = read('page.js');
+const headers = read('_headers');
+
+describe('the page', () => {
+  it('has a button for every scenario, and none for anything else', () => {
+    const shown = [...html.matchAll(/data-scenario="([^"]+)"/g)].map((match) => match[1]);
+    expect(shown).toEqual([...SCENARIOS]);
+  });
+
+  it('prints the keys that really work', () => {
+    expect(html).toContain(READ_KEY);
+    expect(html).toContain(CHARGE_KEY);
+  });
+
+  it('loads nothing from anywhere else', () => {
+    for (const [, url] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
+      if (url?.startsWith('https://latitude10.tech')) continue;
+      expect(url).toMatch(/^\//);
+    }
+    expect(script).not.toMatch(/https?:\/\//);
+  });
+
+  it('never puts a response in as HTML', () => {
+    expect(script).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval\(/);
+  });
+
+  it('uses no cookies or storage', () => {
+    expect(script).not.toMatch(/cookie|localStorage|sessionStorage/);
+  });
+
+  it('doesn\'t link to the repo until it\'s public, so nobody gets a 404', () => {
+    expect(html).not.toContain('github.com');
+  });
+
+  it('says where its numbers come from', () => {
+    expect(script).toContain('from one laptop, not from this server');
+  });
+
+  it('has a strict policy, with nothing inline', () => {
+    expect(headers).toContain("default-src 'none'");
+    expect(headers).toContain("script-src 'self'");
+    expect(headers).not.toContain('unsafe');
+    expect(html).not.toMatch(/<script(?![^>]*src=)|<style|\sstyle="|\son[a-z]+="/);
+  });
+});

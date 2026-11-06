@@ -37,8 +37,7 @@ describe('past the rate limit', () => {
     for (let i = 0; i < RATE_PER_MINUTE + 15; i += 1) {
       statuses.push((await fetch(`${worker.url}/try/no-permission`, { method: 'POST' })).status);
     }
-    console.log('rate limit, first refusal at request', statuses.indexOf(429) + 1, 'of', statuses.length);
-    expect(statuses).toContain(429);
-    expect(statuses[0]).toBe(200);
+    // Exact here. On Cloudflare it's counted per location and approximately, so this isn't a promise there.
+    expect(statuses.indexOf(429)).toBe(RATE_PER_MINUTE);
   });
 });

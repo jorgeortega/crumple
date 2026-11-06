@@ -95,3 +95,18 @@ describe('the built Worker', () => {
     }
   });
 });
+
+describe('the page, as Cloudflare serves it', () => {
+  it('comes back with its policy, and the Worker never sees it', async () => {
+    const page = await fetch(worker.url);
+    expect(page.status).toBe(200);
+    expect(await page.text()).toContain('A crumple zone for AI agents.');
+    expect(page.headers.get('content-security-policy')).toContain("default-src 'none'");
+    expect((await fetch(`${worker.url}/page.js`)).status).toBe(200);
+  });
+
+  it('has the latest report, with all 18 claims', async () => {
+    const proof = (await (await fetch(`${worker.url}/proof.json`)).json()) as { claims: unknown[] };
+    expect(proof.claims).toHaveLength(18);
+  });
+});

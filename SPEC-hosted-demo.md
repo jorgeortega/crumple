@@ -102,6 +102,8 @@ No cookies, analytics or third-party scripts, and a strict CSP. Everything retur
 
 **A change from the main spec:** it names `@cloudflare/vitest-pool-workers`, and the current version needs Vitest 4 while we're on 5. Rather than downgrade every test, `npm run test:workers` starts a real `wrangler dev`, which runs Cloudflare's own `workerd` locally, and tests it over real sockets. That's how the earlier spike worked. It's slower, so like `test:install` it stays out of the pre-push gate.
 
+**What the tests found:** over a socket, `wrangler dev`'s own layer sees `drop`'s broken stream and answers with an error of its own, where Node's socket simply breaks. A caller doesn't get the payment back either way, and that's what `tests/workers/fault-api.run.ts` checks. The demo isn't affected, since its `fault-api` is a function call, and `tests/workers/try.run.ts` tests that path. How real Cloudflare treats a broken stream over a socket stays untested, and nothing here depends on it.
+
 | Test | What it shows |
 |---|---|
 | `prove` against the local Worker | The same outside checks anyone can run, on Cloudflare's runtime |
@@ -133,6 +135,7 @@ No cookies, analytics or third-party scripts, and a strict CSP. Everything retur
 - **Not everything is the same as Node.** The earlier spike couldn't confirm that a caller leaving aborts the real request on Workers, so "cancelling aborts the upstream call" stays a Node claim. The validators also differ, so error wording can too.
 - **Rate limits are approximate.** One visitor can get more than 60 a minute, and an office can get fewer.
 - **Hosted clients may not connect.** A key in a header works for Claude Code. Clients that insist on OAuth, or connect from a browser on another site, may not work, and Crumple has no OAuth sign-in server, by the main spec.
+- **A trace's times can read 0 ms on Cloudflare,** because its clock only moves between waits. The times in a trace are real for waits, and the page says so.
 - **`Checkpoint D` needs rewording.** It says "all 18 claims pass in `npm run prove`", but C14, C15 and C16 run under their own commands. I'll make the proof report say where each ran, as a later step, and I won't count anything that didn't run.
 
 ## Slices
@@ -191,9 +194,18 @@ Slices 1 to 6 change nothing on Cloudflare, and spend nothing.
 | `@cloudflare/vitest-pool-workers` 0.23.0 needs Vitest ^4.1 | `npm view` |
 | Latitude 10's cookies set no `Domain` in what I searched | Its repo's auth, admin, dashboard and SSO code, by search, not a full audit |
 
+**Checked while building, 2026-11-06:**
+
+| Fact | How |
+|---|---|
+| The binding enforces limits under `wrangler dev` | `tests/workers/limits.run.ts`: the 61st request is the first 429. Locally only, since Cloudflare's own counting is approximate and per location |
+| The counter is exact against D1 locally, and an instance that's closed stops writing | The same file, reading the local D1 database directly |
+| `Date.now()` "does not advance during code execution" on Cloudflare, so a span that's only computing shows 0 ms there. Waits show their real time | [Security model](https://developers.cloudflare.com/workers/reference/security-model/). The page says so under each trace |
+| `namespace_id` is yours to choose and unique to the account, and two bindings sharing one share counters | [Rate limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Latitude 10's `wrangler.toml` has no `ratelimits`, so `1001` doesn't clash with it |
+
 **Not confirmed:**
-- Whether the rate limiting binding costs anything, since the page doesn't mention billing. I'll check before deploying, and fall back to the per-instance limits the main spec describes if it does.
-- Whether a WAF-blocked request counts towards Worker billing.
-- Whether the binding enforces limits under `wrangler dev`.
-- That a D1 `RETURNING` counter update is atomic as I've assumed. D1 is SQLite, and a local test will show it works, though not how it behaves under load across regions.
+- Whether the rate limiting binding costs anything. Neither [its page](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/) nor [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) mentions a charge, or which plans have it. That's an absence, not a statement that it's free. If it does cost something, the fallback is the per-instance limits the main spec describes.
+- Whether a WAF-blocked request counts towards Worker billing. The pricing page only says "Only requests that hit a Worker will count".
+- How the D1 counter behaves under load across regions. It's one statement on SQLite, and it's exact in every local test, but none of that is Cloudflare's network.
+- That a request the Worker turns away still counts. I'm assuming it does, which is the expensive reading.
 - That this account is on Workers Paid.

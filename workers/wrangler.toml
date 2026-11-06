@@ -13,6 +13,12 @@ routes = [{ pattern = "crumple.latitude10.tech", custom_domain = true }]
 [assets]
 directory = "public"
 
+# Copies the latest proof report in for the page, before dev and deploy. Wrangler runs this from the
+# folder it was started in, which is the repo's root for every command in package.json and the runbook.
+[build]
+command = "node scripts/demo-assets.mjs"
+watch_dir = "../proof"
+
 # Nothing is stored about visitors, and that includes logs.
 [observability]
 enabled = false

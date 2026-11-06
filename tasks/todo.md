@@ -211,15 +211,15 @@ The only finding that could change the design.
 
 ### Task 29: Add the Workers adapter (M)
 - [x] **OWNER:** approve `SPEC-hosted-demo.md` first (2026-11-06, "Approve all four"). D1 holds only the daily counter, so `src/store/d1.ts` isn't built
-- [ ] The same flows pass in `workerd`
+- [x] The same flows pass in `workerd` (`prove`, `fault-api`'s faults, the buttons)
 - Verify: `npm run test:workers`
 - Depends on: 18, 19. Files: `workers/*`, tests
 
 ### Task 30: Add abuse limits and the results page (M) — C15
-- [ ] Shared demo keys, a rate limit, a daily cap, data that resets, no path to a paid model
-- [ ] One page with four live buttons, showing a run's trace and which claims held, using the site's Terminal design tokens
+- [x] Shared demo keys, a rate limit, a daily cap, data that resets, no path to a paid model
+- [x] One page with four live buttons, showing a run's trace and which claims held, using the site's Terminal design tokens
 - Verify: each limit triggers in tests; desktop and mobile by hand
-- Depends on: 29, 22. Files: `workers/limits.ts`, `workers/page.ts`, tests
+- Depends on: 29, 22. Files: `workers/limits.ts`, `workers/try.ts`, `workers/public/*`, tests
 
 ### Task 31: Deploy the demo
 - [ ] **OWNER:** confirm the same Cloudflare account and Workers Paid, set a billing notification, and okay the first deploy, which adds a DNS record for `crumple.latitude10.tech`
