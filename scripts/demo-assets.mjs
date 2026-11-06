@@ -11,5 +11,5 @@ writeFileSync(new URL('../workers/public/proof.json', import.meta.url), `${JSON.
   startedAt: proof.startedAt,
   environment: { commit, os, cpu, memoryGb, node },
   counts: proof.counts,
-  claims: proof.claims.map(({ id, text, state }) => ({ id, text, state })),
+  claims: proof.claims.map((/** @type {{ id: string, text: string, state: string }} */ { id, text, state }) => ({ id, text, state })),
 }, null, 2)}\n`);

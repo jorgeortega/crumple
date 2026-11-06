@@ -25,7 +25,7 @@ export interface DailyCounter {
 }
 
 export function d1Counter(db: D1Like): DailyCounter {
-  const statement = 'INSERT INTO daily_requests (day, count) VALUES (?1, 1) ON CONFLICT (day) DO UPDATE SET count = count + 1 RETURNING count';
+  const statement = 'INSERT INTO daily_requests (day, count) VALUES (?, 1) ON CONFLICT (day) DO UPDATE SET count = count + 1 RETURNING count';
   return {
     async increment(day) {
       const row = await db.prepare(statement).bind(day).first<{ count: number }>();
