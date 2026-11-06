@@ -260,7 +260,8 @@ The only finding that could change the design.
 - [ ] Take "Not yet on npm" out of the README's Status when `"private": true` goes, and update the rest of Status (a test fails until both match)
 - [ ] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
-- [ ] Links added to outreach messages; a link from latitude10.tech goes through its Build Gate
+- [ ] Links added to outreach messages
+- [ ] Turn on latitude10.tech/crumple (built, a 404 until launch), after publishing: in latitude10, run `node scripts/crumple-snapshot.mjs <this checkout>`, set `CRUMPLE_PUBLISHED`, run `npm run og:images` for the card, add a line to `developer-docs/changelog.md`, and run `npm run test`, `npm run build` and `npm run lint`
 
 ### Optional, if time remains
 - [ ] OpenAI-compatible model adapter (first on the cut list)
