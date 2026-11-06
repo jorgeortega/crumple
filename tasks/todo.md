@@ -236,8 +236,9 @@ The only finding that could change the design.
 ## Phase 4: Launch (days 16-20)
 
 ### Task 32: Write the README (S)
-- [ ] Demo GIF first, then three steps, results table, honest limits, one Latitude 10 section
-- [ ] A test fails if a README number differs from the proof report
+- [x] Demo GIF first, then three steps, results table, honest limits, one Latitude 10 section (2026-11-06)
+- [x] A test fails if a README number differs from the proof report, or if a measured number appears outside a generated block
+- [ ] **OWNER:** read it, above all "How it was built", which speaks for you
 - Depends on: Checkpoint D. Files: `README.md`, `tests/readme-numbers.test.ts`, `assets/demo.gif`
 
 ### Task 33: Add community and security files (S)
@@ -255,6 +256,7 @@ The only finding that could change the design.
 
 ### Task 36: Release (owner actions)
 - [ ] Final secret scan, including history, and the install test from a packed tarball
+- [ ] Record `assets/demo.gif` again with a real `npx`, removing the tape's Hide block, once the package is on npm
 - [ ] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
 - [ ] Links added to outreach messages; a link from latitude10.tech goes through its Build Gate

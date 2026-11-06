@@ -16,6 +16,10 @@
   },
   "description": "A crumple zone for AI agents: an MCP runtime where every claim is a check you can run.",
   "license": "MIT",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/jorgeortega/crumple.git"
+  },
   "author": "October Moon LLC",
   "type": "module",
   "keywords": [
