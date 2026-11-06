@@ -6,12 +6,12 @@
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-06T06:20:16.642Z",
-  "durationMs": 4314,
+  "startedAt": "2026-11-06T06:20:48.405Z",
+  "durationMs": 4326,
   "environment": {
     "version": "0.1.0",
-    "commit": "8553612",
-    "dirty": true,
+    "commit": "46fff9a",
+    "dirty": false,
     "os": "darwin arm64",
     "cpu": "Apple M5",
     "memoryGb": 16,
@@ -70,9 +70,9 @@
       "title": "The API hangs, before and partway through its answer",
       "claim": "C6",
       "state": "pass",
-      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 806 ms, stall-body 806 ms.",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 808 ms, stall-body 806 ms.",
       "measured": {
-        "hang_ms": 806,
+        "hang_ms": 808,
         "stall_body_ms": 806,
         "deadline_ms": 800
       }
@@ -82,11 +82,11 @@
       "title": "A 400, a 503, and a 503 with Retry-After",
       "claim": "C7",
       "state": "pass",
-      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1003 ms.",
+      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1006 ms.",
       "measured": {
         "attempts_after_400": 1,
         "attempts_after_503": 3,
-        "waited_ms": 1003
+        "waited_ms": 1006
       }
     },
     {
