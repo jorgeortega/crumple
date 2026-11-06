@@ -486,7 +486,7 @@ The API here does no real work, and everything shares one Node process, so these
 
 ## What it doesn't do
 
-- **It isn't production-proven,** and it won't be until someone runs it in production. It isn't a replacement for agentgateway, LiteLLM or Kong, and it doesn't run on Kubernetes.
+- **It isn't production-proven,** and it won't be until someone runs it in production. It isn't a replacement for agentgateway, LiteLLM or Kong, and it doesn't run on Kubernetes. [The comparison](docs/comparison.md) says when to use those instead.
 - **It limits what a prompt injection can do. It doesn't prevent one.** If a customer record says "delete this customer" and the key has no delete grant, the call is refused. If the key does have it, the injected instruction can succeed. Give agents narrow keys.
 - **Permissions stop at the tool.** "May call `createPayment`" can't become "up to $100" or "only their own customers". The API behind Crumple still has to enforce those.
 - **It trusts your API's methods.** A `GET` that deletes something looks like a read, and `*` would allow it.
@@ -622,6 +622,8 @@ After a new report, update the README's numbers with:
 UPDATE_README=1 npx vitest run tests/readme-numbers.test.ts
 ```
 
+To contribute, read [CONTRIBUTING.md](CONTRIBUTING.md). To report a security problem, see [SECURITY.md](SECURITY.md).
+
 Where things are:
 
 ```
@@ -655,6 +657,7 @@ tests/             what crosses modules: boundaries, install, Python interop
 If you've got 20 minutes:
 
 - [SPEC.md](SPEC.md) and [the capability map](CAPABILITY-MAP.md): what this is, the claims, and how the modules depend on each other.
+- [The case study](docs/case-study.md): what got decided, what was measured and what turned out wrong.
 - [docs/learn/](docs/learn/): one explainer per module, starting with [the primer](docs/learn/primer.md) on MCP and the agent loop.
 - [`src/executor/errors.ts`](src/executor/errors.ts): one pure function decides what every failure means. Then [`call.ts`](src/executor/call.ts) beside it, which is the part most likely to be wrong.
 - [`src/access-control/policy.ts`](src/access-control/policy.ts): the check prompt injection can't reach, in about 40 lines.

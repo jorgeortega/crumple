@@ -242,15 +242,16 @@ The only finding that could change the design.
 - Depends on: Checkpoint D. Files: `README.md`, `tests/readme-numbers.test.ts`, `assets/demo.gif`
 
 ### Task 33: Add community and security files (S)
-- [ ] `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md`
+- [x] `CONTRIBUTING.md`, `SECURITY.md`, `CODE_OF_CONDUCT.md`, `CHANGELOG.md` (2026-11-06)
+- [ ] **OWNER:** read `SECURITY.md`: it promises a reply usually within a week, and uses info@latitude10.tech
 - Files: those four
 
 ### Task 34: Write the comparison page (S)
-- [ ] Claude reads the projects first; every statement about another project links to its source
+- [x] Claude reads the projects first; every statement about another project links to its source (2026-11-06: their docs were read, the projects weren't run, and the page says so)
 - Files: `docs/comparison.md`
 
 ### Task 35: Write the case study and launch drafts (M)
-- [ ] `docs/case-study.md` written from measured results, plus Show HN, r/mcp and directory drafts
+- [x] `docs/case-study.md` written from measured results, plus Show HN, r/mcp and directory drafts (2026-11-06; `tests/docs-numbers.test.ts` keeps their numbers equal to the README's)
 - [ ] **OWNER:** review; adjust the pitch line and CV entry to match
 - Files: `docs/case-study.md`, `docs/launch/*`
 
@@ -259,6 +260,7 @@ The only finding that could change the design.
 - [ ] Record `assets/demo.gif` again with a real `npx`, removing the tape's Hide block, once the package is on npm
 - [ ] Take "Not yet on npm" out of the README's Status when `"private": true` goes, and update the rest of Status (a test fails until both match)
 - [ ] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them
+- [ ] Set the publish date in `CHANGELOG.md`. If a new report changed the README's numbers, update the blocks quoted in `docs/case-study.md` and `docs/launch/` (a test fails until they match)
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
 - [ ] Links added to outreach messages
 - [ ] Turn on latitude10.tech/crumple (built, a 404 until launch), after publishing: in latitude10, run `node scripts/crumple-snapshot.mjs <this checkout>`, set `CRUMPLE_PUBLISHED`, run `npm run og:images` for the card, add a line to `developer-docs/changelog.md`, and run `npm run test`, `npm run build` and `npm run lint`
