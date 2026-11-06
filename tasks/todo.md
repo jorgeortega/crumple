@@ -229,8 +229,8 @@ The only finding that could change the design.
 - Depends on: 30, 21
 
 ### Checkpoint D
-- [ ] All 18 claims pass in `npm run prove`
-- [ ] Claude writes `docs/learn/prove.md`, `agent-runner.md`, `evals.md` (done 2026-11-05), `hosted-demo.md`
+- [x] All 18 claims pass in `npm run prove`, which now runs C14, C15 and C16's suites and folds their results in (2026-11-06). `prove --self` still reaches 15, because those three need Python, `workerd` and a packed tarball
+- [x] Claude writes `docs/learn/prove.md`, `agent-runner.md`, `evals.md` (2026-11-05), `hosted-demo.md` (2026-11-06)
 - [ ] **OWNER:** read them and do four teach-backs
 
 ## Phase 4: Launch (days 16-20)

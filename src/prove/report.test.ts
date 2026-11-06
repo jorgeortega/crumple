@@ -199,8 +199,8 @@ describe('the Markdown report', () => {
   it('shows claims for Crumple, with what wasn\'t checked', () => {
     const claims = rollUpClaims([outcome('C1', 'pass', 'C1'), outcome('C14', 'pass', 'C14')]);
     const text = renderMarkdown(serverReport({ kind: 'self', requests: undefined as never, claims, environment: { ...ENVIRONMENT, commit: 'abc1234', dirty: true }, checks: [outcome('C1', 'pass', 'C1')] }));
-    expect(text).toContain('| C1 | Access is denied by default | pass |  |');
-    expect(text).toContain('| C14 | It speaks real MCP | partly checked | needs Python, so it runs in npm run test:interop |');
+    expect(text).toContain('| C1 | Access is denied by default | pass | `C1` |  |');
+    expect(text).toContain('| C14 | It speaks real MCP | partly checked | `C14` | needs Python, so it runs in npm run test:interop |');
     expect(text).toContain('| C15 | The demo\'s own limits hold, no public path reaches a paid model, and abuse can\'t cost more than Cloudflare\'s per-request price | not run |');
     expect(text).toContain('commit abc1234 with uncommitted changes');
     expect(text).toContain('production load');

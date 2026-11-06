@@ -51,7 +51,20 @@ Only our own sentences and escaped tool names reach a report. Descriptions and e
 | fail | It ran, and didn't hold | Yes |
 | not run | It didn't run, with the reason | **Never** |
 
-A claim with parts checked elsewhere says so: C14 needs Python, so it shows as not run here, with where it runs. C10 and C12 rest on recordings from a real model, replayed for free, and they can't pass without one. The badge says `16 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
+A claim with parts checked elsewhere says so. C10 and C12 rest on recordings from a real model, replayed for free, and they can't pass without one. The badge says how many of each, such as `16 passed · 0 failed · 0 not run`, and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
+
+### Why 15 claims in one command and 18 in another
+
+There are two ways to run this, and the difference comes up in interviews:
+
+| Command | Who it's for | Claims it reaches |
+|---|---|---|
+| `npx crumple-mcp prove --self` | Anyone, with only Node | 15 of 18. C14 needs Python, C15 needs Cloudflare's `workerd`, and C16 is about installing the package, so they show as not run, with where they do run |
+| `npm run prove` | Someone with the repo and `uv` | All 18. It runs those three test suites first, then folds what they found into one report |
+
+Each suite's result comes from Vitest's own results file, never from its printed words or from a person. It passes only with exit code 0, at least one test passed, none failed and **none skipped**, because a test that skips when a tool is missing would otherwise look like a pass. With `uv` hidden from the `PATH`, C14 fails and the command exits 1, which is how we know the check can fail.
+
+The package has no flag for this. Only the repo's own script does it, so no `npx` run can mark a claim as passed. And C16's row says what it really is: a packed tarball in an empty folder on this machine, not a clean machine or the published package.
 
 ## Why a hand-written client
 

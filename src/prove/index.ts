@@ -4,6 +4,8 @@ export { CLAIMS, rollUpClaims } from './claims.js';
 export type { Claim, ClaimOutcome, ClaimState } from './claims.js';
 export { renderBadge, renderCheckRows, renderCounts, renderJson, renderMarkdown, renderTerminal } from './report.js';
 export type { Environment, ProveReport, ToolCost, ToolSummary } from './report.js';
+export { SUITES, suiteOutcome, withSuites } from './suites.js';
+export type { Suite, SuiteRun } from './suites.js';
 export { agentChecks, gateChecks, proverChecks, recordedChecks, RECOVERY_SCENARIOS, SELF_CHECKS } from './self-checks.js';
 export type { AgentTrace, GateCheck, GateResult, Prover, RecordedRun, RecordedRuns, RecordedTokens, SpanSeen, StartTarget, Target, TargetSetup, TracingAgent, UpstreamRequest } from './self-checks.js';
 export { callResult, createBudget, createHttpTransport, openSession } from '../mcp-client/client.js';

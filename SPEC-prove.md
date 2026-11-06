@@ -141,7 +141,9 @@ Each check starts its own Crumple in front of its own `fault-api`, on real ports
 
 Short deadlines and a short breaker window keep it quick, because C16 gives `demo` 60 seconds and `demo` is built on this.
 
-**A claim only passes when all of its parts ran.** C2 and C10 show as "partly checked" until `evals` exists. Other claims are listed as not run, with the task that brings them: C11 and C12 (Task 27), C13 (Task 28), C14 (`npm run test:interop`, which needs Python, so a stranger's `npx` run can't do it), C15 (`npm run test:workers`), C16 (Task 24), C17 and C18 (Task 23). Checkpoint D's "all 18 pass" is the last step, not this one.
+**A claim only passes when all of its parts ran.** Three claims can't run inside `prove --self`, and a stranger's run shows them as not run, saying where they do run: C14 (`npm run test:interop`, which needs Python), C15 (`npm run test:workers`, which needs `workerd`) and C16 (`npm run test:install`, which packs the tarball). So `prove --self` reaches 15 of the 18.
+
+**`npm run prove` reaches all 18.** It's the repo's own command, for whoever has the tools: it runs those three suites, then `prove --self`, and writes one report with every claim in it. Each suite becomes a check whose result comes from the run: it passes only with exit code 0, at least one test passed, none failed and **none skipped**, because a skipped test proves nothing. The package gets no flag or variable for this, so no `npx` run can mark a claim as passed, and a report's "pass" on C14 is never typed by hand. C16 runs from a packed tarball in an empty folder on this machine, and its row says so: that isn't a clean machine, or the published package.
 
 ### Can each check actually fail?
 
@@ -214,7 +216,7 @@ crumple-mcp prove  https://you/mcp
 ```
 
 - **Exit codes:** 0 when nothing failed, 1 when something did, 2 for a usage error. "Not run" doesn't fail, so it can go in CI.
-- **Files:** `--out` writes Markdown and JSON from the same data. `npm run prove` runs `--self` and writes `proof/latest.md`, `.json` and `.svg` with the commit, date, OS, CPU, memory and Node version. **It leaves out the machine's name,** because this goes in a public repo. A dirty working tree is stated, and the numbers come from the run, never by hand.
+- **Files:** `--out` writes Markdown and JSON from the same data. `npm run prove` runs `--self` and the three suites above, and writes `proof/latest.md`, `.json` and `.svg` with the commit, date, OS, CPU, memory and Node version. **It leaves out the machine's name,** because this goes in a public repo. A dirty working tree is stated, and the numbers come from the run, never by hand.
 - **Query strings are stripped** from the URL in a report, because that's where people put keys.
 
 **The badge is a file, not a service.** `prove.svg` is written locally and says `3 passed · 1 failed · 7 not run`, never just "passing". A hosted badge would be a request to someone's server each time a README loads, which isn't what this package does. **The limit:** it's self-reported, so anyone could edit it. It's only as good as the JSON beside it and being able to run the command again.

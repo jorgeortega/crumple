@@ -132,8 +132,14 @@ export function renderMarkdown(report: ProveReport): string {
   for (const note of report.notes ?? []) lines.push(`Note: ${note}`, '');
 
   if (report.claims) {
-    lines.push('## Claims', '', '| Claim | | Result | Not checked here |', '|---|---|---|---|');
-    for (const claim of report.claims) lines.push(`| ${claim.id} | ${cell(claim.text)} | ${CLAIM_LABEL[claim.state]} | ${cell(claim.pending ?? '')} |`);
+    // A column of blanks would suggest there was something to say about each claim.
+    const anyElsewhere = report.claims.some(({ pending }) => pending !== undefined);
+    const [heading, rule] = anyElsewhere ? ['| Not checked here |', '---|'] : ['', ''];
+    lines.push('## Claims', '', `| Claim | | Result | Checked by |${heading}`, `|---|---|---|---|${rule}`);
+    for (const claim of report.claims) {
+      const by = claim.checks.map((id) => `\`${id}\``).join(', ');
+      lines.push(`| ${claim.id} | ${cell(claim.text)} | ${CLAIM_LABEL[claim.state]} | ${by} |${anyElsewhere ? ` ${cell(claim.pending ?? '')} |` : ''}`);
+    }
     lines.push('');
   }
 
