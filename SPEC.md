@@ -78,7 +78,7 @@ measured, never written by hand.
 | C12 | Each run reports its tokens and cost | Totals match the provider's reported usage in a recorded run, priced from a dated table | `agent-runner` |
 | C13 | A behaviour regression gets caught | A deliberately broken tool description makes the eval gate fail | `evals` |
 | C14 | It speaks real MCP | The official Python SDK, a separate implementation, lists and calls tools | `mcp-surface` |
-| C15 | The public demo can't run up a bill or be abused | Rate limit and daily cap trigger, data resets, and no public path reaches a paid model call | `hosted-demo` |
+| C15 | The demo's own limits hold, no public path reaches a paid model, and abuse can't cost more than Cloudflare's per-request price | Rate limit and daily cap trigger, data resets, and no public path reaches a paid model call | `hosted-demo` |
 | C16 | A stranger succeeds in 60 seconds | On a clean machine with Node, `npx crumple-mcp demo` prints results with no account, key or config | `cli`, `prove` |
 | C17 | `prove` is safe to point at a real server | Against a test server with lying hints, it calls no real tool unless told to by name, and it stays within a stated request budget | `prove` |
 | C18 | Tool definitions have a visible cost | `prove` reports the estimated tokens each tool's definition adds to every turn, labelled as an estimate | `prove` |
@@ -145,7 +145,7 @@ Each one becomes a short decision record in `docs/adr/`.
 | MCP version | Serve 2026-07-28; the spec for `mcp-surface` decides about older clients, since adoption argues for keeping them | Stateless requests mean any instance can serve any call | Some extra code if older clients stay |
 | MCP library | Official TypeScript SDK 2.x, through `createMcpHandler`. The spike passed on Node and in `workerd` ([ADR 0001](docs/adr/0001-mcp-library.md)), so the `modern.ts` fallback isn't needed | Using the standard library shows judgment | Less control, and an 18 MB install, which `SPEC-cli.md` measured and chose to keep |
 | Authentication | Hashed API keys plus JWT checking, acting only as a resource server | Right size for 20 days | No built-in OAuth login flow, which is a natural Latitude 10 upgrade |
-| Storage | One small interface: memory by default, `node:sqlite` when configured, D1 on the demo | `npx` must work with no setup | Some features only last as long as the process in memory mode |
+| Storage | One small interface: memory by default, `node:sqlite` when configured. The demo needs neither: its keys are public, and D1 holds only a daily counter (`SPEC-hosted-demo.md`) | `npx` must work with no setup | Some features only last as long as the process in memory mode |
 | Limits across instances | Exact in the single-process Node runtime. On the demo, D1's atomic counter for the daily cap and per-instance limits for the rest, documented | Durable Objects are out of scope, which removes a large piece of work | Approximate limits on the demo only |
 | Tracing | W3C `traceparent` in the MCP `_meta` field (SEP-414), with span names per OpenTelemetry's MCP conventions, exported as OTLP | Works with tools people already run | A little format work |
 | Model calls | One adapter for Claude first; users supply their own key. Recordings replay by default. An OpenAI-compatible adapter is second | Adoption needs more than one provider, and replay keeps checks free | Replays don't catch new model behaviour |

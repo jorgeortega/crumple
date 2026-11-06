@@ -36,7 +36,7 @@ function openStore(path = ':memory:', maxAuditEvents?: number): SqliteStore {
   return store;
 }
 
-// The same tests for every backend. D1 will run these too.
+// The same tests for every backend.
 keyStoreContract('memory', () => memoryKeyStore());
 keyStoreContract('SQLite', () => openStore().keys);
 auditSinkContract('memory', (capacity) => memoryAuditSink({ capacity }));

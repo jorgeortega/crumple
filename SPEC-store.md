@@ -12,13 +12,13 @@ Without it, keys and audit events disappear when the process stops, which is fin
 | Audit events | `AuditSink` | `telemetry` |
 | The sealed upstream credential | Its own, since `SPEC-cli.md` put it here | `cli`'s `credential set` |
 
-Memory stays the default, because `npx` has to work with no setup. D1 is Task 29, and it runs the same shared tests.
+Memory stays the default, because `npx` has to work with no setup. D1 was planned for Task 29, and the owner dropped it on 2026-11-06 (`SPEC-hosted-demo.md`, decision 3): the demo has no keys to save. If someone later wants Crumple on Workers with saved keys, it runs the same shared tests.
 
 ## Decisions
 
 **`node:sqlite`, not a package.** It comes with Node, so there's no dependency to add and no native build for a stranger's install to fail on. The cost is that it's still marked experimental: it works on Node 22.13.1 with no flag (tested 2026-11-04), but prints an `ExperimentalWarning`. So it's only loaded when someone asks for a database, and a first run never shows it.
 
-**The same tests for every backend.** One contract in `tests/helpers/store-contract.ts` runs against memory and SQLite, and D1 will run it too. That's what stops "works in memory, breaks in production".
+**The same tests for every backend.** One contract in `tests/helpers/store-contract.ts` runs against memory and SQLite, and any later backend runs it too. That's what stops "works in memory, breaks in production".
 
 **The file is readable only by its owner.** It's set to `0600` before anything is written, including SQLite's extra files. It holds key hashes and who called what, so other users on the machine have no business reading it.
 

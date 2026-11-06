@@ -1,6 +1,6 @@
 # Spec: `hosted-demo`
 
-Status: draft for the owner's approval, 2026-11-05. Module on [the map](CAPABILITY-MAP.md). Covers Tasks 29 to 31.
+Status: approved by the owner on 2026-11-06 ("Approve all four": option A on all four decisions below). Module on [the map](CAPABILITY-MAP.md). Covers Tasks 29 to 31.
 
 ## What it is
 

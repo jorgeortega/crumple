@@ -141,7 +141,7 @@ Each check starts its own Crumple in front of its own `fault-api`, on real ports
 
 Short deadlines and a short breaker window keep it quick, because C16 gives `demo` 60 seconds and `demo` is built on this.
 
-**A claim only passes when all of its parts ran.** C2 and C10 show as "partly checked" until `evals` exists. Other claims are listed as not run, with the task that brings them: C11 and C12 (Task 27), C13 (Task 28), C14 (`npm run test:interop`, which needs Python, so a stranger's `npx` run can't do it), C15 (Task 31), C16 (Task 24), C17 and C18 (Task 23). Checkpoint D's "all 18 pass" is the last step, not this one.
+**A claim only passes when all of its parts ran.** C2 and C10 show as "partly checked" until `evals` exists. Other claims are listed as not run, with the task that brings them: C11 and C12 (Task 27), C13 (Task 28), C14 (`npm run test:interop`, which needs Python, so a stranger's `npx` run can't do it), C15 (`npm run test:workers`), C16 (Task 24), C17 and C18 (Task 23). Checkpoint D's "all 18 pass" is the last step, not this one.
 
 ### Can each check actually fail?
 

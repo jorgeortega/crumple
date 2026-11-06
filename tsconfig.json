@@ -17,6 +17,6 @@
     "checkJs": true,
     "noEmit": true
   },
-  "include": ["src", "tests", "scripts", "*.ts"],
+  "include": ["src", "tests", "scripts", "workers", "*.ts"],
   "exclude": ["node_modules", "spikes"]
 }

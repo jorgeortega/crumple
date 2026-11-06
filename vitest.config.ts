@@ -5,8 +5,9 @@ export default defineConfig({
     exclude: ['node_modules/**', 'spikes/**', 'dist/**'],
     coverage: {
       provider: 'v8',
-      include: ['src/**/*.ts'],
-      exclude: ['src/**/*.test.ts'],
+      include: ['src/**/*.ts', 'workers/**/*.ts'],
+      // index.ts is the few lines that read Cloudflare's bindings, and test:workers runs those.
+      exclude: ['src/**/*.test.ts', 'workers/**/*.test.ts', 'workers/index.ts'],
       reporter: ['text-summary'],
       // The spec's bars. Mistakes in these two cause real damage, so they get the higher one.
       thresholds: {

@@ -12,6 +12,12 @@ const SCRIPT = fileURLToPath(new URL('../scripts/secret-scan.mjs', import.meta.u
 const FAKE_GITHUB_TOKEN = `ghp_${'a'.repeat(36)}`;
 
 describe('findSecretShapes', () => {
+  it('lets through only the two keys the public demo prints', () => {
+    expect(findSecretShapes('crumple_public-demo-read-key-fake-data-nothing-else')).toEqual([]);
+    expect(findSecretShapes('crumple_public-demo-charge-key-fake-payments-only-1')).toEqual([]);
+    expect(findSecretShapes('crumple_public-demo-read-key-fake-data-nothing-else'.replace(/e$/, 'x'))).toEqual(['Crumple key']);
+  });
+
   it.each([
     ['Stripe live key', `key = "sk_live_${'a'.repeat(24)}"`],
     ['Stripe webhook secret', `whsec_${'a'.repeat(24)}`],

@@ -198,7 +198,7 @@ describe('the Markdown report', () => {
     const text = renderMarkdown(serverReport({ kind: 'self', requests: undefined as never, claims, environment: { ...ENVIRONMENT, commit: 'abc1234', dirty: true }, checks: [outcome('C1', 'pass', 'C1')] }));
     expect(text).toContain('| C1 | Access is denied by default | pass |  |');
     expect(text).toContain('| C10 | Failures tell the agent what to do next | partly checked | a real model recovering needs a live eval, which spends money |');
-    expect(text).toContain('| C15 | The public demo can\'t run up a bill or be abused | not run |');
+    expect(text).toContain('| C15 | The demo\'s own limits hold, no public path reaches a paid model, and abuse can\'t cost more than Cloudflare\'s per-request price | not run |');
     expect(text).toContain('commit abc1234 with uncommitted changes');
     expect(text).toContain('production load');
   });

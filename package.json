@@ -42,6 +42,7 @@
     "test:coverage": "vitest run --coverage",
     "test:interop": "vitest run --config vitest.interop.config.ts",
     "test:install": "vitest run --config vitest.install.config.ts",
+    "test:workers": "vitest run --config vitest.workers.config.ts",
     "test:oldest-node": "npx -y -p node@22.13.1 node node_modules/vitest/vitest.mjs run",
     "check": "npm run typecheck && npm run lint && npm run test:coverage && npm run secrets"
   },
@@ -52,7 +53,8 @@
     "eslint": "10.14.0",
     "typescript": "6.0.3",
     "typescript-eslint": "8.72.1",
-    "vitest": "5.1.0"
+    "vitest": "5.1.0",
+    "wrangler": "4.158.0"
   },
   "dependencies": {
     "@modelcontextprotocol/server": "2.4.0",

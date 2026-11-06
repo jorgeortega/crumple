@@ -25,7 +25,7 @@ export interface KeyRecord {
   revokedAt?: number;
 }
 
-/** Small on purpose. Memory lives here, and SQLite and D1 pass the same tests later. */
+/** Small on purpose. Memory lives here, and SQLite passes the same tests. */
 export interface KeyStore {
   add(record: KeyRecord): Promise<void>;
   findByHash(hash: string): Promise<KeyRecord | undefined>;

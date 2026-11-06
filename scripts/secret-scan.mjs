@@ -27,12 +27,20 @@ const SECRET_SHAPES = [
 // Lockfiles are full of long hashes, and these formats can't hold readable text.
 const SKIPPED = /\.(png|jpe?g|gif|webp|ico|woff2?|ttf|otf|zip|pdf|mp4|webm|wasm|tgz)$|(^|\/)package-lock\.json$/;
 
+// Printed on the public demo's page, on purpose: they reach fake data. Only these exact two are let
+// through, so any other key of this shape still stops the push.
+const PUBLIC_DEMO_KEYS = [
+  'crumple_public-demo-read-key-fake-data-nothing-else',
+  'crumple_public-demo-charge-key-fake-payments-only-1',
+];
+
 /**
  * @param {string} text
  * @returns {string[]} the names of the credential shapes found, never the values
  */
 export function findSecretShapes(text) {
-  return SECRET_SHAPES.filter(({ pattern }) => pattern.test(text)).map(({ name }) => name);
+  const checked = PUBLIC_DEMO_KEYS.reduce((remaining, key) => remaining.replaceAll(key, ''), text);
+  return SECRET_SHAPES.filter(({ pattern }) => pattern.test(checked)).map(({ name }) => name);
 }
 
 // Tracked files plus untracked ones git wouldn't ignore, so a key is caught before

@@ -51,7 +51,7 @@ These are in the spec and get decision records as they're built:
 - **The agent and `prove` use the protocol only.** They could be pointed at anyone's
   server, which also keeps Crumple honest about being real MCP.
 - **Core on web-standard APIs,** with thin Node and Workers adapters.
-- **Storage behind one small interface:** memory, `node:sqlite`, D1.
+- **Storage behind one small interface:** memory and `node:sqlite`. The demo needs neither.
 
 New in this plan:
 

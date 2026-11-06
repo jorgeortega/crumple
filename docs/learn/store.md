@@ -8,7 +8,7 @@ It saves API keys, audit events and an optional sealed credential in one SQLite 
 
 ## The central idea: one set of tests for every backend
 
-[store-contract.ts](../../tests/helpers/store-contract.ts) is one list of behaviours: a key is found by its hash, revoking happens once, a caller can't change a stored grant, odd text stays data. Memory and SQLite both run it, and D1 will too.
+[store-contract.ts](../../tests/helpers/store-contract.ts) is one list of behaviours: a key is found by its hash, revoking happens once, a caller can't change a stored grant, odd text stays data. Memory and SQLite both run it, and so would any later backend.
 
 That's what stops "it worked in memory and broke in production". A new backend passes those tests or it doesn't exist, and nothing above it has to change.
 

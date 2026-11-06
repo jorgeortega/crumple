@@ -25,7 +25,7 @@ export const CLAIMS: readonly Claim[] = [
   { id: 'C12', text: 'Each run reports its tokens and cost', pending: 'needs a recording from a real model, which spends money (Task 27)' },
   { id: 'C13', text: 'A behaviour regression gets caught' },
   { id: 'C14', text: 'It speaks real MCP', pending: 'needs Python, so it runs in npm run test:interop' },
-  { id: 'C15', text: 'The public demo can\'t run up a bill or be abused', pending: 'needs the hosted demo (Task 31)' },
+  { id: 'C15', text: 'The demo\'s own limits hold, no public path reaches a paid model, and abuse can\'t cost more than Cloudflare\'s per-request price', pending: 'needs the Worker, so it runs in npm run test:workers' },
   { id: 'C16', text: 'A stranger succeeds in 60 seconds', pending: 'a stranger\'s first run, so it runs in npm run test:install' },
   { id: 'C17', text: 'prove is safe to point at a real server' },
   { id: 'C18', text: 'Tool definitions have a visible cost' },

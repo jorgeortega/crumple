@@ -209,20 +209,20 @@ The only finding that could change the design.
 - [ ] Bring the owner the failures and a few transcripts from that run: would they have scored any differently?
 - Depends on: 27, 7. Files: `src/evals/*`, `scenarios/*`
 
-### Task 29: Add the Workers adapter and D1 storage (M)
-- [ ] **OWNER:** approve `SPEC-hosted-demo.md` first, including the Workers Paid check
+### Task 29: Add the Workers adapter (M)
+- [x] **OWNER:** approve `SPEC-hosted-demo.md` first (2026-11-06, "Approve all four"). D1 holds only the daily counter, so `src/store/d1.ts` isn't built
 - [ ] The same flows pass in `workerd`
-- Verify: `npx vitest run tests/workers`
-- Depends on: 18, 19. Files: `workers/*`, `src/store/d1.ts`, tests
+- Verify: `npm run test:workers`
+- Depends on: 18, 19. Files: `workers/*`, tests
 
 ### Task 30: Add abuse limits and the results page (M) — C15
 - [ ] Shared demo keys, a rate limit, a daily cap, data that resets, no path to a paid model
-- [ ] One read-only page showing a run's trace and which claims held, using the site's Terminal design tokens
+- [ ] One page with four live buttons, showing a run's trace and which claims held, using the site's Terminal design tokens
 - Verify: each limit triggers in tests; desktop and mobile by hand
 - Depends on: 29, 22. Files: `workers/limits.ts`, `workers/page.ts`, tests
 
 ### Task 31: Deploy the demo
-- [ ] **OWNER:** okay the first deploy, which adds a DNS record for `crumple.latitude10.tech`
+- [ ] **OWNER:** confirm the same Cloudflare account and Workers Paid, set a billing notification, and okay the first deploy, which adds a DNS record for `crumple.latitude10.tech`
 - [ ] A stock MCP client connects to the public URL and calls a tool
 - Depends on: 30, 21
 

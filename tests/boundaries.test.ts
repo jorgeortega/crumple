@@ -36,7 +36,7 @@ const WIRING: ModuleMap = { cli: ['prove', 'evals', 'agent-runner'] };
 const NO_PROTOCOL_LIBRARY = ['fault-api', 'telemetry', 'executor', 'access-control'];
 
 // These also run on Cloudflare Workers, so they use web-standard APIs only.
-const WEB_STANDARD_ONLY = [...NO_PROTOCOL_LIBRARY, 'mcp-surface'];
+const WEB_STANDARD_ONLY = [...NO_PROTOCOL_LIBRARY, 'mcp-surface', 'hosted-demo'];
 
 function moduleOf(path: string): string | undefined {
   // An import names the compiled file, so an import of it arrives here as node.js.
@@ -108,6 +108,7 @@ describe('the capability map', () => {
     expect(MAP['agent-runner']).toEqual(['telemetry', 'mcp-client']);
     expect(MAP['mcp-client']).toEqual([]);
     expect(MAP['mcp-surface']).toEqual(['executor', 'access-control', 'telemetry']);
+    expect(MAP['hosted-demo']).toEqual(['mcp-surface', 'telemetry', 'fault-api']);
   });
 
   it('has no cycles', () => {
@@ -128,6 +129,8 @@ describe('findViolations', () => {
     ['the agent reaching into prove', 'src/agent-runner/loop.ts', "import { x } from '../prove/report.js';"],
     ['prove reaching into the agent', 'src/prove/run.ts', "import { x } from '../agent-runner/loop.js';"],
     ['the public demo reaching a paid model', 'workers/index.ts', "import { x } from '../src/agent-runner/claude.js';"],
+    ['the public demo using saved keys', 'workers/index.ts', "import { x } from '../src/store/sqlite.js';"],
+    ['the public demo using a Node-only API', 'workers/index.ts', "import { x } from 'node:fs';"],
     ['telemetry using a Node-only API', 'src/telemetry/spans.ts', "import { x } from 'node:fs';"],
     ['the protocol layer using a Node-only API', 'src/mcp-surface/server.ts', "import { x } from 'crypto';"],
     ['a folder the map doesn\'t know', 'src/helpers/util.ts', 'export const a = 1;'],
