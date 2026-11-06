@@ -1,33 +1,33 @@
 # crumple-mcp prove: Crumple itself
 
-**16 passed, 0 failed, 0 not run.**
+**19 passed, 0 failed, 0 not run.**
 
-Run 2026-11-06T15:07:18.299Z, taking 4.7 s, with crumple-mcp 0.1.0: commit e001085. darwin arm64, Apple M5, 16 GB, Node 26.10.0.
+Run 2026-11-06T15:15:30.582Z, taking 70.7 s, with crumple-mcp 0.1.0: commit f952fff. darwin arm64, Apple M5, 16 GB, Node 26.10.0.
 
 Measured on one machine, with failures caused on purpose. It says nothing about production load.
 
 ## Claims
 
-| Claim | | Result | Not checked here |
+| Claim | | Result | Checked by |
 |---|---|---|---|
-| C1 | Access is denied by default | pass |  |
-| C2 | The model can't talk its way past a permission | pass |  |
-| C3 | The agent's token never reaches the upstream API | pass |  |
-| C4 | The stored credential never leaks | pass |  |
-| C5 | A write is never applied twice | pass |  |
-| C6 | No call outlives its deadline | pass |  |
-| C7 | Only temporary failures are retried | pass |  |
-| C8 | A failing upstream stops being hit | pass |  |
-| C9 | One noisy caller can't starve another | pass |  |
-| C10 | Failures tell the agent what to do next | pass |  |
-| C11 | Every call can be traced end to end | pass |  |
-| C12 | Each run reports its tokens and cost | pass |  |
-| C13 | A behaviour regression gets caught | pass |  |
-| C14 | It speaks real MCP | not run | needs Python, so it runs in npm run test:interop |
-| C15 | The demo's own limits hold, no public path reaches a paid model, and abuse can't cost more than Cloudflare's per-request price | not run | needs the Worker, so it runs in npm run test:workers |
-| C16 | A stranger succeeds in 60 seconds | not run | a stranger's first run, so it runs in npm run test:install |
-| C17 | prove is safe to point at a real server | pass |  |
-| C18 | Tool definitions have a visible cost | pass |  |
+| C1 | Access is denied by default | pass | `denied-by-default` |
+| C2 | The model can't talk its way past a permission | pass | `permission-holds` |
+| C3 | The agent's token never reaches the upstream API | pass | `token-stays-here` |
+| C4 | The stored credential never leaks | pass | `credential-stays-hidden` |
+| C5 | A write is never applied twice | pass | `one-effect` |
+| C6 | No call outlives its deadline | pass | `deadline-holds` |
+| C7 | Only temporary failures are retried | pass | `right-retries` |
+| C8 | A failing upstream stops being hit | pass | `breaker-opens` |
+| C9 | One noisy caller can't starve another | pass | `noisy-caller` |
+| C10 | Failures tell the agent what to do next | pass | `errors-say-what-next`, `real-model-acted-on-errors` |
+| C11 | Every call can be traced end to end | pass | `trace-joined` |
+| C12 | Each run reports its tokens and cost | pass | `recorded-usage-adds-up` |
+| C13 | A behaviour regression gets caught | pass | `gate-notices-change` |
+| C14 | It speaks real MCP | pass | `python-sdk-interop` |
+| C15 | The demo's own limits hold, no public path reaches a paid model, and abuse can't cost more than Cloudflare's per-request price | pass | `demo-limits-in-workerd` |
+| C16 | A stranger succeeds in 60 seconds | pass | `first-run-from-tarball` |
+| C17 | prove is safe to point at a real server | pass | `prove-is-safe` |
+| C18 | Tool definitions have a visible cost | pass | `tool-cost-shown` |
 
 ## Checks
 
@@ -49,6 +49,9 @@ Measured on one machine, with failures caused on purpose. It says nothing about 
 | `gate-notices-change` Every tool's description is broken, and a recording is replayed | pass | Unchanged, the replay passes. With the descriptions broken, it reports them as changed and the gate fails. This catches any change, good or bad. Only a live run shows whether a real model does worse. |
 | `real-model-acted-on-errors` A real model reading Crumple's errors, replayed from its recording | pass | On 2026-11-06, claude-haiku-5-5 got each failure from Crumple and acted on what it said, with a system prompt that says nothing about errors: lost-responses, api-down-then-up, wont-get-better. Today's server still gives it the same words. This is one kept run of each, not a rate: the rates are in the live eval's report. |
 | `recorded-usage-adds-up` Each run's tokens and cost, against the provider's own numbers | pass | In 14 recordings from a real model, each run's totals equal what the provider's replies add up to, with a cost worked out per call: 36880 tokens in and 3181 out. |
+| `python-sdk-interop` The official Python SDK, a separate implementation, lists and calls tools | pass | npm run test:interop: 7 tests passed in 3.6 s. |
+| `demo-limits-in-workerd` The demo's rate limit, daily cap and reset, in workerd, with no public path to a paid model | pass | npm run test:workers: 30 tests passed in 25.6 s. |
+| `first-run-from-tarball` A first run from a packed tarball in an empty folder on this machine, not a clean machine or the published package | pass | npm run test:install: 15 tests passed in 36.7 s. |
 
 ---
 

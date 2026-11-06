@@ -1,16 +1,16 @@
 {
   "counts": {
-    "passed": 16,
+    "passed": 19,
     "failed": 0,
     "notRun": 0
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-06T15:07:18.299Z",
-  "durationMs": 4663,
+  "startedAt": "2026-11-06T15:15:30.582Z",
+  "durationMs": 70739,
   "environment": {
     "version": "0.1.0",
-    "commit": "e001085",
+    "commit": "f952fff",
     "dirty": false,
     "os": "darwin arm64",
     "cpu": "Apple M5",
@@ -110,7 +110,7 @@
         "flood_succeeded": 3,
         "flood_refused": 17,
         "other_succeeded": 3,
-        "other_slowest_ms": 213
+        "other_slowest_ms": 216
       }
     },
     {
@@ -177,6 +177,36 @@
         "recordings": 14,
         "input_tokens": 36880,
         "output_tokens": 3181
+      }
+    },
+    {
+      "id": "python-sdk-interop",
+      "title": "The official Python SDK, a separate implementation, lists and calls tools",
+      "claim": "C14",
+      "state": "pass",
+      "detail": "npm run test:interop: 7 tests passed in 3.6 s.",
+      "measured": {
+        "durationMs": 3634
+      }
+    },
+    {
+      "id": "demo-limits-in-workerd",
+      "title": "The demo's rate limit, daily cap and reset, in workerd, with no public path to a paid model",
+      "claim": "C15",
+      "state": "pass",
+      "detail": "npm run test:workers: 30 tests passed in 25.6 s.",
+      "measured": {
+        "durationMs": 25641
+      }
+    },
+    {
+      "id": "first-run-from-tarball",
+      "title": "A first run from a packed tarball in an empty folder on this machine, not a clean machine or the published package",
+      "claim": "C16",
+      "state": "pass",
+      "detail": "npm run test:install: 15 tests passed in 36.7 s.",
+      "measured": {
+        "durationMs": 36674
       }
     }
   ],
@@ -289,23 +319,26 @@
     {
       "id": "C14",
       "text": "It speaks real MCP",
-      "state": "not_run",
-      "checks": [],
-      "pending": "needs Python, so it runs in npm run test:interop"
+      "state": "pass",
+      "checks": [
+        "python-sdk-interop"
+      ]
     },
     {
       "id": "C15",
       "text": "The demo's own limits hold, no public path reaches a paid model, and abuse can't cost more than Cloudflare's per-request price",
-      "state": "not_run",
-      "checks": [],
-      "pending": "needs the Worker, so it runs in npm run test:workers"
+      "state": "pass",
+      "checks": [
+        "demo-limits-in-workerd"
+      ]
     },
     {
       "id": "C16",
       "text": "A stranger succeeds in 60 seconds",
-      "state": "not_run",
-      "checks": [],
-      "pending": "a stranger's first run, so it runs in npm run test:install"
+      "state": "pass",
+      "checks": [
+        "first-run-from-tarball"
+      ]
     },
     {
       "id": "C17",
