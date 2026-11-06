@@ -1,0 +1,460 @@
+{
+  "format": 1,
+  "source": "live",
+  "recordedAt": "2026-11-06T12:47:09.732Z",
+  "commit": "6abdfe6",
+  "apiVersion": "2026-10-21",
+  "model": "claude-haiku-5-5",
+  "scenario": "api-down-then-up",
+  "exchanges": [
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the email address of customer cus_1?"
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhLGmj8PSK49BDSv5Yr",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "tool_use",
+              "id": "toolu_016n1EmtfT7dtKPCZFp3qQvb",
+              "name": "getCustomer",
+              "input": {
+                "id": "cus_1"
+              },
+              "caller": {
+                "type": "direct"
+              }
+            }
+          ],
+          "container": null,
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 779,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 52,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the email address of customer cus_1?"
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "toolu_016n1EmtfT7dtKPCZFp3qQvb",
+                "name": "getCustomer",
+                "input": {
+                  "id": "cus_1"
+                },
+                "caller": {
+                  "type": "direct"
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_016n1EmtfT7dtKPCZFp3qQvb",
+                "content": "{\"code\":\"unavailable\",\"message\":\"The API is having problems. Try again later.\",\"retry\":\"later\"}",
+                "is_error": true
+              }
+            ]
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhLL79jLi4pChzq3Cub",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "thinking",
+              "thinking": "",
+              "signature": "CAQSqQUKEAgTGAI4AUIIdGhpbmtpbmcSDBnWkGwyWiF0m+sarBoMhNVo3cbopfSEBYtEIjBtCKuzHfh2I80B7frMwwrhlGQq1WBK2DFpReWR5aHP06mylhWhOh5xIeVTCuTot8QqxgSvXxoKDha8/1L3wTrSYFUhO5tpJ0BDAvkyTrASmWbqAu8th/JKQhzqArAWlSzHew0KXBPHClNUomwcLsxaocioC2y+y9nY2/n+dZpR9iSzeB2LAdTh7TSnFivdDUH/2QTZfCmVtceBFb6a8NZajtxL0FvmgHeNjH8Lg7K1PlO9O1C31ka6GiSx58779qoDxvGXmzY1RieTy9M3q+hJ0pWLAY1iGXo5iDmMWSZUVFNGE2NPKfhfuZAyuYppoM3ElqQ8B2tLfDygfyjEOVNL+b9nXfkim1U85bRZlQdnbHTZATTMaQpDEjz/OvqIgEiiMn8RtuZcb14Jm+MozuYp39EzcPgx2Ew4UPG05GZ148MlEl1A83iM731hk/4Aide/8gDH3rNxyCu+e9wPj62nvSeeGaq04GxkjVPX0j7VeCC01ln7Qoia09TcuvXHoDD/iqu7t6HX9w5UWZKgbpOBTZm9N3x7yjmDmBKZrlWSPl2UOQvEKjZkXYcpggXunnjVLvP7MWFtV5nxO0n7BBw0Z8Yi4rPaqqg8E0uUeHZyfacCtu6C3zcWwiljM+xg6XO734+6Un1rp+GXkt38ymi1Q7VRMAZfqb76CeigiYB2c/RBFv4dlwBC0e71GvANiXe3+qA320E4Twm0irdGka3ux/JVtefv12MvsLhHpUEMr68ZG0tQNSwKmBlnL7BsbjTH1+2mNXYaBxOFcwGRBP9X24gMO/rYfRlnvClrrkUDCZp7C14d1Lnz8z2i8b2wYciSiqm6ir4msa8YAQ=="
+            },
+            {
+              "type": "tool_use",
+              "id": "toolu_012DM4JEJD63W1U4SNeoNwfN",
+              "name": "getCustomer",
+              "input": {
+                "id": "cus_1"
+              },
+              "caller": {
+                "type": "direct"
+              }
+            }
+          ],
+          "container": null,
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 875,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 76,
+            "output_tokens_details": {
+              "thinking_tokens": 23
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "What's the email address of customer cus_1?"
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "toolu_016n1EmtfT7dtKPCZFp3qQvb",
+                "name": "getCustomer",
+                "input": {
+                  "id": "cus_1"
+                },
+                "caller": {
+                  "type": "direct"
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_016n1EmtfT7dtKPCZFp3qQvb",
+                "content": "{\"code\":\"unavailable\",\"message\":\"The API is having problems. Try again later.\",\"retry\":\"later\"}",
+                "is_error": true
+              }
+            ]
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "",
+                "signature": "CAQSqQUKEAgTGAI4AUIIdGhpbmtpbmcSDBnWkGwyWiF0m+sarBoMhNVo3cbopfSEBYtEIjBtCKuzHfh2I80B7frMwwrhlGQq1WBK2DFpReWR5aHP06mylhWhOh5xIeVTCuTot8QqxgSvXxoKDha8/1L3wTrSYFUhO5tpJ0BDAvkyTrASmWbqAu8th/JKQhzqArAWlSzHew0KXBPHClNUomwcLsxaocioC2y+y9nY2/n+dZpR9iSzeB2LAdTh7TSnFivdDUH/2QTZfCmVtceBFb6a8NZajtxL0FvmgHeNjH8Lg7K1PlO9O1C31ka6GiSx58779qoDxvGXmzY1RieTy9M3q+hJ0pWLAY1iGXo5iDmMWSZUVFNGE2NPKfhfuZAyuYppoM3ElqQ8B2tLfDygfyjEOVNL+b9nXfkim1U85bRZlQdnbHTZATTMaQpDEjz/OvqIgEiiMn8RtuZcb14Jm+MozuYp39EzcPgx2Ew4UPG05GZ148MlEl1A83iM731hk/4Aide/8gDH3rNxyCu+e9wPj62nvSeeGaq04GxkjVPX0j7VeCC01ln7Qoia09TcuvXHoDD/iqu7t6HX9w5UWZKgbpOBTZm9N3x7yjmDmBKZrlWSPl2UOQvEKjZkXYcpggXunnjVLvP7MWFtV5nxO0n7BBw0Z8Yi4rPaqqg8E0uUeHZyfacCtu6C3zcWwiljM+xg6XO734+6Un1rp+GXkt38ymi1Q7VRMAZfqb76CeigiYB2c/RBFv4dlwBC0e71GvANiXe3+qA320E4Twm0irdGka3ux/JVtefv12MvsLhHpUEMr68ZG0tQNSwKmBlnL7BsbjTH1+2mNXYaBxOFcwGRBP9X24gMO/rYfRlnvClrrkUDCZp7C14d1Lnz8z2i8b2wYciSiqm6ir4msa8YAQ=="
+              },
+              {
+                "type": "tool_use",
+                "id": "toolu_012DM4JEJD63W1U4SNeoNwfN",
+                "name": "getCustomer",
+                "input": {
+                  "id": "cus_1"
+                },
+                "caller": {
+                  "type": "direct"
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_012DM4JEJD63W1U4SNeoNwfN",
+                "content": "{\"id\":\"cus_1\",\"name\":\"Ada Example\",\"email\":\"ada@example.com\",\"status\":\"active\",\"notes\":\"Prefers email.\"}"
+              }
+            ]
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhLPy4tEeVSEgybm7y8",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "The email address for customer cus_1 (Ada Example) is **ada@example.com**.\n\nThe first lookup failed with a temporary API error, so I retried and got the result."
+            }
+          ],
+          "container": null,
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 1001,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 55,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    }
+  ]
+}

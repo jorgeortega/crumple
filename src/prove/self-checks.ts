@@ -1,6 +1,6 @@
 import { MALICIOUS_TEXT } from '../fault-api/index.js';
 import { callResult, createBudget, createHttpTransport, openSession, type Budget, type CallResult, type Session } from '../mcp-client/client.js';
-import { fail, pass, type Check, type CheckResult } from './checks.js';
+import { fail, notRun, pass, type Check, type CheckResult } from './checks.js';
 import { DEFAULT_MAX_REQUESTS, proveServer, type ExternalResult } from './external.js';
 
 // Crumple's claims, each with a failure caused on purpose. Each check starts its own server, so
@@ -480,6 +480,82 @@ export function gateChecks(gate: GateCheck): readonly Check<StartTarget>[] {
         if (unchanged !== 'pass') return fail(`The recording didn't replay cleanly when nothing had changed (${unchanged}), so this shows nothing.`);
         if (broken !== 'stale') return fail(`With the descriptions broken, the replay came back ${broken}, so the gate didn't notice.`);
         return pass('Unchanged, the replay passes. With the descriptions broken, it reports them as changed and the gate fails. This catches any change, good or bad. Only a live run shows whether a real model does worse.');
+      },
+    },
+  ];
+}
+
+export interface RecordedTokens {
+  input: number;
+  output: number;
+  cacheRead: number;
+  cacheWrite: number;
+}
+
+/** One recording, replayed against today's server. */
+export interface RecordedRun {
+  id: string;
+  /** Only `live` says anything about what a real model does. */
+  source: 'live' | 'scripted' | 'missing';
+  model?: string;
+  recordedAt?: string;
+  status?: string;
+  /** Our own words on why it isn't a pass. */
+  note?: string;
+  toolOutcomes: readonly string[];
+  /** Added up from the provider's replies in the recording. */
+  providerUsage: RecordedTokens;
+  /** What the run worked out for itself. */
+  reportedUsage: RecordedTokens;
+  costUsd: number | null;
+}
+
+/** prove can't import evals, by the capability map, so the CLI hands this over. */
+export type RecordedRuns = (start: StartTarget) => Promise<readonly RecordedRun[]>;
+
+/** Each one sends the model a failure from Crumple, with nothing else telling it what to do about it. */
+export const RECOVERY_SCENARIOS: readonly string[] = ['lost-responses', 'api-down-then-up', 'wont-get-better'];
+
+const sameTokens = (a: RecordedTokens, b: RecordedTokens): boolean =>
+  a.input === b.input && a.output === b.output && a.cacheRead === b.cacheRead && a.cacheWrite === b.cacheWrite;
+
+const notAPass = (run: RecordedRun): string => `Replaying ${run.id} came back ${run.status ?? 'with nothing'}${run.note ? `: ${run.note}` : '.'}`;
+
+export function recordedChecks(recorded: RecordedRuns): readonly Check<StartTarget>[] {
+  return [
+    {
+      id: 'real-model-acted-on-errors',
+      title: 'A real model reading Crumple\'s errors, replayed from its recording',
+      claim: 'C10',
+      async run(start) {
+        const runs = await recorded(start);
+        const chosen = RECOVERY_SCENARIOS.map((id) => runs.find((run) => run.id === id && run.source === 'live'));
+        const absent = RECOVERY_SCENARIOS.filter((_id, index) => chosen[index] === undefined);
+        if (absent.length > 0) return notRun(`There's no recording from a real model of ${absent.join(', ')}. A live eval makes them, and that spends money.`);
+        const found = chosen.filter((run) => run !== undefined);
+        for (const run of found) {
+          if (run.status !== 'pass') return fail(notAPass(run));
+          if (!run.toolOutcomes.includes('tool_error')) return fail(`The recording of ${run.id} has no failed call in it, so it shows nothing about acting on an error.`);
+        }
+        const [first] = found;
+        return pass(`On ${first?.recordedAt?.slice(0, 10) ?? 'an unknown day'}, ${first?.model ?? 'a real model'} got each failure from Crumple and acted on what it said, with a system prompt that says nothing about errors: ${RECOVERY_SCENARIOS.join(', ')}. Today's server still gives it the same words. This is one kept run of each, not a rate: the rates are in the live eval's report.`);
+      },
+    },
+    {
+      id: 'recorded-usage-adds-up',
+      title: 'Each run\'s tokens and cost, against the provider\'s own numbers',
+      claim: 'C12',
+      async run(start) {
+        const live = (await recorded(start)).filter((run) => run.source === 'live');
+        if (live.length === 0) return notRun('There are no recordings from a real model. A live eval makes them, and that spends money.');
+        for (const run of live) {
+          if (run.status !== 'pass') return fail(notAPass(run));
+          if (!sameTokens(run.reportedUsage, run.providerUsage)) return fail(`In ${run.id}, the run's totals aren't what the provider's replies add up to.`);
+          if (run.costUsd === null || run.costUsd <= 0) return fail(`In ${run.id}, tokens were used and the cost is ${run.costUsd === null ? 'unknown' : 'zero'}.`);
+        }
+        const input = live.reduce((total, run) => total + run.providerUsage.input, 0);
+        const output = live.reduce((total, run) => total + run.providerUsage.output, 0);
+        return pass(`In ${count(live.length, 'recording')} from a real model, each run's totals equal what the provider's replies add up to, with a cost worked out per call: ${String(input)} tokens in and ${String(output)} out.`, { recordings: live.length, input_tokens: input, output_tokens: output });
       },
     },
   ];

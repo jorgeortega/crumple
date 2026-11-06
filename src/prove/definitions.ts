@@ -12,7 +12,8 @@ const MAX_LISTED = 3;
 
 /**
  * A rough rule, and labelled as an estimate everywhere it shows. Each model and client counts and
- * wraps tools differently, so a tokenizer would only add false precision about one of them.
+ * wraps tools differently, so a tokenizer would only add false precision about one of them. It runs
+ * low: on Haiku 5.5 and Sonnet 5.5, Anthropic's count was 1.6 times this (npm run tokens, 2026-11-06).
  */
 export function estimateTokens(tool: Pick<ListedTool, 'name' | 'description' | 'inputSchema'>): number {
   const text = JSON.stringify({ name: tool.name, description: tool.description, inputSchema: tool.inputSchema });

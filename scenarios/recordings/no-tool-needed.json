@@ -1,0 +1,126 @@
+{
+  "format": 1,
+  "source": "live",
+  "recordedAt": "2026-11-06T12:47:09.737Z",
+  "commit": "6abdfe6",
+  "apiVersion": "2026-10-21",
+  "model": "claude-haiku-5-5",
+  "scenario": "no-tool-needed",
+  "exchanges": [
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "What does an HTTP 404 status mean?"
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhTDYhWiPFgmtGEb6kK",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "An HTTP 404 status means \"Not Found.\" The server understood the request, but it could not find the resource at the URL requested. Common causes include:\n\n- **A mistyped or outdated URL**, such as a misspelled path or a page that has moved or been deleted.\n- **A broken link** on another site or within the same site.\n- **An incorrect resource ID** in an API call, such as a customer or payment that doesn't exist.\n- **Access hidden on purpose**, where a server returns 404 instead of 403 so it doesn't reveal that a resource exists.\n\nThe 404 is a client-side error in the 4xx range. Retrying the same request won't help unless the resource is created later. To fix it, check the URL or ID for typos, confirm the resource still exists, or update the link that points to it."
+            }
+          ],
+          "container": null,
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 780,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 251,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    }
+  ]
+}

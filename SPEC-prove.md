@@ -120,7 +120,7 @@ A tool's definition goes to the model on every turn, so it costs money whether o
 estimated tokens = characters in the JSON / 4
 ```
 
-It's labelled as an estimate everywhere. Anthropic's current tokenizer isn't published, and each client wraps tools differently, so an exact count isn't available here. **Task 27 compares this against a real recorded run** and the docs state how far off it is. We don't add a dependency for a tokenizer, because that would give false precision about one provider's model. And there's no verdict such as "too many tools", because that depends on the agent.
+It's labelled as an estimate everywhere. Anthropic's current tokenizer isn't published, and each client wraps tools differently, so an exact count isn't available here. **Task 27 compared this with Anthropic's token count on 2026-11-06:** on Claude Haiku 5.5 and Sonnet 5.5, 753 estimated and 1,206 counted for Crumple's six tools, a ratio of 0.62, and reports now say so. We don't add a dependency for a tokenizer, because that would give false precision about one provider's model. And there's no verdict such as "too many tools", because that depends on the agent.
 
 ## `prove --self`: Crumple, with failures on purpose
 

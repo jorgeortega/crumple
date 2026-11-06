@@ -51,7 +51,7 @@ Only our own sentences and escaped tool names reach a report. Descriptions and e
 | fail | It ran, and didn't hold | Yes |
 | not run | It didn't run, with the reason | **Never** |
 
-A claim with a part checked elsewhere says "partly checked", such as C10, which needs a real model. The badge says `14 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
+A claim with parts checked elsewhere says so: C14 needs Python, so it shows as not run here, with where it runs. C10 and C12 rest on recordings from a real model, replayed for free, and they can't pass without one. The badge says `16 passed · 0 failed · 0 not run` and never just "passing". It's a file, so anyone could edit it, and it's only as good as being able to run the command again.
 
 ## Why a hand-written client
 
@@ -118,8 +118,8 @@ All real, and good answers to "tell me about a bug":
 
 - **From outside, it can't say whether your server survives a failing API.** That's the most interesting question.
 - **It proves Crumple on one laptop,** not under production load or on Cloudflare.
-- **C10's part with a real model waits for a live eval.** C2 doesn't: a scripted agent that obeys the injected text is the worst case, and it's still refused. See [evals.md](evals.md).
-- **The token estimate is rough:** characters divided by 4. Task 27 compares it with a real run.
+- **C10's part with a real model rests on one live eval,** on one model and one day. C2 doesn't need a model: a scripted agent that obeys the injected text is the worst case, and it's still refused. See [evals.md](evals.md).
+- **The token estimate runs low:** it's characters divided by 4. For Crumple's six tools on Claude Haiku 5.5 and Sonnet 5.5, it said 753, and Anthropic's count was 1,206, so the estimate is 0.62 of the real figure. Adding the 286-token tool system prompt from Anthropic's docs, tools add 1,492 tokens to every turn, about twice the estimate. The recordings back this up without relying on the 286: going from 3 tools to 6 raises a first turn from about 779 tokens to about 1,541, so those 3 cost about 762 where the estimate says 481, which is 0.63. The two models gave the same count to the token, so they look like one measurement, not two, and other models may differ. It's also one server, on 2026-11-06. Use the estimate to compare tools with each other, not to forecast a bill.
 - **`--parallel` is at most 50 calls,** which is a burst and not a load test.
 - **Tools using `x-mcp-header` can't be named yet.** The report says so rather than sending a wrong request.
 - **Timing checks could flake on a very busy machine.** C6 has a 500 ms margin, and if it fails on someone's overloaded laptop, the report will say so.

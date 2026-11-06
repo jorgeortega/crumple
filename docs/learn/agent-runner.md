@@ -8,14 +8,14 @@ Give it a task and an MCP server, and it asks a real model what to do, calls the
 
 ## Where it stands today
 
-**No real model has run through this yet.** Everything so far is tested with scripted models and a fake of the API. The first real recording was put off on 2026-11-05, so:
+**A real model has run through this, once, on 2026-11-06:** Claude Haiku 5.5, in the 70 model runs of the first live eval, for $0.0258. So:
 
 | | Status |
 |---|---|
-| The loop, the cap, replay, joined traces | Built and tested, with scripted models |
+| The loop, the cap, replay, joined traces | Built, tested with scripted models, and the loop has now run against the real API |
 | C11, traces across agent and server | Passes, and `prove --self` and `demo` check it |
-| C12, tokens and cost against real usage | **Not run.** The arithmetic is tested. Whether it matches a real bill needs a real run |
-| That our idea of the API matches the API | **Unknown** until the first real run |
+| C12, tokens and cost against real usage | **Passes.** Each run's totals equal the provider's replies: 178,217 in and 16,008 out. Recomputing at the published $0.10 and $0.50 per million gives the same $0.0258. Nobody has compared it with a real invoice yet |
+| That our idea of the API matches the API | **Held for this model,** with 0 errors in 70 runs. Other models haven't been tried |
 
 Say this if asked. Don't let a passing test suite sound like a real run.
 
@@ -114,7 +114,7 @@ We don't send `traceparent` to Anthropic. It would only help someone with a trac
 
 ## Honest limits
 
-- **Not run against a real model yet,** as above.
+- **One model, one day,** as above.
 - **Not a production agent:** no memory, no compaction, no streaming.
 - **Recordings age.** A replay says nothing about today's models.
 - **One run on one model proves little.** `evals` has to run scenarios more than once, and say how many.

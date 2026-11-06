@@ -1,0 +1,364 @@
+{
+  "format": 1,
+  "source": "live",
+  "recordedAt": "2026-11-06T12:47:09.733Z",
+  "commit": "6abdfe6",
+  "apiVersion": "2026-10-21",
+  "model": "claude-haiku-5-5",
+  "scenario": "dollars-to-cents",
+  "exchanges": [
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "createPayment",
+            "description": "Charge a customer\n\nCharges a customer and moves real money in a real system, so repeat it only with the same Idempotency-Key.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotencyKey": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Leave this out on a first attempt. Use it only to repeat a call that came back with outcome_unknown and a key, passing that key, so the write is not applied twice."
+                },
+                "body": {
+                  "type": "object",
+                  "required": [
+                    "customerId",
+                    "amountCents"
+                  ],
+                  "properties": {
+                    "customerId": {
+                      "type": "string",
+                      "description": "The customer to charge.",
+                      "examples": [
+                        "cus_1"
+                      ]
+                    },
+                    "amountCents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "The amount to charge, in cents.",
+                      "examples": [
+                        5000
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "Charge customer cus_1 $50."
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhMoJo65gknAjvaqDeF",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "tool_use",
+              "id": "toolu_011yTo2q8GDd4rvrVAZ9gMMa",
+              "name": "createPayment",
+              "input": {
+                "body": {
+                  "customerId": "cus_1",
+                  "amountCents": 5000
+                }
+              },
+              "caller": {
+                "type": "direct"
+              }
+            }
+          ],
+          "container": null,
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 1087,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 69,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "createPayment",
+            "description": "Charge a customer\n\nCharges a customer and moves real money in a real system, so repeat it only with the same Idempotency-Key.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotencyKey": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Leave this out on a first attempt. Use it only to repeat a call that came back with outcome_unknown and a key, passing that key, so the write is not applied twice."
+                },
+                "body": {
+                  "type": "object",
+                  "required": [
+                    "customerId",
+                    "amountCents"
+                  ],
+                  "properties": {
+                    "customerId": {
+                      "type": "string",
+                      "description": "The customer to charge.",
+                      "examples": [
+                        "cus_1"
+                      ]
+                    },
+                    "amountCents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "The amount to charge, in cents.",
+                      "examples": [
+                        5000
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "Charge customer cus_1 $50."
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "tool_use",
+                "id": "toolu_011yTo2q8GDd4rvrVAZ9gMMa",
+                "name": "createPayment",
+                "input": {
+                  "body": {
+                    "customerId": "cus_1",
+                    "amountCents": 5000
+                  }
+                },
+                "caller": {
+                  "type": "direct"
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_011yTo2q8GDd4rvrVAZ9gMMa",
+                "content": "{\"id\":\"pay_1\",\"customerId\":\"cus_1\",\"amountCents\":5000,\"currency\":\"usd\",\"status\":\"succeeded\"}"
+              }
+            ]
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhMs1nMWppcQ64YaVB9",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "I charged customer cus_1 $50.00 (5000 cents, USD). The payment is pay_1 and its status is succeeded."
+            }
+          ],
+          "container": null,
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 1206,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 45,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    }
+  ]
+}

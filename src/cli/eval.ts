@@ -1,15 +1,13 @@
 import { readdir } from 'node:fs/promises';
 import { join } from 'node:path';
-import { fileURLToPath } from 'node:url';
 import { claude, hasPrice } from '../agent-runner/index.js';
 import { gatePasses, parseScenario, renderEvalJson, renderEvalMarkdown, renderEvalTerminal, renderScenarioLine, runLive, runReplay, toRecording, type EvalReport, type Recording, type Scenario, type ScenarioResult } from '../evals/index.js';
 import { CliError, parseFlags, usage, type Io } from './io.js';
-import { environment, startCrumple } from './prove.js';
+import { BUNDLED_SCENARIOS, environment, startCrumple } from './prove.js';
 
 // eval replays for free, or --live spends real money, stopping at the budget. The key only ever comes
 // from the environment, and a test run can pass its own fetch through io, never its own address.
 
-const BUNDLED = fileURLToPath(new URL('../../scenarios/', import.meta.url));
 const DEFAULT_MODEL = 'claude-haiku-5-5';
 const DEFAULT_REPS = 5;
 const MAX_REPS = 50;
@@ -59,7 +57,7 @@ export async function evalCommand(args: string[], io: Io): Promise<number> {
     transcripts: { type: 'string' },
   });
   if (positionals.length > 1) throw usage('Give one scenarios folder, or none for the ones in the package.');
-  const dir = positionals[0] ?? BUNDLED;
+  const dir = positionals[0] ?? BUNDLED_SCENARIOS;
 
   if (!values.live) {
     for (const [flag, given] of [['--record', values.record], ['--max-usd', values['max-usd']], ['--reps', values.reps], ['--model', values.model], ['--transcripts', values.transcripts]] as const) {

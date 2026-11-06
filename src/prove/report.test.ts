@@ -184,6 +184,9 @@ describe('the Markdown report', () => {
   it('labels token counts as estimates, and lists them', () => {
     const text = renderMarkdown(serverReport({ tools: { count: 2, totalTokens: 30, incomplete: false, perTool: [{ name: 'big', tokens: 25 }, { name: 'small', tokens: 5 }] } }));
     expect(text).toContain('**estimates**');
+    expect(text).toContain('Expect the real figure to be higher');
+    expect(text).toContain('1.6 times');
+    expect(text).toContain('Claude Haiku 5.5 and Sonnet 5.5');
     expect(text).toContain('| `big` | 25 |');
   });
 
@@ -194,10 +197,10 @@ describe('the Markdown report', () => {
   });
 
   it('shows claims for Crumple, with what wasn\'t checked', () => {
-    const claims = rollUpClaims([outcome('C1', 'pass', 'C1'), outcome('C10', 'pass', 'C10')]);
+    const claims = rollUpClaims([outcome('C1', 'pass', 'C1'), outcome('C14', 'pass', 'C14')]);
     const text = renderMarkdown(serverReport({ kind: 'self', requests: undefined as never, claims, environment: { ...ENVIRONMENT, commit: 'abc1234', dirty: true }, checks: [outcome('C1', 'pass', 'C1')] }));
     expect(text).toContain('| C1 | Access is denied by default | pass |  |');
-    expect(text).toContain('| C10 | Failures tell the agent what to do next | partly checked | a real model recovering needs a live eval, which spends money |');
+    expect(text).toContain('| C14 | It speaks real MCP | partly checked | needs Python, so it runs in npm run test:interop |');
     expect(text).toContain('| C15 | The demo\'s own limits hold, no public path reaches a paid model, and abuse can\'t cost more than Cloudflare\'s per-request price | not run |');
     expect(text).toContain('commit abc1234 with uncommitted changes');
     expect(text).toContain('production load');

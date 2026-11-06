@@ -41,6 +41,7 @@ const plural = (count: number, one: string, many = `${one}s`): string => `${Stri
 
 function extras(result: ScenarioResult): string {
   const parts: string[] = [];
+  if (result.scenario.scripted !== undefined) parts.push('scripted, no model');
   if (result.errors > 0) parts.push(plural(result.errors, 'error'));
   if (result.truncated > 0) parts.push(`${String(result.truncated)} cut off`);
   if (result.notRun > 0 && result.rows.length > 0) parts.push(`${String(result.notRun)} not run`);
@@ -70,7 +71,12 @@ const money = (usd: number): string => (usd === 0 ? '$0' : `$${usd.toFixed(usd <
 function costLine(report: EvalReport): string {
   const { runs, errors, input, output, costUsd, costIsAtMost } = totals(report.results);
   const cost = costUsd === null ? 'cost unknown' : `${costIsAtMost ? 'at most ' : ''}${money(costUsd)}`;
-  return `${plural(runs, 'run')}, ${plural(errors, 'error')}. ${cost}, ${String(input)} tokens in, ${String(output)} out.`;
+  const spent = `${cost}, ${String(input)} tokens in, ${String(output)} out.`;
+  const scripted = report.results.filter((result) => result.scenario.scripted !== undefined).reduce((total, result) => total + result.rows.filter((row) => row.status !== 'not_run').length, 0);
+  const tally = `${plural(runs, 'run')}${scripted > 0 ? `, ${String(scripted)} of them scripted with no model` : ''}, ${plural(errors, 'error')}.`;
+  // The money in a replay was spent when the recording was made. Without saying so, it reads as a bill.
+  if (report.mode === 'replay') return `${tally} Nothing was spent.${input + output > 0 ? ` When they were recorded: ${spent}` : ''}`;
+  return `${tally} ${spent}`;
 }
 
 function header(report: EvalReport): string {

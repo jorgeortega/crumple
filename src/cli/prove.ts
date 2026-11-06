@@ -1,11 +1,16 @@
+import { readdir } from 'node:fs/promises';
 import { arch, cpus, platform, totalmem } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { runAgent, type ModelClient } from '../agent-runner/index.js';
 import { proveGateNoticesChange } from '../evals/gate.js';
+import { replayRecordings } from '../evals/recorded.js';
+import type { Recording } from '../evals/run.js';
+import { parseScenario } from '../evals/scenarios.js';
 import { createFaultApi, DEFAULT_CREDENTIAL, OPENAPI } from '../fault-api/index.js';
 import { convertOpenApi, createAudit, createKey, createMcpSurface, createTelemetry, formatTrace, memoryAuditSink, memoryKeyStore, memorySink, plainCredential } from '../mcp-surface/index.js';
 import { serveOnNode } from '../node.js';
-import { agentChecks, gateChecks, countChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type Target, type TargetSetup, type TracingAgent } from '../prove/index.js';
+import { agentChecks, gateChecks, countChecks, recordedChecks, createBudget, createHttpTransport, createStdioTransport, DEFAULT_MAX_REQUESTS, MAX_MAX_REQUESTS, MAX_PARALLEL, OUT_OF_REACH, proveServer, proverChecks, renderBadge, renderJson, renderLoadJson, renderLoadMarkdown, renderLoadTerminal, renderMarkdown, renderTerminal, rollUpClaims, runChecks, runLoad, SELF_CHECKS, type Environment, type LoadReport, type NamedCall, type ProveReport, type StartTarget, type RecordedRuns, type Target, type TargetSetup, type TracingAgent } from '../prove/index.js';
 import { parseFlags, readVersion, usage, type Io } from './io.js';
 import { logSink } from './serve.js';
 
@@ -131,10 +136,23 @@ const tracingAgent: TracingAgent = async (url, key) => {
   return { traceId, callSpanId: call?.spanId ?? '' };
 };
 
+export const BUNDLED_SCENARIOS = fileURLToPath(new URL('../../scenarios/', import.meta.url));
+
+/** The recordings the package ships, replayed for free. Scripted scenarios have none, and never will. */
+const shippedRecordings = (io: Io): RecordedRuns => async (start) => {
+  const names = (await readdir(BUNDLED_SCENARIOS)).filter((name) => name.endsWith('.json'));
+  const found = await Promise.all(names.map(async (name) => {
+    const scenario = parseScenario(await io.readFile(join(BUNDLED_SCENARIOS, name)), name.slice(0, -5));
+    const path = join(BUNDLED_SCENARIOS, 'recordings', name);
+    return { scenario, recording: io.fileExists(path) ? JSON.parse(await io.readFile(path)) as Recording : undefined };
+  }));
+  return replayRecordings(found.filter(({ scenario }) => scenario.scripted === undefined), start);
+};
+
 export async function runSelf(start: StartTarget, io: Io): Promise<ProveReport> {
   const startedAt = new Date(io.now()).toISOString();
   const began = performance.now();
-  const checks = await runChecks([...SELF_CHECKS, ...proverChecks(), ...agentChecks(tracingAgent), ...gateChecks(proveGateNoticesChange)], start);
+  const checks = await runChecks([...SELF_CHECKS, ...proverChecks(), ...agentChecks(tracingAgent), ...gateChecks(proveGateNoticesChange), ...recordedChecks(shippedRecordings(io))], start);
   return {
     kind: 'self',
     target: 'self',

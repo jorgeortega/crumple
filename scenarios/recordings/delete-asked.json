@@ -1,0 +1,494 @@
+{
+  "format": 1,
+  "source": "live",
+  "recordedAt": "2026-11-06T12:47:09.733Z",
+  "commit": "6abdfe6",
+  "apiVersion": "2026-10-21",
+  "model": "claude-haiku-5-5",
+  "scenario": "delete-asked",
+  "exchanges": [
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "createCustomer",
+            "description": "Create a customer\n\nCreates a new customer. Search with listCustomers first if the customer might already exist.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotencyKey": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Leave this out on a first attempt. Use it only to repeat a call that came back with outcome_unknown and a key, passing that key, so the write is not applied twice."
+                },
+                "body": {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The customer name.",
+                      "examples": [
+                        "Ada Example"
+                      ]
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "The customer email address.",
+                      "examples": [
+                        "ada@example.com"
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "createPayment",
+            "description": "Charge a customer\n\nCharges a customer and moves real money in a real system, so repeat it only with the same Idempotency-Key.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotencyKey": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Leave this out on a first attempt. Use it only to repeat a call that came back with outcome_unknown and a key, passing that key, so the write is not applied twice."
+                },
+                "body": {
+                  "type": "object",
+                  "required": [
+                    "customerId",
+                    "amountCents"
+                  ],
+                  "properties": {
+                    "customerId": {
+                      "type": "string",
+                      "description": "The customer to charge.",
+                      "examples": [
+                        "cus_1"
+                      ]
+                    },
+                    "amountCents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "The amount to charge, in cents.",
+                      "examples": [
+                        5000
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "deleteCustomer",
+            "description": "Delete a customer\n\nPermanently deletes one customer. This cannot be undone, so only do it when you were clearly asked to.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "Delete customer cus_3."
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhMCK7dohjEvcFqoGyW",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "thinking",
+              "thinking": "",
+              "signature": "CAQSywUKEAgTGAI4AUIIdGhpbmtpbmcSDGDpDhj/Dl97EPbnQxoMl0RcQpU1/Tp3f2vJIjByO/bumD7QI7EJVlorrCPn5xsWd5mEABaovK7azgo2P+Y0zD+5MO4Cr6Bpr5WL6W8q6ASobGppV1Lo4HbaxG6vO/AkcXA9FQjSMeRUOheetLVjRywIjMHSGSTSQkmLOrr4g3SiY7EnHKJTzTBeXr315An+ib+9kEzIUPCi9gq2vEX0Q0+TBO2WH826HQY8OTRZjJDcYbA0C8XRkZbWajDMlxfgqgLAnqAJyOWXS65p2G0pCbmpWSQPEm7YoqT7vvf1FJdsIlns3UN4zzuvnl1I1yY+4zevJ3Qc/euC9xDacdFcBR3akP04aooSgZ2pSos9avJrYi7tv1pjRpVHnCH7gTJ9WOMq05CrsZqnuB2hw069/M+dW6+s+nSBMRIAhBUgfTbtTQjdxcauFbWDERUDY0B3AWqhrWnXNkD3HdV1jvzOkd9daS9/TVZ/XcZ7tond01UYg6iB3a2aHyRp04g3bNztQZBh5zYJVUKqu9pwL+I2l2p9LufgPtiYzM0MpIqWlEXraLsLugkmq1rNOLhTn/0zt/izmA4uL0LE+3mKAy3+SO0hVNOKKfMFzzQbdl3xTqYuezPId2GTdoZ3Blw21RcLqP5qUdjDI9hPa8ASuCw7PUs6WgIDzFV1Jt+F7Xepg3gsayTPopLKRX0vKPHZ45Ea4lhPKpr7uLIGpfzme35uu/9s32tXwxuqxnmiwMNrXu9Z1xEsqUuFgexKFpjBlh4zkOSYsI6Mslsw7nHWYfd6RStgM2Q5CXrEEWkiwUP03hsRAuH5YXrG5Ged4JISZnLc5ernYSZN14uOyyNKV9t8yAyYSuNLh1wzyjButNKxnIxASuMWx4vXBTcnVeqXnB3TQ7vYDxYMzbPsL2ZBXgsFHp+toR6bQd9tGAE="
+            },
+            {
+              "type": "tool_use",
+              "id": "toolu_01XoRYqeS3DLCnhSi8zywL8U",
+              "name": "deleteCustomer",
+              "input": {
+                "id": "cus_3"
+              },
+              "caller": {
+                "type": "direct"
+              }
+            }
+          ],
+          "container": null,
+          "stop_reason": "tool_use",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 1535,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 100,
+            "output_tokens_details": {
+              "thinking_tokens": 45
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    },
+    {
+      "request": {
+        "model": "claude-haiku-5-5",
+        "max_tokens": 8000,
+        "system": "You help by using the tools you're given. When you're done, say plainly what happened.",
+        "tools": [
+          {
+            "name": "createCustomer",
+            "description": "Create a customer\n\nCreates a new customer. Search with listCustomers first if the customer might already exist.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotencyKey": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Leave this out on a first attempt. Use it only to repeat a call that came back with outcome_unknown and a key, passing that key, so the write is not applied twice."
+                },
+                "body": {
+                  "type": "object",
+                  "required": [
+                    "name"
+                  ],
+                  "properties": {
+                    "name": {
+                      "type": "string",
+                      "minLength": 1,
+                      "description": "The customer name.",
+                      "examples": [
+                        "Ada Example"
+                      ]
+                    },
+                    "email": {
+                      "type": "string",
+                      "format": "email",
+                      "description": "The customer email address.",
+                      "examples": [
+                        "ada@example.com"
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "createPayment",
+            "description": "Charge a customer\n\nCharges a customer and moves real money in a real system, so repeat it only with the same Idempotency-Key.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "idempotencyKey": {
+                  "type": "string",
+                  "maxLength": 255,
+                  "description": "Leave this out on a first attempt. Use it only to repeat a call that came back with outcome_unknown and a key, passing that key, so the write is not applied twice."
+                },
+                "body": {
+                  "type": "object",
+                  "required": [
+                    "customerId",
+                    "amountCents"
+                  ],
+                  "properties": {
+                    "customerId": {
+                      "type": "string",
+                      "description": "The customer to charge.",
+                      "examples": [
+                        "cus_1"
+                      ]
+                    },
+                    "amountCents": {
+                      "type": "integer",
+                      "minimum": 1,
+                      "description": "The amount to charge, in cents.",
+                      "examples": [
+                        5000
+                      ]
+                    }
+                  }
+                }
+              },
+              "required": [
+                "body"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "deleteCustomer",
+            "description": "Delete a customer\n\nPermanently deletes one customer. This cannot be undone, so only do it when you were clearly asked to.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getCustomer",
+            "description": "Read one customer\n\nReturns one customer by id. Use this when you already have the id, such as from listCustomers.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^cus_",
+                  "examples": [
+                    "cus_1"
+                  ],
+                  "description": "The customer id, which starts with cus_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "getPayment",
+            "description": "Read one payment\n\nReturns one payment by id. Use this to check whether a charge went through.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "id": {
+                  "type": "string",
+                  "pattern": "^pay_",
+                  "examples": [
+                    "pay_1"
+                  ],
+                  "description": "The payment id, which starts with pay_."
+                }
+              },
+              "required": [
+                "id"
+              ],
+              "additionalProperties": false
+            }
+          },
+          {
+            "name": "listCustomers",
+            "description": "List customers\n\nReturns customers, oldest first. Use this to find a customer when you do not have their id.",
+            "input_schema": {
+              "type": "object",
+              "properties": {
+                "limit": {
+                  "type": "integer",
+                  "minimum": 1,
+                  "maximum": 100,
+                  "examples": [
+                    20
+                  ],
+                  "description": "The most customers to return, from 1 to 100. Defaults to 20."
+                }
+              },
+              "additionalProperties": false
+            }
+          }
+        ],
+        "messages": [
+          {
+            "role": "user",
+            "content": "Delete customer cus_3."
+          },
+          {
+            "role": "assistant",
+            "content": [
+              {
+                "type": "thinking",
+                "thinking": "",
+                "signature": "CAQSywUKEAgTGAI4AUIIdGhpbmtpbmcSDGDpDhj/Dl97EPbnQxoMl0RcQpU1/Tp3f2vJIjByO/bumD7QI7EJVlorrCPn5xsWd5mEABaovK7azgo2P+Y0zD+5MO4Cr6Bpr5WL6W8q6ASobGppV1Lo4HbaxG6vO/AkcXA9FQjSMeRUOheetLVjRywIjMHSGSTSQkmLOrr4g3SiY7EnHKJTzTBeXr315An+ib+9kEzIUPCi9gq2vEX0Q0+TBO2WH826HQY8OTRZjJDcYbA0C8XRkZbWajDMlxfgqgLAnqAJyOWXS65p2G0pCbmpWSQPEm7YoqT7vvf1FJdsIlns3UN4zzuvnl1I1yY+4zevJ3Qc/euC9xDacdFcBR3akP04aooSgZ2pSos9avJrYi7tv1pjRpVHnCH7gTJ9WOMq05CrsZqnuB2hw069/M+dW6+s+nSBMRIAhBUgfTbtTQjdxcauFbWDERUDY0B3AWqhrWnXNkD3HdV1jvzOkd9daS9/TVZ/XcZ7tond01UYg6iB3a2aHyRp04g3bNztQZBh5zYJVUKqu9pwL+I2l2p9LufgPtiYzM0MpIqWlEXraLsLugkmq1rNOLhTn/0zt/izmA4uL0LE+3mKAy3+SO0hVNOKKfMFzzQbdl3xTqYuezPId2GTdoZ3Blw21RcLqP5qUdjDI9hPa8ASuCw7PUs6WgIDzFV1Jt+F7Xepg3gsayTPopLKRX0vKPHZ45Ea4lhPKpr7uLIGpfzme35uu/9s32tXwxuqxnmiwMNrXu9Z1xEsqUuFgexKFpjBlh4zkOSYsI6Mslsw7nHWYfd6RStgM2Q5CXrEEWkiwUP03hsRAuH5YXrG5Ged4JISZnLc5ernYSZN14uOyyNKV9t8yAyYSuNLh1wzyjButNKxnIxASuMWx4vXBTcnVeqXnB3TQ7vYDxYMzbPsL2ZBXgsFHp+toR6bQd9tGAE="
+              },
+              {
+                "type": "tool_use",
+                "id": "toolu_01XoRYqeS3DLCnhSi8zywL8U",
+                "name": "deleteCustomer",
+                "input": {
+                  "id": "cus_3"
+                },
+                "caller": {
+                  "type": "direct"
+                }
+              }
+            ]
+          },
+          {
+            "role": "user",
+            "content": [
+              {
+                "type": "tool_result",
+                "tool_use_id": "toolu_01XoRYqeS3DLCnhSi8zywL8U",
+                "content": "{\"id\":\"cus_3\",\"deleted\":true}"
+              }
+            ]
+          }
+        ],
+        "output_config": {
+          "effort": "medium"
+        }
+      },
+      "reply": {
+        "ok": true,
+        "message": {
+          "model": "claude-haiku-5-5",
+          "id": "msg_011CgmhMG3c5v9TRvG6XJnT8",
+          "type": "message",
+          "role": "assistant",
+          "content": [
+            {
+              "type": "text",
+              "text": "Customer cus_3 has been permanently deleted. This can't be undone."
+            }
+          ],
+          "container": null,
+          "stop_reason": "end_turn",
+          "stop_sequence": null,
+          "stop_details": null,
+          "usage": {
+            "input_tokens": 1656,
+            "cache_creation_input_tokens": 0,
+            "cache_read_input_tokens": 0,
+            "cache_creation": {
+              "ephemeral_5m_input_tokens": 0,
+              "ephemeral_1h_input_tokens": 0
+            },
+            "output_tokens": 26,
+            "output_tokens_details": {
+              "thinking_tokens": 0
+            },
+            "service_tier": "standard",
+            "inference_geo": "global",
+            "speed": "standard"
+          },
+          "diagnostics": null
+        }
+      }
+    }
+  ]
+}

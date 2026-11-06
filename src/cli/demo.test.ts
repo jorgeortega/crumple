@@ -35,8 +35,8 @@ describe('demo', () => {
     const { out } = await runOnce(['demo']);
     expect(out).toMatch(/pass\s+denied-by-default/);
     expect(out).toMatch(/pass\s+deadline-holds/);
-    expect(out).toContain('14 passed, 0 failed, 0 not run');
-    expect(out).toMatch(/Of 18 claims, \d+ passed, 1 was partly checked and \d+ weren't checked by this run\./);
+    expect(out).toContain('16 passed, 0 failed, 0 not run');
+    expect(out).toMatch(/Of 18 claims, 15 passed and 3 weren't checked by this run\./);
     expect(out).toContain('says nothing about production');
   }, 60_000);
 

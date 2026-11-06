@@ -147,7 +147,7 @@ export function renderMarkdown(report: ProveReport): string {
     lines.push(
       '## What the tool definitions cost',
       '',
-      'A tool\'s definition goes to the model on every turn, whether or not the tool is used. These are **estimates**: characters in the JSON divided by 4. Each model and client counts differently.',
+      'A tool\'s definition goes to the model on every turn, whether or not the tool is used. These are **estimates**: characters in the JSON divided by 4. Each model and client counts differently. Expect the real figure to be higher: for Crumple\'s six tools on Claude Haiku 5.5 and Sonnet 5.5, measured on 2026-11-06, Anthropic\'s count was 1.6 times this, and using tools at all adds a hidden system prompt on top.',
       '',
       `${toolsLine(report.tools)}.`,
       '',

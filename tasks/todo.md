@@ -189,15 +189,15 @@ The only finding that could change the design.
 - [x] **OWNER:** approve `SPEC-agent-runner.md` first, after Claude reads the current Claude API reference (2026-11-05, "Approve all three")
 - [x] A minimal loop over MCP with a Claude adapter on plain `fetch`; replay needs no key or network (2026-11-05)
 - [x] Prices, per-call cost and a spending cap that holds against a model that always spends its whole allowance
-- [ ] **OWNER:** run the first real recording. `npm run eval:live`, under Task 28, does this and more
-- Verify: a recorded run replays identically. Done with a scripted model, and the real recording is the true test
+- [x] **OWNER:** run the first real recording. `npm run eval:live`, under Task 28, did this and more (2026-11-06)
+- Verify: a recorded run replays identically. Done with the real recordings, 2026-11-06
 - Depends on: Checkpoint C. Files: `src/agent-runner/*`, `scenarios/recordings/*`
 
 ### Task 27: Add tokens, cost and joined traces (S) — C11, C12
 - [x] Costs priced from a dated table, per call. Tested on scripted usage (2026-11-05)
-- [ ] Totals match the provider's usage in a recording. Waits for the first real recording, which the owner put off on 2026-11-05 ("Continue without it"), so C12 stays not run
+- [x] Totals match the provider's usage in a recording: `recorded-usage-adds-up` in `prove --self`, on the real recordings (C12, 2026-11-06)
 - [x] Agent and server spans share one trace id through `_meta` (C11, 2026-11-05). `prove --self` and `demo` now check it
-- [ ] Compare the C18 estimate with real counts: `npm run tokens` is written, is free, and needs the owner's key
+- [x] Compare the C18 estimate with real counts (owner ran `npm run tokens`, 2026-11-06): estimate 753, counted 1,206, ratio 0.62, identical on Haiku 5.5 and Sonnet 5.5. Formula kept, as `SPEC-prove.md` says, and reports now state the gap
 - Depends on: 26, 9. Files: `src/agent-runner/usage.ts`, `prices.ts`, `tracing.ts`, tests
 
 ### Task 28: Build `evals` and the gate (M) — C2, C10, C13
@@ -205,7 +205,7 @@ The only finding that could change the design.
 - [x] Fifteen scenarios for right tool, right arguments, recovery after failure, and injected instructions, tested with an oracle, a model that does nothing and plausible wrong answers (2026-11-05)
 - [x] C2 rests on a scripted agent that obeys the injected text, and C13 on replay. Both pass with nothing spent
 - [x] `eval --live` stops at `--max-usd`, and a run that couldn't be graded is never counted as a failure
-- [ ] **OWNER:** run the first live evals, whenever you choose, at about 4 cents by my estimate: `npm run eval:live` with `ANTHROPIC_API_KEY` set. It finishes Task 26's check, C10, C12 and the recordings
+- [x] **OWNER:** run the first live evals (2026-11-06): 70 of 70 graded model runs passed, $0.0258, [proof/evals-2026-11-06.md](../proof/evals-2026-11-06.md). C10 and C12 now pass in `prove --self`
 - [ ] Bring the owner the failures and a few transcripts from that run: would they have scored any differently?
 - Depends on: 27, 7. Files: `src/evals/*`, `scenarios/*`
 

@@ -45,6 +45,37 @@ function report(results: EvalReport['results'], more: Partial<EvalReport> = {}):
 
 const line = (scenario: Scenario, rows: RunRow[], planned = 5): string => renderScenarioLine(summarise(scenario, rows, planned), 8);
 
+describe('a run with no model in it', () => {
+  const SCRIPTED: Scenario = { ...SAFETY, scripted: 'obeys-injection' };
+  const free = { usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costUsd: 0 };
+
+  it('says so beside its score, so nobody reads it as a model being stopped', () => {
+    expect(line(SCRIPTED, [row('pass', free)], 1)).toContain('scripted, no model');
+    expect(line(SAFETY, [row('pass')], 1)).not.toContain('scripted');
+  });
+
+  it('is counted apart in the totals', () => {
+    const results = [summarise(SCRIPTED, [row('pass', free)], 1), summarise(BEHAVIOUR, many('pass', 5), 5)];
+    expect(renderEvalTerminal(report(results))).toContain('6 runs, 1 of them scripted with no model, 0 errors.');
+    expect(renderEvalMarkdown(report(results))).toContain('6 runs, 1 of them scripted with no model, 0 errors.');
+    expect(renderEvalTerminal(report([summarise(BEHAVIOUR, many('pass', 5), 5)]))).toContain('5 runs, 0 errors.');
+  });
+});
+
+describe('a replay\'s totals', () => {
+  it('say nothing was spent, and that the money is from when the recording was made', () => {
+    const text = renderEvalTerminal(report([summarise(BEHAVIOUR, [row('pass')], 1)], { mode: 'replay' }));
+    expect(text).toContain('Nothing was spent. When they were recorded: $0.001000, 10 tokens in, 2 out.');
+  });
+
+  it('leave that out when no recording had any usage', () => {
+    const free = { usage: { input: 0, output: 0, cacheRead: 0, cacheWrite: 0 }, costUsd: 0 };
+    const text = renderEvalTerminal(report([summarise(BEHAVIOUR, [row('pass', free)], 1)], { mode: 'replay' }));
+    expect(text).toContain('Nothing was spent.');
+    expect(text).not.toContain('When they were recorded');
+  });
+});
+
 describe('a scenario\'s line', () => {
   it('gives counts, not percentages', () => {
     expect(line(BEHAVIOUR, [...many('pass', 4), row('fail')])).toMatch(/behaviour\s+charge\s+4 of 5$/);

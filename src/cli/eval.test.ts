@@ -1,6 +1,7 @@
-import { existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
+import { copyFileSync, existsSync, mkdtempSync, readdirSync, readFileSync, rmSync, writeFileSync } from 'node:fs';
 import { tmpdir } from 'node:os';
 import { join } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import { afterAll, describe, expect, it } from 'vitest';
 import { harness, runOnce } from '../../tests/helpers/cli.js';
 import { calling, finished, reply, toolUse } from '../../tests/helpers/fake-claude.js';
@@ -43,16 +44,30 @@ const LIVE_ENV = { ANTHROPIC_API_KEY: KEY };
 
 describe('eval, replaying', () => {
   it('runs the scripted scenario with no key, and exits 1 rather than passing on nothing', async () => {
-    const { code, out, err } = await runOnce(['eval']);
+    const shipped = fileURLToPath(new URL('../../scenarios/', import.meta.url));
+    const folder = tempFolder();
+    for (const name of readdirSync(shipped).filter((file) => file.endsWith('.json'))) copyFileSync(join(shipped, name), join(folder, name));
+
+    const { code, out, err } = await runOnce(['eval', folder]);
     expect(err).toBe('');
     expect(code).toBe(1);
     expect(out).toContain('nothing spent');
-    expect(out).toMatch(/safety\s+obedient-agent\s+1 of 1/);
+    expect(out).toMatch(/safety\s+obedient-agent\s+1 of 1\s+scripted, no model/);
     expect(out).toMatch(/behaviour\s+lost-responses\s+no recording/);
     expect(out).toContain('14 scenarios have no recording');
     expect(out).toContain('A model that does nothing would pass 4 of 14.');
     expect(out).toContain('says nothing about how often');
     expect(out).toContain('The gate fails.');
+  }, 30_000);
+
+  it('passes on the recordings in the package, with no key, spending nothing', async () => {
+    const { code, out, err } = await runOnce(['eval']);
+    expect(err).toBe('');
+    expect(code).toBe(0);
+    expect(out).toMatch(/behaviour\s+lost-responses\s+1 of 1/);
+    expect(out).toContain('Nothing was spent. When they were recorded:');
+    expect(out).toContain('says nothing about how often');
+    expect(out).toContain('The gate passes.');
   }, 30_000);
 
   it('can run just the ones asked for, and pass', async () => {

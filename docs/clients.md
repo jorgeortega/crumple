@@ -83,6 +83,8 @@ Run automatically, so these stay true:
 | The hosted demo, `https://crumple.latitude10.tech/mcp`, with the printed read key | 2026-11-06 | 2026-07-28 | 6 of 30 | 7 passed, 0 failed, 3 not run. About 272 tokens per turn for its 3 tools (estimate) |
 | The same, naming `getCustomer`, with `--parallel 10` | 2026-11-06 | 2026-07-28 | 18 of 30 | 10 passed, 0 failed, 0 not run. 10 at once: p50 106 ms, p95 109 ms, from one laptop, on fake data in the Worker |
 
+**The token figures here are `prove`'s estimate, which runs low.** On Claude Haiku 5.5 and Sonnet 5.5, Anthropic's count for Crumple's six tools was 1.6 times the estimate, before the hidden tool system prompt. See [prove.md](learn/prove.md).
+
 **The failure was a true finding, and it's fixed.** The docs server answered a request from an unknown website with a 200, and MCP's spec requires a 403. All of Latitude 10's `/mcp` routes share that handler, so the fix went there, and the rerun got a 403. The practical risk looked low, since those routes use bearer keys or are public, so a browser can't add anything sensitive by itself. Still a MUST.
 
 **What these runs don't show.** The two Latitude 10 servers are public, so with no token the authentication checks didn't run. No tool was named, so no tool was called. Neither run says whether a tool works, or how a server behaves when its API fails.
