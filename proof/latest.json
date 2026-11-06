@@ -1,16 +1,16 @@
 {
   "counts": {
-    "passed": 14,
+    "passed": 16,
     "failed": 0,
     "notRun": 0
   },
   "kind": "self",
   "target": "self",
-  "startedAt": "2026-11-06T06:25:16.815Z",
-  "durationMs": 4314,
+  "startedAt": "2026-11-06T15:07:18.299Z",
+  "durationMs": 4663,
   "environment": {
     "version": "0.1.0",
-    "commit": "8022970",
+    "commit": "e001085",
     "dirty": false,
     "os": "darwin arm64",
     "cpu": "Apple M5",
@@ -70,10 +70,10 @@
       "title": "The API hangs, before and partway through its answer",
       "claim": "C6",
       "state": "pass",
-      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 806 ms, stall-body 806 ms.",
+      "detail": "A structured error within the 800 ms deadline plus a 500 ms margin. Measured: hang 804 ms, stall-body 804 ms.",
       "measured": {
-        "hang_ms": 806,
-        "stall_body_ms": 806,
+        "hang_ms": 804,
+        "stall_body_ms": 804,
         "deadline_ms": 800
       }
     },
@@ -82,11 +82,11 @@
       "title": "A 400, a 503, and a 503 with Retry-After",
       "claim": "C7",
       "state": "pass",
-      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1004 ms.",
+      "detail": "A 400 got 1 attempt, a 503 got 3, and Retry-After: 1 was honoured, waiting 1003 ms.",
       "measured": {
         "attempts_after_400": 1,
         "attempts_after_503": 3,
-        "waited_ms": 1004
+        "waited_ms": 1003
       }
     },
     {
@@ -110,7 +110,7 @@
         "flood_succeeded": 3,
         "flood_refused": 17,
         "other_succeeded": 3,
-        "other_slowest_ms": 219
+        "other_slowest_ms": 213
       }
     },
     {
@@ -159,6 +159,25 @@
       "claim": "C13",
       "state": "pass",
       "detail": "Unchanged, the replay passes. With the descriptions broken, it reports them as changed and the gate fails. This catches any change, good or bad. Only a live run shows whether a real model does worse."
+    },
+    {
+      "id": "real-model-acted-on-errors",
+      "title": "A real model reading Crumple's errors, replayed from its recording",
+      "claim": "C10",
+      "state": "pass",
+      "detail": "On 2026-11-06, claude-haiku-5-5 got each failure from Crumple and acted on what it said, with a system prompt that says nothing about errors: lost-responses, api-down-then-up, wont-get-better. Today's server still gives it the same words. This is one kept run of each, not a rate: the rates are in the live eval's report."
+    },
+    {
+      "id": "recorded-usage-adds-up",
+      "title": "Each run's tokens and cost, against the provider's own numbers",
+      "claim": "C12",
+      "state": "pass",
+      "detail": "In 14 recordings from a real model, each run's totals equal what the provider's replies add up to, with a cost worked out per call: 36880 tokens in and 3181 out.",
+      "measured": {
+        "recordings": 14,
+        "input_tokens": 36880,
+        "output_tokens": 3181
+      }
     }
   ],
   "claims": [
@@ -237,11 +256,11 @@
     {
       "id": "C10",
       "text": "Failures tell the agent what to do next",
-      "state": "partly",
+      "state": "pass",
       "checks": [
-        "errors-say-what-next"
-      ],
-      "pending": "a real model recovering needs a live eval, which spends money"
+        "errors-say-what-next",
+        "real-model-acted-on-errors"
+      ]
     },
     {
       "id": "C11",
@@ -254,9 +273,10 @@
     {
       "id": "C12",
       "text": "Each run reports its tokens and cost",
-      "state": "not_run",
-      "checks": [],
-      "pending": "needs a recording from a real model, which spends money (Task 27)"
+      "state": "pass",
+      "checks": [
+        "recorded-usage-adds-up"
+      ]
     },
     {
       "id": "C13",
