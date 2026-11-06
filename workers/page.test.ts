@@ -27,6 +27,10 @@ describe('the page', () => {
     expect(script).not.toMatch(/https?:\/\//);
   });
 
+  it('tells Cloudflare not to edit it, because the zone\'s analytics would add a script the page says it doesn\'t have', () => {
+    expect(headers).toMatch(/Cache-Control: .*no-transform/);
+  });
+
   it('never puts a response in as HTML', () => {
     expect(script).not.toMatch(/innerHTML|outerHTML|insertAdjacentHTML|document\.write|eval\(/);
   });

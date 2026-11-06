@@ -201,11 +201,23 @@ Slices 1 to 6 change nothing on Cloudflare, and spend nothing.
 | The binding enforces limits under `wrangler dev` | `tests/workers/limits.run.ts`: the 61st request is the first 429. Locally only, since Cloudflare's own counting is approximate and per location |
 | The counter is exact against D1 locally, and an instance that's closed stops writing | The same file, reading the local D1 database directly |
 | `Date.now()` "does not advance during code execution" on Cloudflare, so a span that's only computing shows 0 ms there. Waits show their real time | [Security model](https://developers.cloudflare.com/workers/reference/security-model/). The page says so under each trace |
-| `namespace_id` is yours to choose and unique to the account, and two bindings sharing one share counters | [Rate limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Latitude 10's `wrangler.toml` has no `ratelimits`, so `1001` doesn't clash with it |
+| `namespace_id` is yours to choose and unique to the account, and two bindings sharing one share counters | [Rate limiting binding](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/). Latitude 10's `wrangler.toml` has no `ratelimits`, but `latitude10-demo-apis`, on the same account, uses `1001`, found just before the first deploy. This Worker uses `2001` |
+
+**Checked on Cloudflare, after the first deploy, 2026-11-06:**
+
+| Fact | How |
+|---|---|
+| The binding enforces the limit, roughly | 150 requests from one address, 5 at a time: 46 got through, then 104 got a 429 with `retry-after: 60`. It had seen 18 requests the minute before, which would fit a counter that weighs the last window, but that's a guess. The next minute's request got through |
+| The page stays up while an address is limited | It answered 200 while `/mcp` and the buttons answered 429 |
+| The daily counter is exact at this small scale, and counts only what reaches the buttons and `/mcp` | It read 73, equal to the requests I sent that weren't turned away first. Free refusals and 429s didn't count. One address, one location |
+| The rules work over the real network | Unknown path 404, unknown button 404, `GET` on a button 405, foreign Origin 403 on a button and on `/mcp`, and the page's headers include the strict CSP |
+| Each button held | One charge from two requests. A 1,500 ms deadline, with the answer at 1,585 ms from this laptop. Two refusals, with nothing deleted |
+| **The zone's Web Analytics was adding a script to the page,** for requests that look like a browser. The CSP blocked it, so it never ran, but the page promises no analytics | Found in the browser's console. [Web Analytics FAQ](https://developers.cloudflare.com/web-analytics/faq/): `no-transform` stops the injection. With it in `_headers`, a browser-like request gets the repo's file byte for byte, and `/page.js` is the only script. Latitude 10's own hosts keep their analytics |
+| A stock client works | Claude Code connected with the page's command and called a tool. See `docs/clients.md` |
+| D1 is in EEUR | Cloudflare picked it from where the database was created. It only holds a day and a count, but a US visitor's request waits for a write there |
 
 **Not confirmed:**
 - Whether the rate limiting binding costs anything. Neither [its page](https://developers.cloudflare.com/workers/runtime-apis/bindings/rate-limit/) nor [Workers pricing](https://developers.cloudflare.com/workers/platform/pricing/) mentions a charge, or which plans have it. That's an absence, not a statement that it's free. If it does cost something, the fallback is the per-instance limits the main spec describes.
 - Whether a WAF-blocked request counts towards Worker billing. The pricing page only says "Only requests that hit a Worker will count".
-- How the D1 counter behaves under load across regions. It's one statement on SQLite, and it's exact in every local test, but none of that is Cloudflare's network.
+- How the D1 counter behaves under load across regions. It was exact for 73 requests from one place, which says nothing about many places at once.
 - That a request the Worker turns away still counts. I'm assuming it does, which is the expensive reading.
-- That this account is on Workers Paid.

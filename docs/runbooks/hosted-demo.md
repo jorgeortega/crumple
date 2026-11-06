@@ -25,7 +25,7 @@ The owner checks these. Only they can.
 1. **The account.** This goes on the same Cloudflare account as Latitude 10, and that account is on Workers Paid. If it's on Free, the limits are 100,000 requests a day and 10 ms of CPU per request, and a run may not fit.
 2. **A billing notification** in Cloudflare's dashboard. The code can't cap Cloudflare's own bill: a flood of 100 million requests would cost about $27.
 3. **The name.** `crumple.latitude10.tech` has no existing CNAME, because a custom domain can't use one.
-4. **The rate limit's namespace.** `1001` in `workers/wrangler.toml` must not be used by another Worker on the account, or they'd share counters.
+4. **The rate limit's namespace.** `2001` in `workers/wrangler.toml` must not be used by another Worker on the account, or they'd share counters. `1001` is taken by `latitude10-demo-apis`.
 5. **The binding's cost.** Cloudflare's pages don't mention one, and don't say it's free. Check the dashboard after deploying.
 
 ## The first deploy
@@ -40,7 +40,7 @@ npx wrangler whoami
 npx wrangler d1 create crumple-demo
 ```
 
-Put the id it prints in `database_id` in `workers/wrangler.toml`. The placeholder there is all zeros, and a deploy with it fails.
+Put the id it prints in `database_id` in `workers/wrangler.toml`.
 
 ```bash
 npx wrangler d1 migrations apply DB --remote --config workers/wrangler.toml
@@ -57,6 +57,14 @@ CRUMPLE_PROVE_TOKEN=crumple_public-demo-read-key-fake-data-nothing-else node dis
 ```
 
 Connect a stock client with the command on the page, and call a tool.
+
+**Check that Cloudflare didn't edit the page.** The zone's Web Analytics adds a script to pages on every subdomain, but only for requests that look like a browser, so a plain `curl` won't show it. The page promises no analytics, so `_headers` sets `no-transform` to stop it. This must print one line, for `/page.js`. Run on `latitude10.tech`, which has the script, it also finds `cloudflareinsights`:
+
+```bash
+curl -sS -H "User-Agent: Mozilla/5.0 (Macintosh) Chrome/140.0.0.0" -H "Accept: text/html" https://crumple.latitude10.tech/ | grep -o '<script[^>]*src="[^"]*"'
+```
+
+**If your own machine can't find the name right after the first deploy,** it's probably a cached "no such name" from looking it up before the record existed. That lasts up to 30 minutes.
 
 ## Switch it off
 

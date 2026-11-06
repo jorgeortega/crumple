@@ -222,8 +222,10 @@ The only finding that could change the design.
 - Depends on: 29, 22. Files: `workers/limits.ts`, `workers/try.ts`, `workers/public/*`, tests
 
 ### Task 31: Deploy the demo
-- [ ] **OWNER:** confirm the same Cloudflare account and Workers Paid, set a billing notification, and okay the first deploy, which adds a DNS record for `crumple.latitude10.tech`
-- [ ] A stock MCP client connects to the public URL and calls a tool
+- [x] **OWNER:** confirm the same Cloudflare account and Workers Paid, set a billing notification, and okay the first deploy, which adds a DNS record for `crumple.latitude10.tech` (2026-11-06: "Yes, deploy it")
+- [x] `prove` passes against the public URL, with results in `docs/clients.md`
+- [ ] **OWNER:** check the rate limiting binding's cost in the dashboard
+- [x] A stock MCP client connects to the public URL and calls a tool (Claude Code, 2026-11-06)
 - Depends on: 30, 21
 
 ### Checkpoint D

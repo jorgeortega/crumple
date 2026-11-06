@@ -28,13 +28,12 @@ DAILY_CAP = "20000"
 
 [[ratelimits]]
 name = "RATE_LIMIT"
-namespace_id = "1001"
+namespace_id = "2001" # 1001 is latitude10-demo-apis, on the same account: sharing one shares counters.
 simple = { limit = 60, period = 60 }
 
-# A placeholder until the first deploy, which replaces it with the real database's id. Local runs need
-# none, and a deploy with this id fails rather than doing anything.
+# The counter behind the daily cap. It holds a day and a count, and nothing about anyone.
 [[d1_databases]]
 binding = "DB"
 database_name = "crumple-demo"
-database_id = "00000000-0000-0000-0000-000000000000"
+database_id = "85e2c5cc-4dd6-482e-bcd5-85a337b57557"
 migrations_dir = "migrations"
