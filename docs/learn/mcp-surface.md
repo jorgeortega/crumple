@@ -84,7 +84,7 @@ All real:
 - **Some clients may show a refusal less clearly.** Both official clients raise it as an exception. Claude Code never reached that point, because the tool wasn't listed. Other clients are in `docs/clients.md`.
 - **Validators differ by runtime,** Ajv on Node and cfworker on Workers, so the API behind Crumple must still validate its own input.
 - **On Workers, whether a disconnect cancels the upstream call is unconfirmed.** The deadline holds either way. Cancelling is only proved on Node.
-- **It hasn't run on Workers in this form.** The spike's script did, and Task 29 runs the real thing.
+- **On Workers, it's only been run as the hosted demo.** `npm run test:workers` runs that in `workerd`, and it's live on Cloudflare. See [hosted-demo.md](hosted-demo.md).
 - **Install size.** The SDK brings about 18 MB. `SPEC-cli.md` measured that and chose to keep it.
 
 ## Where to look

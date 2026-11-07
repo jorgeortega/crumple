@@ -45,7 +45,7 @@ I'd written that the 18 MB install "is slow for a first `npx`", and planned a bu
 
 ## The best evidence so far
 
-Real Claude Code, with every response to a payment lost on purpose. The model read `outcome_unknown`, called again with the key it was handed, and `fault-api` shows **one charge**. It's one run on one model, so it shows the design can work rather than how often it does, and `evals` will measure that. [clients.md](../clients.md) has the run. But it's the project's central claim happening with a real agent, for about half a cent.
+Real Claude Code, with every response to a payment lost on purpose. The model read `outcome_unknown`, called again with the key it was handed, and `fault-api` shows **one charge**. It's one run on one model, so it shows the design can work rather than how often it does. [evals.md](evals.md) has the later live run, which measured that on one model and one day. [clients.md](../clients.md) has this run. But it's the project's central claim happening with a real agent, for about half a cent.
 
 ## Sealing, and where it helps
 
@@ -63,7 +63,7 @@ Commands take an `io` object and return an exit code, so most tests run in proce
 - **The key sits in your scrollback,** or in a log if the output is piped. That's the price of no setup.
 - **With `--db` on Node 22, you'll see an `ExperimentalWarning`** from SQLite. Without `--db`, you won't.
 - **In memory, audit events aren't kept at all.** The log lines show refusals, and `--db` is how to keep them.
-- **`eval` isn't here yet.** It comes in Task 28. `demo` and `prove` are explained in [prove.md](prove.md).
+- **The other commands have their own explainers.** `demo` and `prove` are in [prove.md](prove.md), and `eval` is in [evals.md](evals.md).
 
 ## Where to look
 

@@ -8,7 +8,7 @@ A public page with four buttons, each of which really breaks something on the se
 
 ## Where it stands today
 
-**It isn't deployed.** Everything has run on this laptop, in `workerd`, the open source runtime Cloudflare's Workers are built on. That's close to Cloudflare, and it isn't Cloudflare. The first deploy is what changes that, and it's the owner's call.
+**It's live at https://crumple.latitude10.tech,** deployed on 2026-11-06 on the owner's go-ahead. `prove` passed 10 of 10 against it from outside, and Claude Code connected with the page's command, as [`docs/clients.md`](../clients.md) records. The automated tests (`npm run test:workers`) still run on this laptop in `workerd`, the open source runtime Cloudflare's Workers are built on, which is close to Cloudflare and isn't Cloudflare. Any later deploy after a change to the abuse limits needs the owner's okay first.
 
 ## Why this module exists
 
@@ -85,7 +85,7 @@ The logic also runs on Node with an injected clock, for what's awkward in a real
 
 ## Where to look
 
-[limits.ts](../../workers/limits.ts) is short and has the reasoning. [try.ts](../../workers/try.ts) has the four buttons. [surface.ts](../../workers/surface.ts) shows how little it takes to run the real thing here. [wrangler.toml](../../workers/wrangler.toml) is what would be deployed.
+[limits.ts](../../workers/limits.ts) is short and has the reasoning. [try.ts](../../workers/try.ts) has the four buttons. [surface.ts](../../workers/surface.ts) shows how little it takes to run the real thing here. [wrangler.toml](../../workers/wrangler.toml) is what gets deployed.
 
 ## Teach-back
 

@@ -73,7 +73,7 @@ All real, and each one found by a test. They're good answers to "tell me about a
 - **No retry budget.** Google's SRE book suggests capping retries as a share of traffic. Here the attempt limit and breaker cover most of it.
 - **Redaction has a limit.** It catches a credential echoed as sent or URL-encoded, not one an API hashes.
 - **Limits and the breaker are per instance on Workers,** and exact only within one Node process.
-- **These results are from tests on one laptop,** with a fake clock, and one manual run over real sockets. `prove` will run them properly, and nothing here is proven in production.
+- **These results are from one laptop:** the module's tests use a fake clock, and `prove` runs the same claims over real sockets. Nothing here is proven in production.
 
 ## Where to look
 
