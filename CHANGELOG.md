@@ -2,7 +2,7 @@
 
 Each published version gets its changes here, newest first.
 
-## 0.1.0 (not yet published)
+## 0.1.0 (2026-11-08)
 
 The first real version. `crumple-mcp@0.0.1` on npm is a placeholder that holds the name.
 

@@ -177,9 +177,4 @@ describe('the README', () => {
     expect(readme).not.toMatch(/battle-tested/i);
     expect(readme.replace('It isn\'t production-proven', '')).not.toMatch(/production-proven/i);
   });
-
-  it('says it isn\'t on npm yet, until the release removes this test and the line', () => {
-    const { private: unpublished } = readJson('package.json') as { private?: boolean };
-    expect(readme.includes('Not yet on npm')).toBe(unpublished === true);
-  });
 });

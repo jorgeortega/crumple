@@ -1,7 +1,6 @@
 {
   "name": "crumple-mcp",
   "version": "0.1.0",
-  "private": true,
   "bin": {
     "crumple-mcp": "dist/cli/bin.js",
     "crumple": "dist/cli/bin.js"

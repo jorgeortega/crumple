@@ -665,10 +665,9 @@ If you've got 20 minutes:
 
 ## Status
 
-As of 2026-11-06, version 0.1.0.
+As of 2026-11-08, version 0.1.0.
 
-- **Built and checked:** everything above. The hosted demo is live.
-- **Not yet on npm.** `crumple-mcp` there is still a placeholder, so the `npx` commands in this README work once 0.1.0 is published. Until then, clone this repo and use `node dist/cli/bin.js` after `npm run build`.
+- **Built and checked:** everything above. The hosted demo is live, and the package is `crumple-mcp` on npm.
 - **CI is off until December 2026.** Until then the gate is the pre-push hook and the committed reports.
 - **Still open:** trying a second stock client, and running the official MCP conformance suite against `serve`.
 
