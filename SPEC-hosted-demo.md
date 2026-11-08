@@ -90,13 +90,36 @@ What sits on top, all yours, since they're account settings:
 
 ## The page
 
-One static HTML file, with the Terminal tokens from Latitude 10's design doc copied in, so it looks related without sharing code. In order: one sentence, the four buttons, what happened, how to connect, the claims table, then limits and credit.
-
-No cookies, analytics or third-party scripts, and a strict CSP. Everything returned is put in the page as text, never HTML. Checked by hand at desktop and mobile widths.
-
-**The GitHub link appears once the repo is public.** Until then the page credits Latitude 10 only, so nobody gets a 404.
+One static HTML file, with the Terminal tokens from Latitude 10's design doc copied in, so it looks related without sharing code. No cookies, analytics or third-party scripts, and a strict CSP. Everything returned is put in the page as text, never HTML. Checked by hand at desktop and mobile widths.
 
 **Nothing is stored about visitors.** The IP is only the rate limit's key, and Workers Logs stays off.
+
+### Redesign, 2026-11-08 (approved)
+
+The first version read like a test report: a paragraph, then the buttons, then lists. It's redone in the same order as `latitude10.tech/crumple` (spec in the latitude10 repo, `docs/superpowers/specs/2026-11-08-crumple-page-redesign.md`, approved 2026-11-08): what is this, why would I need it, how does it help me. Pictures and numbers first, a sentence where one is needed, and the rest one click away.
+
+The owner approved it on 2026-11-08: "Approve, build it".
+
+Top to bottom:
+
+| # | Part | What it shows |
+|---|---|---|
+| 1 | **Hero** | The name, then the H1 "Break an API on purpose. Watch what holds." and one line: "Crumple sits between AI agents and your API. Everything here is fake, and runs live on this server." |
+| 2 | **Four button cards** | A 2 by 2 grid (one column on a phone). Each card is the button itself: an icon, the action in bold ("Lose the response") and its question under it ("Does a retry charge twice?"). |
+| 3 | **The result, as a picture** | The verdict in large words and colour ("Held, on this run" or "Did not hold, on this run"), the headline, then the run's facts as tiles: label small, value large (Charges 1, Customers deleted 0, and so on). What the API received and Crumple's trace move into a `<details>`, closed, with the Cloudflare clock note inside it. |
+| 4 | **Connect a real client** | One copyable command with a Copy button. One line under it: the keys are public on purpose, reach fake data, and neither can delete. The charge key is a second copyable line. Why a payment can seem to vanish moves into a `<details>`. |
+| 5 | **What's been checked** | The same scoreboard as the site: "{passed} of {total} claims passed", one chip per claim with its result in words, then the laptop line ("These numbers come from one laptop, not from this server"). |
+| 6 | **What this is, and isn't** | The four limits, one short line each, unchanged in meaning: a demo and not a load test; everything fake and no model; the rate limits; no cookies, analytics or third-party scripts. |
+| 7 | **Footer** | "Run it on your machine: `npx crumple-mcp demo`", the GitHub link (the repo is public now), and the Latitude 10 credit. A link to `latitude10.tech/crumple` is added only once that page is published, so nobody gets a 404. |
+
+**What changes in the code:**
+
+- `workers/public/index.html`: the parts above. Icons are inline SVG in the HTML, `aria-hidden`, with no `style` attribute, so the CSP and the "nothing inline" test still hold.
+- `workers/public/page.css`: the card grid, the result tiles, the scoreboard chips, the dark scheme it already has, `prefers-reduced-motion` honoured (only colour and press feedback move).
+- `workers/public/page.js`: the result rendered as tiles and a `<details>`; the claims as chips with a count; a Copy button using `navigator.clipboard`, with the text still selectable if that's refused. Still text only (`textContent`, `replaceChildren`), no storage, no URL.
+- `workers/page.test.ts`: "doesn't link to the repo until it's public" becomes "links to the public repo"; new checks that every button names its question, and that the copy command equals the key the server accepts. Every other check stays as it is.
+
+**What doesn't change:** the four scenarios and their routes, the keys, `_headers` and its CSP, the limits, `proof.json`, and everything the Worker does. This is the page only.
 
 ## How it gets tested
 
