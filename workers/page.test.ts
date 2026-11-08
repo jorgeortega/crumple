@@ -19,11 +19,9 @@ describe('the page', () => {
     expect(html).toContain(CHARGE_KEY);
   });
 
-  it('loads nothing from anywhere else', () => {
-    for (const [, url] of html.matchAll(/(?:src|href)="([^"]+)"/g)) {
-      if (url?.startsWith('https://latitude10.tech')) continue;
-      expect(url).toMatch(/^\//);
-    }
+  it('loads nothing from anywhere else, and links only to Crumple and Latitude 10', () => {
+    for (const [, url] of html.matchAll(/<(?:script|link|img|source|video|iframe)\b[^>]*(?:src|href)="([^"]+)"/g)) expect(url).toMatch(/^\//);
+    for (const [, url] of html.matchAll(/<a\b[^>]*href="([^"]+)"/g)) expect(url).toMatch(/^(\/|#|https:\/\/latitude10\.tech\/|https:\/\/github\.com\/jorgeortega\/crumple\b|https:\/\/www\.npmjs\.com\/package\/crumple-mcp\b)/);
     expect(script).not.toMatch(/https?:\/\//);
   });
 
@@ -39,8 +37,20 @@ describe('the page', () => {
     expect(script).not.toMatch(/cookie|localStorage|sessionStorage/);
   });
 
-  it('doesn\'t link to the repo until it\'s public, so nobody gets a 404', () => {
-    expect(html).not.toContain('github.com');
+  it('links to the repo, now that it\'s public', () => {
+    expect(html).toContain('href="https://github.com/jorgeortega/crumple"');
+  });
+
+  it('asks each button\'s question on the button itself', () => {
+    const cards = [...html.matchAll(/<button[^>]*data-scenario="([^"]+)"[^>]*>([\s\S]*?)<\/button>/g)];
+    expect(cards).toHaveLength(SCENARIOS.length);
+    for (const [, , inside] of cards) expect(inside).toMatch(/\?\s*</);
+  });
+
+  it('offers a command to copy that uses the key the server accepts', () => {
+    expect(html).toContain(`--header "Authorization: Bearer ${READ_KEY}"`);
+    expect(html).toMatch(/data-copy="[^"]+"/);
+    expect(script).toContain('navigator.clipboard');
   });
 
   it('says where its numbers come from', () => {

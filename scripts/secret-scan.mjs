@@ -44,9 +44,12 @@ export function findSecretShapes(text) {
 }
 
 // Tracked files plus untracked ones git wouldn't ignore, so a key is caught before
-// its first commit rather than after.
+// its first commit rather than after. Git finds the repo from the folder: inside a
+// hook git sets GIT_DIR, and pushed from a worktree that has no work tree with it.
 function filesGitWouldCommit() {
+  const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_')));
   const output = execFileSync('git', ['ls-files', '--cached', '--others', '--exclude-standard', '-z'], {
+    env,
     encoding: 'utf8',
     maxBuffer: 64 * 1024 * 1024,
   });
