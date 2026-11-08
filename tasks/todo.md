@@ -256,10 +256,10 @@ The only finding that could change the design.
 - Files: `docs/case-study.md`, `docs/launch/*`
 
 ### Task 36: Release (owner actions)
-- [ ] Final secret scan, including history, and the install test from a packed tarball
+- [x] Final secret scan, including history, and the install test from a packed tarball (2026-11-08: 76 commits, 602 text blobs, no credential shapes; rerun on ship day if anything is committed after this)
 - [ ] Record `assets/demo.gif` again with a real `npx`, removing the tape's Hide block, once the package is on npm
 - [ ] Take "Not yet on npm" out of the README's Status when `"private": true` goes, and update the rest of Status (a test fails until both match)
-- [ ] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them
+- [x] `npm run test:oldest-node`, `npm run test:interop` and `npm run test:install` pass, because the pre-push gate runs none of them (2026-11-08 at `1378b84`: 1,873 tests on Node 22.13.1, 7 interop, 15 install, and 30 in `test:workers`; rerun on ship day if anything changes)
 - [ ] Set the publish date in `CHANGELOG.md`. If a new report changed the README's numbers, update the blocks quoted in `docs/case-study.md` and `docs/launch/` (a test fails until they match)
 - [ ] **OWNER:** make the repo public, run `npm publish`, post the launch
 - [ ] Links added to outreach messages
