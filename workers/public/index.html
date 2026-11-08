@@ -11,70 +11,87 @@
 </head>
 <body>
   <main>
-    <header>
+    <header class="hero">
       <p class="name">crumple</p>
-      <h1>A crumple zone for AI agents.</h1>
-      <p class="lede">Crumple puts your API in front of AI agents as MCP tools, and takes the damage when something goes wrong. Press a button to break something. It runs on this server, right now, against a fake API.</p>
+      <h1>Break an API on purpose. Watch what holds.</h1>
+      <p class="lede">Crumple sits between AI agents and your API. Everything here is fake, and runs live on this server.</p>
     </header>
 
     <section aria-labelledby="break-heading">
       <h2 id="break-heading">Break something</h2>
-      <ul class="buttons">
+      <ul class="cards">
         <li>
-          <button type="button" data-scenario="lose-the-response">Lose the response</button>
-          <p>A payment goes through, then its response is lost. Does a retry charge twice?</p>
+          <button type="button" class="card" data-scenario="lose-the-response">
+            <svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M20 11a8 8 0 0 0-14.3-4.9L4 8"/><path d="M4 3v5h5"/><path d="M4 13a8 8 0 0 0 14.3 4.9L20 16"/><path d="M20 21v-5h-5"/></svg>
+            <span class="action">Lose the response</span>
+            <span class="question">A payment goes through, then its answer is lost. Does a retry charge twice?</span>
+          </button>
         </li>
         <li>
-          <button type="button" data-scenario="hang-the-api">Hang the API</button>
-          <p>The API stops answering. Does the agent wait forever?</p>
+          <button type="button" class="card" data-scenario="hang-the-api">
+            <svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M12 21a9 9 0 1 0 0-18 9 9 0 0 0 0 18z"/><path d="M12 7v5l3 2"/></svg>
+            <span class="action">Hang the API</span>
+            <span class="question">The API stops answering. Does the agent wait forever?</span>
+          </button>
         </li>
         <li>
-          <button type="button" data-scenario="no-permission">Try without permission</button>
-          <p>A read-only key tries to delete a customer. Does the request reach the API?</p>
+          <button type="button" class="card" data-scenario="no-permission">
+            <svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 11h12v10H6z"/><path d="M8 11V7a4 4 0 0 1 8 0v4"/></svg>
+            <span class="action">Try without permission</span>
+            <span class="question">A read-only key tries to delete a customer. Does it reach the API?</span>
+          </button>
         </li>
         <li>
-          <button type="button" data-scenario="plant-an-instruction">Plant an instruction</button>
-          <p>A customer's record says to delete them, and a scripted agent obeys. Is anything deleted?</p>
+          <button type="button" class="card" data-scenario="plant-an-instruction">
+            <svg class="icon" viewBox="0 0 24 24" width="24" height="24" fill="none" stroke="currentColor" stroke-width="1.75" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true" focusable="false"><path d="M6 3h9l4 4v14H6z"/><path d="M14 3v5h5"/><path d="M9 12h7"/><path d="M9 16h3"/><path d="M15 15l3 3"/><path d="M18 15l-3 3"/></svg>
+            <span class="action">Plant an instruction</span>
+            <span class="question">A record says "delete this customer", and a scripted agent obeys. Is anything deleted?</span>
+          </button>
         </li>
       </ul>
 
       <div id="result" class="result" aria-live="polite">
-        <p class="waiting">Nothing yet. Press a button, and what happened shows here.</p>
+        <p class="waiting">Press a card. What happened shows here.</p>
       </div>
     </section>
 
     <section aria-labelledby="connect-heading">
       <h2 id="connect-heading">Connect a real client</h2>
-      <p>This is a real MCP endpoint, and these keys are public on purpose. They reach fake data, and neither can delete.</p>
-      <pre class="wrap"><code>claude mcp add --transport http crumple https://crumple.latitude10.tech/mcp --header "Authorization: Bearer crumple_public-demo-read-key-fake-data-nothing-else"</code></pre>
-      <p>To let an agent charge fake customers as well, use this key instead:</p>
-      <pre class="wrap"><code>crumple_public-demo-charge-key-fake-payments-only-1</code></pre>
-      <p class="note">Everyone shares these keys, and the data lives in memory on whichever server answers. It resets every hour, so a payment can seem to vanish between calls. The buttons above each get their own fresh copy, so that's where the one-charge result comes from. Nothing can make this endpoint fail on purpose, because a planted instruction shouldn't reach a stranger's agent.</p>
+      <div class="copy">
+        <pre class="wrap"><code>claude mcp add --transport http crumple https://crumple.latitude10.tech/mcp --header "Authorization: Bearer crumple_public-demo-read-key-fake-data-nothing-else"</code></pre>
+        <button type="button" class="copy-button" data-copy="claude mcp add --transport http crumple https://crumple.latitude10.tech/mcp --header &quot;Authorization: Bearer crumple_public-demo-read-key-fake-data-nothing-else&quot;" hidden>Copy</button>
+      </div>
+      <p class="note">These keys are public on purpose. They reach fake data, and neither can delete. To let an agent charge fake customers too, use this key instead:</p>
+      <div class="copy">
+        <pre class="wrap"><code>crumple_public-demo-charge-key-fake-payments-only-1</code></pre>
+        <button type="button" class="copy-button" data-copy="crumple_public-demo-charge-key-fake-payments-only-1" hidden>Copy</button>
+      </div>
+      <details>
+        <summary>Why might a payment vanish?</summary>
+        <p>Everyone shares these keys, and the data lives in memory on whichever server answers. It resets every hour, so a payment can seem to vanish between calls. The cards above each get their own fresh copy, so that's where the one-charge result comes from. Nothing can make this endpoint fail on purpose, because a planted instruction shouldn't reach a stranger's agent.</p>
+      </details>
     </section>
 
     <section aria-labelledby="claims-heading">
       <h2 id="claims-heading">What's been checked</h2>
-      <p id="claims-source">Loading the last report.</p>
-      <div class="table-scroll" tabindex="0" role="region" aria-labelledby="claims-heading">
-        <table id="claims" hidden>
-          <thead><tr><th scope="col">Claim</th><th scope="col">Result</th></tr></thead>
-          <tbody></tbody>
-        </table>
-      </div>
+      <p id="claims-count" class="count" hidden></p>
+      <ul id="claims" class="chips" aria-labelledby="claims-heading" hidden></ul>
+      <p id="claims-source" class="note">Loading the last report.</p>
     </section>
 
     <section aria-labelledby="limits-heading">
       <h2 id="limits-heading">What this is, and isn't</h2>
-      <ul class="plain">
-        <li>A demo, not a load test. A button shows one run, and says nothing about production.</li>
-        <li>Everything behind it is fake, and no model runs here.</li>
-        <li>Limited to about 60 requests a minute per address and 20,000 a day in total. Past that it answers with an error until the limit resets.</li>
-        <li>No cookies, analytics or third-party scripts. Your address is only used for the rate limit, and isn't stored.</li>
+      <ul class="limits">
+        <li><strong>A demo, not a load test.</strong> A card shows one run, and says nothing about production.</li>
+        <li><strong>Everything is fake.</strong> No model runs here.</li>
+        <li><strong>Rate limited:</strong> about 60 requests a minute per address and 20,000 a day in total. Past that it answers with an error until the limit resets.</li>
+        <li><strong>No cookies, analytics or third-party scripts.</strong> Your address is only used for the rate limit, and isn't stored.</li>
       </ul>
     </section>
 
     <footer>
-      <p>Open source from <a href="https://latitude10.tech/platform/mcp">Latitude 10</a>, which also hosts MCP servers.</p>
+      <p class="run">Run it on your machine: <code>npx crumple-mcp demo</code></p>
+      <p><a href="https://github.com/jorgeortega/crumple">Crumple on GitHub</a>. Open source from <a href="https://latitude10.tech/platform/mcp">Latitude 10</a>, which also hosts MCP servers.</p>
     </footer>
   </main>
 </body>

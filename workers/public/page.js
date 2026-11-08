@@ -21,6 +21,9 @@ function showMessage(text) {
   result.replaceChildren(make('p', 'waiting', text));
 }
 
+// The result as a picture first: the verdict in large words, the headline,
+// then each fact as a tile, with short values large. What the API received
+// and the trace are one click away.
 function showReport(report) {
   const verdict = report.held ? 'Held, on this run' : 'Did not hold, on this run';
   const parts = [
@@ -28,31 +31,33 @@ function showReport(report) {
     make('p', 'headline', report.headline),
   ];
 
-  const facts = make('dl');
+  const facts = make('dl', 'tiles');
   for (const { label, value } of report.facts) {
-    const row = make('div');
-    row.append(make('dt', '', label), make('dd', '', value));
-    facts.append(row);
+    const tile = make('div', value.length <= 12 ? 'tile short' : 'tile');
+    tile.append(make('dt', '', label), make('dd', '', value));
+    facts.append(tile);
   }
   parts.push(facts);
 
-  parts.push(make('h3', '', 'What the API received'));
+  const more = make('details');
+  more.append(make('summary', '', "What the API received, and Crumple's trace"));
+  more.append(make('h3', '', 'What the API received'));
   if (report.api.length === 0) {
-    parts.push(make('p', '', 'Nothing.'));
+    more.append(make('p', '', 'Nothing.'));
   } else {
     const lines = report.api.map(({ method, path, outcome }) => `${method} ${path}  ${outcome}`);
-    parts.push(scrollable(lines.join('\n')));
+    more.append(scrollable(lines.join('\n')));
   }
-
-  parts.push(make('h3', '', "Crumple's own trace"));
-  parts.push(scrollable(report.trace || 'No spans.'));
-  parts.push(make('p', 'note', "On Cloudflare the clock only moves between waits, so work that's only computing shows as 0 ms. A wait, such as the deadline, shows its real time."));
+  more.append(make('h3', '', "Crumple's own trace"));
+  more.append(scrollable(report.trace || 'No spans.'));
+  more.append(make('p', 'note', "On Cloudflare the clock only moves between waits, so work that's only computing shows as 0 ms. A wait, such as the deadline, shows its real time."));
+  parts.push(more);
   result.replaceChildren(...parts);
 }
 
 async function press(button) {
   for (const other of buttons) other.disabled = true;
-  showMessage(`Running "${button.textContent}"...`);
+  showMessage(`Running "${button.querySelector('.action')?.textContent ?? button.textContent}"...`);
   // On a phone the answer appears below the fold, and a press with nothing to see looks broken.
   if (result.getBoundingClientRect().top > window.innerHeight / 2) result.scrollIntoView({ block: 'start' });
   try {
@@ -69,6 +74,20 @@ async function press(button) {
 
 for (const button of buttons) button.addEventListener('click', () => { void press(button); });
 
+// Copy buttons appear only where the clipboard can be written; the text stays selectable either way.
+if (navigator.clipboard) {
+  for (const button of document.querySelectorAll('button[data-copy]')) {
+    button.hidden = false;
+    button.addEventListener('click', () => {
+      navigator.clipboard.writeText(button.dataset.copy).then(
+        () => { button.textContent = 'Copied'; },
+        () => { button.textContent = 'Select and copy'; },
+      );
+      setTimeout(() => { button.textContent = 'Copy'; }, 2000);
+    });
+  }
+}
+
 const STATES = {
   pass: ['Passed', 'pass'],
   fail: ['Failed', 'fail'],
@@ -78,7 +97,8 @@ const STATES = {
 
 async function loadClaims() {
   const source = document.getElementById('claims-source');
-  const table = document.getElementById('claims');
+  const count = document.getElementById('claims-count');
+  const chips = document.getElementById('claims');
   try {
     const response = await fetch('/proof.json');
     if (!response.ok) throw new Error('No report.');
@@ -86,18 +106,17 @@ async function loadClaims() {
     const { commit, os, cpu, memoryGb, node } = proof.environment;
     const day = proof.startedAt.slice(0, 10);
     source.textContent = `These numbers come from one laptop, not from this server: ${cpu}, ${memoryGb} GB, ${os}, Node ${node}, on ${day}, at commit ${commit ?? 'unknown'}. Only the buttons above are measured here. "Not run" means this report didn't cover it: some claims need a live model, or a command of their own.`;
-    const rows = proof.claims.map(({ id, text, state }) => {
+    const passed = proof.claims.filter(({ state }) => state === 'pass').length;
+    count.textContent = `${passed} of ${proof.claims.length} claims passed`;
+    count.hidden = false;
+    const items = proof.claims.map(({ id, text, state }) => {
       const [label, kind] = STATES[state] ?? [state, 'other'];
-      const row = make('tr');
-      const claim = make('td');
-      claim.append(make('span', 'claim-id', id), text);
-      const outcome = make('td');
-      outcome.append(make('span', `state ${kind}`, label));
-      row.append(claim, outcome);
-      return row;
+      const chip = make('li', 'chip');
+      chip.append(make('span', 'claim-id', id), make('span', 'claim-text', text), make('span', `state ${kind}`, label));
+      return chip;
     });
-    table.tBodies[0].replaceChildren(...rows);
-    table.hidden = false;
+    chips.replaceChildren(...items);
+    chips.hidden = false;
   } catch {
     source.textContent = "The last report couldn't be loaded.";
   }
