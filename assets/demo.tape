@@ -1,8 +1,7 @@
-# The README's GIF: vhs assets/demo.tape, from the repo root, after npm run build.
+# The README's GIF: vhs assets/demo.tape, from the repo root.
 #
-# The output is a real run of the demo, measured as it's recorded. Until the package is published,
-# npx can't fetch it, so a hidden function runs the local build under the same words. Record this again
-# without the Hide block once crumple-mcp is on npm (Task 36).
+# A real run of the published package, measured as it's recorded. The hidden lines only set the prompt
+# and give npm an empty cache and folder, without its update notice, so npx fetches crumple-mcp from npm as a stranger's would.
 
 Output assets/demo.gif
 
@@ -15,7 +14,7 @@ Set TypingSpeed 60ms
 Set Theme "Builtin Dark"
 
 Hide
-Type "npx() { node dist/cli/bin.js demo | cut -c1-118; }; PS1='$ '; clear"
+Type `PS1='$ '; export npm_config_cache=$(mktemp -d) npm_config_update_notifier=false; cd $(mktemp -d); clear`
 Enter
 Show
 
@@ -23,4 +22,10 @@ Sleep 500ms
 Type "npx crumple-mcp demo"
 Sleep 500ms
 Enter
-Sleep 14s
+# npx asks before installing, as it does for anyone running this the first time.
+Wait+Screen@60s /Ok to proceed/
+Sleep 1s
+Type "y"
+Enter
+Wait+Line@60s /^\$ *$/
+Sleep 4s
