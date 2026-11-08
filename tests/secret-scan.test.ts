@@ -50,16 +50,20 @@ describe('the scan command', () => {
     for (const folder of folders.splice(0)) rmSync(folder, { recursive: true, force: true });
   });
 
+  // Inside a git hook (the pre-push gate), git sets GIT_DIR and friends, and
+  // from a worktree they would point these throwaway repos at the real one.
+  const env = Object.fromEntries(Object.entries(process.env).filter(([name]) => !name.startsWith('GIT_')));
+
   function repoWith(files: Record<string, string>): string {
     const folder = mkdtempSync(join(tmpdir(), 'crumple-scan-'));
     folders.push(folder);
-    execFileSync('git', ['init', '-q'], { cwd: folder });
+    execFileSync('git', ['init', '-q'], { cwd: folder, env });
     for (const [name, text] of Object.entries(files)) writeFileSync(join(folder, name), text);
     return folder;
   }
 
   function scan(cwd: string) {
-    return spawnSync(process.execPath, [SCRIPT], { cwd, encoding: 'utf8' });
+    return spawnSync(process.execPath, [SCRIPT], { cwd, env, encoding: 'utf8' });
   }
 
   it('passes on a clean repo', () => {
