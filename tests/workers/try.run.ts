@@ -100,7 +100,7 @@ describe('the page, as Cloudflare serves it', () => {
   it('comes back with its policy, and the Worker never sees it', async () => {
     const page = await fetch(worker.url);
     expect(page.status).toBe(200);
-    expect(await page.text()).toContain('A crumple zone for AI agents.');
+    expect(await page.text()).toContain('Break an API on purpose. Watch what holds.');
     expect(page.headers.get('content-security-policy')).toContain("default-src 'none'");
     expect((await fetch(`${worker.url}/page.js`)).status).toBe(200);
   });
