@@ -1,7 +1,7 @@
 import tseslint from 'typescript-eslint';
 
 export default tseslint.config(
-  { ignores: ['node_modules/', 'dist/', 'coverage/', 'spikes/', '**/.wrangler/'] },
+  { ignores: ['node_modules/', 'dist/', 'coverage/', 'spikes/', '**/.wrangler/', '.claude/'] },
   // The type-checked rules are the point: they catch an unawaited promise, which
   // in an execution engine is how a timeout or a failed retry gets silently lost.
   ...tseslint.configs.strictTypeChecked,

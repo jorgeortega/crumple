@@ -2,7 +2,8 @@ import { defineConfig } from 'vitest/config';
 
 export default defineConfig({
   test: {
-    exclude: ['node_modules/**', 'spikes/**', 'dist/**'],
+    // .claude/ holds worktrees, each with its own tests and node_modules.
+    exclude: ['**/node_modules/**', 'spikes/**', 'dist/**', '.claude/**'],
     coverage: {
       provider: 'v8',
       include: ['src/**/*.ts', 'workers/**/*.ts'],
